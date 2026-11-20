@@ -25,20 +25,20 @@ dit.tiled_decode = _small_decode
 llm = LLMHandler()  # not initialized: skip the language model planner on CPU
 
 params = GenerationParams(
-    caption=("tropical house pop, dancehall pop, chopped vocal synth hooks, plucky marimba synths, "
+    caption=os.environ.get("CAPTION", "tropical house pop, dancehall pop, chopped vocal synth hooks, plucky marimba synths, "
              "snappy claps, offbeat rhythm, warm deep bass, airy young male tenor vocals, smooth "
              "falsetto chorus, upbeat, catchy, radio pop 2016, Spanish lyrics"),
     lyrics=open(LYRICS_FILE).read(),
-    vocal_language="es",
-    bpm=100,
-    keyscale="C minor",
+    vocal_language=os.environ.get("LANG_VOCAL", "es"),
+    bpm=int(os.environ.get("BPM", "100")),
+    keyscale=os.environ.get("KEY", "C minor"),
     timesignature="4",
     duration=DUR,
     inference_steps=8,
     thinking=False,
     use_cot_metas=False, use_cot_caption=False, use_cot_language=False,
 )
-cfg = GenerationConfig(batch_size=1, audio_format="wav", use_random_seed=False, seeds=[42])
+cfg = GenerationConfig(batch_size=1, audio_format="wav", use_random_seed=False, seeds=[int(os.environ.get("SEED", "42"))])
 t1 = time.time()
 res = generate_music(dit, llm, params, cfg, save_dir=OUT)
 print("gen", f"{time.time()-t1:.0f}s", res.success, res.error, flush=True)
