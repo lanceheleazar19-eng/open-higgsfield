@@ -3,99 +3,164 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Taller Mecànic Avinguda · Sant Andreu, Barcelona</title>
-<meta name="description" content="Taller mecánico en Sant Andreu, Barcelona. Revisiones, frenos, neumáticos, pre-ITV y diagnosis. Presupuesto sin compromiso.">
+<title>Taller Mecànic Avinguda · Sant Andreu</title>
+<meta name="description" content="Taller mecánico en Sant Andreu, Barcelona. Revisiones, frenos, neumáticos, pre-ITV y diagnosis. Calcula tu próxima ITV y pide presupuesto por WhatsApp.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500;75..125,800&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"AutoRepair","name":"Taller Mecànic Avinguda","address":{"@type":"PostalAddress","streetAddress":"Avinguda Inventada, 45","postalCode":"08030","addressLocality":"Barcelona"},"telephone":"+34930000002","openingHours":["Mo-Fr 08:30-13:30","Mo-Fr 15:00-19:00"]}
+</script>
 <style>
-  :root { --bg:#f4f7fa; --ink:#0f1f2e; --soft:#536576; --blue:#0f3d63; --blue-2:#2a7ab0; --yellow:#ffc72c; --line:#dce5ee; --card:#fff; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
-  a { color:inherit; }
-  .demo-ribbon { background:var(--yellow); color:#222; text-align:center; font-size:13px; font-weight:600; padding:6px 12px; }
-  .wrap { max-width:1000px; margin:0 auto; padding:0 16px; }
-  .top { background:var(--blue); color:#fff; }
-  .top .wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; height:64px; }
-  .brand { font-weight:800; font-size:19px; letter-spacing:-.01em; }
-  .brand span { color:var(--yellow); }
-  .call { background:var(--yellow); color:var(--ink); font-weight:800; padding:10px 16px; border-radius:8px; text-decoration:none; white-space:nowrap; }
-  .hero { background:linear-gradient(135deg,var(--blue),var(--blue-2)); color:#fff; padding:48px 0 70px; }
-  .hero h1 { font-size:clamp(34px,6vw,60px); line-height:1.05; letter-spacing:-.03em; margin:0 0 14px; max-width:16ch; }
-  .hero p { font-size:19px; opacity:.92; max-width:32em; margin:0 0 24px; }
-  .btn { display:inline-block; padding:13px 22px; border-radius:8px; font-weight:800; text-decoration:none; }
-  .btn-y { background:var(--yellow); color:var(--ink); }
-  .btn-w { background:rgba(255,255,255,.15); color:#fff; border:2px solid rgba(255,255,255,.5); }
-  .row { display:flex; flex-wrap:wrap; gap:12px; }
-  .trust { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:-36px; }
-  .trust div { background:var(--card); border-radius:12px; padding:16px; text-align:center; box-shadow:0 10px 24px rgba(15,31,46,.08); font-weight:700; font-size:15px; }
-  .trust b { display:block; font-size:24px; color:var(--blue-2); }
-  section { padding:56px 0; }
-  h2 { font-size:clamp(28px,4.5vw,40px); letter-spacing:-.02em; margin:0 0 20px; }
-  .services { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .service { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
-  .service h3 { margin:6px 0 4px; font-size:18px; }
-  .service p { margin:0; color:var(--soft); font-size:15px; }
-  .service .from { display:block; margin-top:10px; font-weight:800; color:var(--blue-2); }
-  .icon { font-size:28px; }
-  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; counter-reset:s; }
-  .step { background:var(--card); border-radius:14px; padding:20px; border-left:5px solid var(--yellow); }
-  .step::before { counter-increment:s; content:"Paso " counter(s); font-weight:800; color:var(--blue-2); font-size:13px; text-transform:uppercase; letter-spacing:.06em; }
-  .step p { margin:6px 0 0; color:var(--soft); }
-  .info { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
-  .hours { width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; }
-  .hours td { padding:12px 16px; border-bottom:1px solid var(--line); }
-  .hours td:last-child { text-align:right; color:var(--soft); }
-  .map { aspect-ratio:4/3; border-radius:12px; background:repeating-linear-gradient(45deg,#e3ebf2 0 14px,#edf2f7 14px 28px); display:grid; place-items:center; text-align:center; color:var(--soft); padding:16px; }
-  footer { background:var(--ink); color:#b8c6d3; font-size:14px; padding:28px 0 96px; }
-  .bar { position:fixed; left:0; right:0; bottom:0; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px 12px; background:#fff; box-shadow:0 -6px 20px rgba(0,0,0,.08); }
-  .bar a { text-align:center; padding:13px; border-radius:10px; font-weight:800; text-decoration:none; }
-  .bar .c { background:var(--blue); color:#fff; } .bar .w { background:#25d366; color:#04210d; }
-  @media (max-width:760px){ .trust{grid-template-columns:repeat(2,1fr)} .services,.steps,.info{grid-template-columns:1fr} .top .call{display:none} }
+  /* Layout: blueprint-grid hero, work-order styling (mono labels, numbered order fields); two working tools (ITV + estimate) as the core. */
+  :root {
+    --navy: #0e2336; --navy-2: #163452; --grid: rgba(158,196,230,.12); --paper: #f3f5f7; --ink: #0e1a24; --muted: #59697a;
+    --orange: #ff6a13; --line: #d4dbe2; --ok: #1d8a4e; --warn: #c25a00;
+    --display: Archivo, "Arial Narrow", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--display); font-stretch: 100%; line-height: 1.55; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .ribbon { background: var(--orange); color: #1a0d03; font-size: 12px; text-align: center; padding: 6px 12px; font-weight: 600; }
+  .ribbon a { font-weight: 800; }
+  .mono { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+
+  .hero { background: var(--navy); color: #e9f0f6; background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 32px 32px; }
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 18px; border-bottom: 1px solid rgba(255,255,255,.12); }
+  .logo { font-weight: 800; font-stretch: 120%; font-size: 20px; text-decoration: none; letter-spacing: -.01em; }
+  .logo span { color: var(--orange); }
+  .status { font-family: var(--mono); font-size: 12px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.3); text-align: right; }
+  .status.open { border-color: #4fd08a; color: #8ff0b6; } .status.closed { color: #ffb48a; border-color: #ffb48a; }
+  .hero-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 40px; padding-block: 56px 72px; align-items: end; }
+  .hero h1 { font-weight: 800; font-stretch: 75%; font-size: clamp(56px, 10vw, 128px); line-height: .88; letter-spacing: -.02em; margin: 14px 0 20px; text-transform: uppercase; }
+  .hero h1 span { color: var(--orange); }
+  .hero p { font-size: 19px; color: #b9c8d6; margin: 0 0 26px; max-width: 30em; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 14px 22px; font-weight: 800; text-decoration: none; border: 2px solid var(--orange); background: var(--orange); color: #1a0d03; cursor: pointer; font-family: var(--display); font-size: 16px; }
+  .btn-ghost { background: transparent; color: #e9f0f6; border-color: rgba(255,255,255,.45); }
+  .btn:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .spec { border: 1px solid rgba(255,255,255,.18); background: rgba(14,35,54,.7); }
+  .spec div { display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.12); }
+  .spec div:last-child { border-bottom: 0; }
+  .spec b { font-size: 22px; font-stretch: 85%; }
+
+  section { padding-block: 72px; }
+  h2 { font-weight: 800; font-stretch: 75%; text-transform: uppercase; font-size: clamp(40px, 6vw, 72px); line-height: .92; margin: 8px 0 28px; }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .tool { background: #fff; border: 1px solid var(--line); padding: 26px; display: grid; gap: 14px; align-content: start; }
+  .tool h3 { margin: 0; font-size: 24px; font-stretch: 90%; }
+  .tool p { margin: 0; color: var(--muted); }
+  label.field { display: grid; gap: 6px; font-weight: 600; }
+  input, select { font: inherit; padding: 12px; border: 1px solid #b8c3ce; background: var(--paper); width: 100%; color: var(--ink); }
+  .result { border-left: 4px solid var(--navy); background: var(--paper); padding: 14px 16px; min-height: 64px; }
+  .result.ok { border-color: var(--ok); } .result.warn { border-color: var(--warn); }
+  .result b { font-size: 20px; }
+  .checks { display: grid; gap: 8px; }
+  .check { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); cursor: pointer; }
+  .check input { width: auto; margin-right: 10px; accent-color: var(--orange); }
+  .check span:last-child { font-family: var(--mono); font-size: 14px; white-space: nowrap; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--ink); padding-top: 12px; }
+  .total b { font-size: 30px; font-stretch: 85%; font-variant-numeric: tabular-nums; }
+  .small { font-size: 13px; color: var(--muted); }
+
+  .order { counter-reset: o; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); background: #fff; }
+  .order div { padding: 22px; border-right: 1px solid var(--line); }
+  .order div:last-child { border-right: 0; }
+  .order div::before { counter-increment: o; content: "0" counter(o); display: block; font-family: var(--mono); color: var(--orange); margin-bottom: 10px; }
+  .order h3 { margin: 0 0 6px; font-size: 18px; }
+  .order p { margin: 0; color: var(--muted); font-size: 15px; }
+
+  .info { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .info h3 { margin: 0 0 10px; }
+  .hours { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .hours td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  .hours td:last-child { text-align: right; }
+  footer { background: var(--navy); color: #9fb2c4; padding-block: 24px 100px; font-size: 14px; }
+  .dock { position: fixed; left: 0; right: 0; bottom: 0; display: none; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px max(12px, env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)); background: #fff; border-top: 1px solid var(--line); }
+  .dock a { text-align: center; padding: 13px; font-weight: 800; text-decoration: none; }
+  .dock .call { background: var(--navy); color: #fff; } .dock .wa { background: #25d366; color: #05240f; }
+
+  @media (max-width: 860px) {
+    .hero-grid, .tools, .info { grid-template-columns: 1fr; }
+    .order { grid-template-columns: 1fr 1fr; }
+    .order div:nth-child(2) { border-right: 0; } .order div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+    .dock { display: grid; }
+  }
 </style>
 </head>
 <body>
-<div class="demo-ribbon">Web de ejemplo de un negocio inventado, hecha por <a href="../index.html">WebBarri</a></div>
-<div class="top"><div class="wrap"><div class="brand">Taller Mecànic <span>Avinguda</span></div><a class="call" href="tel:+34930000002">📞 93 000 00 02</a></div></div>
+<div class="ribbon">Web de ejemplo · negocio inventado · diseñada por <a href="../index.html">WebBarri</a></div>
+
 <header class="hero">
   <div class="wrap">
-    <h1>Tu coche, en buenas manos en Sant Andreu</h1>
-    <p>Mecánica general, frenos, neumáticos y pre-ITV. Presupuesto claro antes de tocar nada y sin sorpresas al pagar.</p>
-    <div class="row">
-      <a class="btn btn-y" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche">Pedir cita por WhatsApp</a>
-      <a class="btn btn-w" href="#servicios">Ver servicios</a>
+    <div class="bar">
+      <a class="logo" href="#">Taller Mecànic <span>Avinguda</span></a>
+      <span class="status" id="status">Horario</span>
+    </div>
+    <div class="hero-grid">
+      <div>
+        <span class="mono" style="color:#8fb3d4">Sant Andreu · desde 1998</span>
+        <h1>Mecánica<br>sin <span>sorpresas</span>.</h1>
+        <p>Te decimos lo que tiene tu coche y lo que cuesta antes de tocar nada. Si no das el OK, no se repara.</p>
+        <div class="actions">
+          <a class="btn" href="#herramientas">Calcular presupuesto</a>
+          <a class="btn btn-ghost" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche" target="_blank" rel="noopener">Pedir cita</a>
+        </div>
+      </div>
+      <div class="spec" aria-label="Datos del taller">
+        <div><span class="mono">Valoración Google</span><b>4,7 / 5</b></div>
+        <div><span class="mono">Presupuesto</span><b>En 24 h</b></div>
+        <div><span class="mono">Garantía reparaciones</span><b>12 meses</b></div>
+        <div><span class="mono">Coche de sustitución</span><b>Consultar</b></div>
+      </div>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="wrap trust">
-    <div><b>+20</b>años en el barrio</div>
-    <div><b>4,7★</b>en Google</div>
-    <div><b>24 h</b>presupuesto</div>
-    <div><b>✔</b>Garantía en reparaciones</div>
-  </div>
-
-  <section id="servicios">
+  <section id="herramientas">
     <div class="wrap">
-      <h2>Servicios</h2>
-      <div class="services">
-        <div class="service"><span class="icon">🛢️</span><h3>Revisión y aceite</h3><p>Cambio de aceite y filtros según fabricante.</p><span class="from">Desde 69 €</span></div>
-        <div class="service"><span class="icon">🛑</span><h3>Frenos</h3><p>Pastillas, discos y líquido de frenos.</p><span class="from">Desde 89 €</span></div>
-        <div class="service"><span class="icon">🛞</span><h3>Neumáticos</h3><p>Montaje, equilibrado y alineación.</p><span class="from">Consultar</span></div>
-        <div class="service"><span class="icon">✅</span><h3>Pre-ITV</h3><p>Revisamos todo para que pases a la primera.</p><span class="from">Desde 35 €</span></div>
-        <div class="service"><span class="icon">💻</span><h3>Diagnosis</h3><p>Lectura de averías con máquina.</p><span class="from">Desde 40 €</span></div>
-        <div class="service"><span class="icon">❄️</span><h3>Aire acondicionado</h3><p>Carga de gas y revisión del circuito.</p><span class="from">Desde 59 €</span></div>
+      <span class="mono" style="color:var(--muted)">Herramientas</span>
+      <h2>Resuélvelo desde el móvil</h2>
+      <div class="tools">
+        <form class="tool" id="itv-form" aria-labelledby="itv-title">
+          <h3 id="itv-title">¿Cuándo me toca la ITV?</h3>
+          <p>Para turismos de uso particular: primera a los 4 años, luego cada 2 años y anual a partir de los 10.</p>
+          <label class="field">Fecha de primera matriculación
+            <input type="month" id="reg" min="1980-01">
+          </label>
+          <div class="result" id="itv-result" aria-live="polite">Introduce la fecha que aparece en el permiso de circulación.</div>
+          <a class="btn" id="itv-cta" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20una%20pre-ITV" target="_blank" rel="noopener">Pedir pre-ITV por WhatsApp</a>
+        </form>
+
+        <form class="tool" id="quote" aria-labelledby="quote-title">
+          <h3 id="quote-title">Presupuesto orientativo</h3>
+          <label class="field">Tu coche
+            <select id="size">
+              <option value="1">Pequeño (Ibiza, Corsa, 208…)</option>
+              <option value="1.15" selected>Mediano (León, Golf, Mégane…)</option>
+              <option value="1.35">SUV / grande (Qashqai, Tucson…)</option>
+            </select>
+          </label>
+          <div class="checks" id="checks"></div>
+          <div class="total"><span>Desde</span><b id="total">0 €</b></div>
+          <p class="small">Precio orientativo con IVA, mano de obra incluida. El precio final te lo confirmamos tras revisar el coche.</p>
+          <a class="btn" id="quote-cta" href="#" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+        </form>
       </div>
     </div>
   </section>
 
   <section style="padding-top:0">
     <div class="wrap">
-      <h2>Así trabajamos</h2>
-      <div class="steps">
-        <div class="step"><p>Nos escribes o llamas y te damos cita.</p></div>
-        <div class="step"><p>Revisamos el coche y te pasamos el presupuesto por WhatsApp.</p></div>
-        <div class="step"><p>Solo reparamos cuando nos das el OK. Sin sorpresas.</p></div>
+      <span class="mono" style="color:var(--muted)">Cómo trabajamos</span>
+      <h2>Tu orden de trabajo</h2>
+      <div class="order">
+        <div><h3>Cita</h3><p>Nos escribes o llamas y te damos día y hora.</p></div>
+        <div><h3>Diagnóstico</h3><p>Revisamos el coche y te enviamos fotos y presupuesto por WhatsApp.</p></div>
+        <div><h3>Tu OK</h3><p>Solo reparamos lo que apruebas. Ni un euro más.</p></div>
+        <div><h3>Entrega</h3><p>Factura detallada y 12 meses de garantía.</p></div>
       </div>
     </div>
   </section>
@@ -103,23 +168,99 @@
   <section style="padding-top:0">
     <div class="wrap info">
       <div>
-        <h2>Horario</h2>
+        <h3>Horario</h3>
         <table class="hours">
-          <tr><td>Lunes a viernes</td><td>8:30 – 13:30 · 15:00 – 19:00</td></tr>
-          <tr><td>Sábado</td><td>Cerrado</td></tr>
-          <tr><td>Domingo</td><td>Cerrado</td></tr>
+          <tr><td>Lunes a viernes</td><td>8:30 – 13:30</td></tr>
+          <tr><td></td><td>15:00 – 19:00</td></tr>
+          <tr><td>Sábado y domingo</td><td>Cerrado</td></tr>
         </table>
-        <p style="color:var(--soft)">Avinguda Inventada, 45 · 08030 Barcelona<br>Metro: Sant Andreu (L1)</p>
       </div>
-      <div class="map">📍 Aquí va el mapa de Google con la ubicación del taller</div>
+      <div>
+        <h3>Dónde</h3>
+        <p style="margin:0">Avinguda Inventada, 45<br>08030 Barcelona (Sant Andreu)<br>Metro: Sant Andreu (L1)</p>
+        <p style="margin:10px 0 0"><a href="https://www.google.com/maps/search/?api=1&query=Sant+Andreu+Barcelona" target="_blank" rel="noopener">Cómo llegar →</a></p>
+      </div>
+      <div>
+        <h3>Contacto</h3>
+        <p style="margin:0">Teléfono: <b>93 000 00 02</b><br>WhatsApp: <b>600 00 00 00</b></p>
+        <p style="margin:10px 0 0" class="small">Trabajamos con todas las marcas. Aparcamiento para clientes.</p>
+      </div>
     </div>
   </section>
 </main>
 
 <footer><div class="wrap">© Taller Mecànic Avinguda · Sant Andreu, Barcelona</div></footer>
-<div class="bar">
-  <a class="c" href="tel:+34930000002">📞 Llamar</a>
-  <a class="w" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche">💬 WhatsApp</a>
-</div>
+<div class="dock"><a class="call" href="tel:+34930000002">Llamar</a><a class="wa" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche" target="_blank" rel="noopener">WhatsApp</a></div>
+
+<script>
+(function () {
+  var WA = "34600000000";
+  var parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+  var get = function (t) { return (parts.find(function (p) { return p.type === t; }) || {}).value; };
+  var day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+  var minutes = Number(get("hour")) * 60 + Number(get("minute"));
+  var today = new Date(Number(get("year")), Number(get("month")) - 1, Number(get("day")));
+
+  // Open status: weekdays 8:30-13:30 and 15:00-19:00.
+  var status = document.getElementById("status");
+  var weekday = day >= 1 && day <= 5;
+  var open = weekday && ((minutes >= 510 && minutes < 810) || (minutes >= 900 && minutes < 1140));
+  status.className = "status " + (open ? "open" : "closed");
+  if (open) status.textContent = "● Abierto ahora";
+  else if (weekday && minutes >= 810 && minutes < 900) status.textContent = "Pausa · abre 15:00";
+  else if (weekday && minutes < 510) status.textContent = "Cerrado · abre 8:30";
+  else status.textContent = "Cerrado · abre " + (day === 5 || day === 6 ? "lunes" : "mañana") + " 8:30";
+
+  // ITV for private cars: 4 years after registration, every 2 until 10, then yearly.
+  var months = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  var reg = document.getElementById("reg"), out = document.getElementById("itv-result");
+  reg.max = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0");
+  function nextItv(start) {
+    var due = new Date(start); due.setFullYear(due.getFullYear() + 4);
+    while (due < today) {
+      var age = (due.getFullYear() - start.getFullYear()) + (due.getMonth() - start.getMonth()) / 12;
+      due.setFullYear(due.getFullYear() + (age >= 10 ? 1 : 2));
+    }
+    return due;
+  }
+  reg.addEventListener("input", function () {
+    if (!reg.value) { out.className = "result"; out.textContent = "Introduce la fecha que aparece en el permiso de circulación."; return; }
+    var p = reg.value.split("-"), start = new Date(Number(p[0]), Number(p[1]) - 1, 1);
+    if (start > today) { out.className = "result warn"; out.textContent = "Esa fecha es posterior a hoy."; return; }
+    var due = nextItv(start);
+    var days = Math.round((due - today) / 86400000);
+    var age = today.getFullYear() - start.getFullYear() - (today.getMonth() < start.getMonth() ? 1 : 0);
+    out.className = "result " + (days <= 60 ? "warn" : "ok");
+    out.innerHTML = "Próxima ITV: <b>" + months[due.getMonth()] + " de " + due.getFullYear() + "</b><br>" +
+      (days <= 60 ? "¡Te toca pronto! Haz una pre-ITV para pasarla a la primera." : "Faltan unos " + Math.round(days / 30) + " meses.") +
+      " <span class='small'>(Coche de " + age + " años.)</span>";
+    document.getElementById("itv-cta").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent("Hola, mi coche tiene la ITV en " + months[due.getMonth()] + " de " + due.getFullYear() + ". Quiero pedir una pre-ITV.");
+  });
+
+  // Estimate.
+  var SERVICES = [["Cambio de aceite y filtros", 69], ["Pastillas de freno delanteras", 89], ["Pre-ITV", 35], ["Diagnosis con máquina", 40], ["Carga de aire acondicionado", 59], ["Alineación", 45]];
+  var checks = document.getElementById("checks"), size = document.getElementById("size");
+  checks.innerHTML = SERVICES.map(function (s, i) {
+    return "<label class='check'><span><input type='checkbox' value='" + i + "'" + (i === 0 ? " checked" : "") + ">" + s[0] + "</span><span data-i='" + i + "'></span></label>";
+  }).join("");
+  function euros(n) { return Math.round(n) + " €"; }
+  function recalc() {
+    var factor = Number(size.value), total = 0, chosen = [];
+    SERVICES.forEach(function (s, i) {
+      var price = s[1] * factor;
+      checks.querySelector("[data-i='" + i + "']").textContent = euros(price);
+      if (checks.querySelector("input[value='" + i + "']").checked) { total += price; chosen.push(s[0].toLowerCase()); }
+    });
+    document.getElementById("total").textContent = euros(total);
+    var car = size.options[size.selectedIndex].text.split(" (")[0].toLowerCase();
+    var msg = chosen.length ? "Hola, quiero presupuesto para un coche " + car + ": " + chosen.join(", ") + " (orientativo " + euros(total) + ")." : "Hola, quiero pedir presupuesto para mi coche.";
+    document.getElementById("quote-cta").href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(msg);
+  }
+  checks.addEventListener("change", recalc); size.addEventListener("change", recalc);
+  document.getElementById("quote").addEventListener("submit", function (e) { e.preventDefault(); });
+  document.getElementById("itv-form").addEventListener("submit", function (e) { e.preventDefault(); });
+  recalc();
+})();
+</script>
 </body>
 </html>

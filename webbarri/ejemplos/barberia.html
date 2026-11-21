@@ -3,120 +3,327 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Barbería del Barri · Sants, Barcelona</title>
-<meta name="description" content="Barbería en Sants, Barcelona. Cortes clásicos y modernos, arreglo de barba y afeitado a navaja. Reserva por WhatsApp.">
+<title>Barbería del Barri · Sants</title>
+<meta name="description" content="Barbería de barrio en Sants, Barcelona. Cortes, degradados, barba y afeitado a navaja. Reserva tu hora por WhatsApp en 3 toques.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BarberShop","name":"Barbería del Barri","address":{"@type":"PostalAddress","streetAddress":"Carrer Inventat, 12","postalCode":"08014","addressLocality":"Barcelona"},"telephone":"+34930000000","priceRange":"€","openingHours":["Mo-Fr 10:00-20:00","Sa 09:30-14:30"]}
+</script>
 <style>
-  :root { --bg:#111; --panel:#1b1b1b; --ink:#f3efe8; --soft:#b9b1a5; --gold:#c8963e; --line:#2c2c2c; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
-  a { color:inherit; }
-  .demo-ribbon { background:#ffd84d; color:#222; text-align:center; font-size:13px; font-weight:600; padding:6px 12px; }
-  .demo-ribbon a { font-weight:700; }
-  .wrap { max-width:980px; margin:0 auto; padding:0 16px; }
-  h1, h2, .brand { font-family:Oswald, Impact, sans-serif; text-transform:uppercase; letter-spacing:.04em; }
-  nav { display:flex; justify-content:space-between; align-items:center; padding:18px 0; }
-  .brand { font-size:22px; font-weight:700; text-decoration:none; }
-  .brand span { color:var(--gold); }
-  .btn { display:inline-block; background:var(--gold); color:#111; font-weight:700; padding:13px 22px; border-radius:6px; text-decoration:none; }
-  .btn-line { background:transparent; color:var(--ink); border:2px solid var(--gold); }
-  .hero { min-height:72vh; display:grid; align-items:center; background:radial-gradient(circle at 75% 30%, rgba(200,150,62,.25), transparent 55%), linear-gradient(180deg,#151515,#0c0c0c); }
-  .hero h1 { font-size:clamp(44px,9vw,96px); line-height:.95; margin:0 0 16px; }
-  .hero h1 span { color:var(--gold); }
-  .hero p { color:var(--soft); font-size:19px; max-width:34em; margin:0 0 26px; }
-  .row { display:flex; flex-wrap:wrap; gap:12px; }
-  .badges { display:flex; flex-wrap:wrap; gap:18px; margin-top:28px; color:var(--soft); font-size:15px; }
-  section { padding:64px 0; border-top:1px solid var(--line); }
-  h2 { font-size:clamp(30px,5vw,44px); margin:0 0 24px; }
-  .prices { display:grid; gap:2px; background:var(--line); border-radius:10px; overflow:hidden; }
-  .price { display:flex; justify-content:space-between; gap:16px; background:var(--panel); padding:18px 20px; }
-  .price small { display:block; color:var(--soft); }
-  .price b { color:var(--gold); font-size:20px; white-space:nowrap; }
-  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .gallery div { aspect-ratio:1; border-radius:8px; display:grid; place-items:end start; padding:12px; font-weight:600; font-size:14px; }
-  .g1 { background:linear-gradient(150deg,#3a2c1d,#141414); } .g2 { background:linear-gradient(150deg,#2b2b2b,#5b4426); } .g3 { background:linear-gradient(150deg,#4a3a2a,#1a1a1a); }
-  .g4 { background:linear-gradient(150deg,#1f1f1f,#6a5030); } .g5 { background:linear-gradient(150deg,#523a1c,#202020); } .g6 { background:linear-gradient(150deg,#262626,#3f3020); }
-  .two { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
-  .hours { width:100%; border-collapse:collapse; }
-  .hours td { padding:10px 0; border-bottom:1px solid var(--line); }
-  .hours td:last-child { text-align:right; color:var(--soft); }
-  .map { aspect-ratio:4/3; border-radius:10px; background:repeating-linear-gradient(45deg,#1c1c1c 0 14px,#222 14px 28px); display:grid; place-items:center; text-align:center; color:var(--soft); padding:16px; }
-  .reviews { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
-  .review { background:var(--panel); border-radius:10px; padding:18px; }
-  .review b { color:var(--gold); }
-  footer { padding:30px 0 90px; color:var(--soft); font-size:14px; border-top:1px solid var(--line); }
-  .wa { position:fixed; left:16px; right:16px; bottom:16px; max-width:420px; margin:0 auto; background:#25d366; color:#04210d; text-align:center; font-weight:800; padding:15px; border-radius:12px; text-decoration:none; box-shadow:0 10px 30px rgba(0,0,0,.4); }
-  @media (max-width:760px){ .two{grid-template-columns:1fr} .reviews{grid-template-columns:1fr} .gallery{grid-template-columns:repeat(2,1fr)} }
+  /* Layout: full-bleed bands; one oversized condensed headline; ticket-style price list; booking panel as the centrepiece. */
+  :root {
+    --ink: #121110; --paper: #ece6da; --paper-2: #e2dacb; --muted: #6d655a;
+    --red: #c4302b; --blue: #1f3f8a; --line: #121110;
+    --display: Anton, "Arial Narrow", Impact, sans-serif; --body: Inter, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); line-height: 1.55; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .ribbon { background: var(--ink); color: var(--paper); font-size: 12px; text-align: center; padding: 6px 12px; letter-spacing: .02em; }
+  .ribbon a { color: #fff; font-weight: 700; }
+
+  /* barber pole */
+  .pole { height: 10px; background: repeating-linear-gradient(-45deg, var(--red) 0 14px, var(--paper) 14px 28px, var(--blue) 28px 42px, var(--paper) 42px 56px); background-size: 79px 10px; animation: pole 3s linear infinite; }
+  @keyframes pole { to { background-position: 79px 0; } }
+  @media (prefers-reduced-motion: reduce) { .pole { animation: none; } }
+
+  nav .wrap { display: flex; justify-content: space-between; align-items: center; padding-block: 18px; gap: 12px; }
+  .logo { font-family: var(--display); font-size: 24px; letter-spacing: .02em; text-transform: uppercase; text-decoration: none; }
+  .status { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; border: 2px solid var(--ink); border-radius: 999px; padding: 6px 12px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #999; }
+  .status.open .dot { background: #1c9a4b; box-shadow: 0 0 0 4px rgba(28,154,75,.18); }
+  .status.closed .dot { background: var(--red); }
+
+  .hero .wrap { padding-block: 24px 56px; display: grid; gap: 28px; }
+  .hero h1 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(64px, 12vw, 150px); line-height: .86; letter-spacing: -.01em; margin: 0; }
+  .hero h1 .red { color: var(--red); }
+  .hero-foot { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: end; border-top: 3px solid var(--line); padding-top: 20px; }
+  .hero-foot p { margin: 0; font-size: 19px; max-width: 34em; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: flex-end; font-size: 14px; color: var(--muted); }
+  .facts b { color: var(--ink); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--ink); color: var(--paper); font-weight: 700; padding: 14px 22px; border-radius: 0; text-decoration: none; border: 2px solid var(--ink); cursor: pointer; font: inherit; font-weight: 700; }
+  .btn:hover { background: var(--red); border-color: var(--red); }
+  .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+
+  section { padding-block: 64px; }
+  .band { background: var(--ink); color: var(--paper); }
+  h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: clamp(40px, 7vw, 76px); line-height: .95; margin: 0 0 28px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+
+  /* ticket price list */
+  .ticket { background: var(--paper); color: var(--ink); padding: 26px 24px; position: relative; }
+  .ticket::before, .ticket::after { content: ""; position: absolute; left: 0; right: 0; height: 10px; background: radial-gradient(circle at 7px -2px, transparent 7px, var(--paper) 7.5px) 0 0 / 14px 10px repeat-x; }
+  .ticket::before { top: -9px; transform: scaleY(-1); }
+  .ticket::after { bottom: -9px; }
+  .ticket h3 { margin: 0 0 14px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline; padding: 10px 0; }
+  .row .fill { border-bottom: 2px dotted #b5ab9c; transform: translateY(-4px); }
+  .row b { font-variant-numeric: tabular-nums; font-size: 18px; }
+  .row small { display: block; color: var(--muted); font-size: 13px; }
+  .note { color: #a89f92; font-size: 14px; margin-top: 18px; }
+
+  /* booking */
+  .book { background: var(--paper-2); border: 3px solid var(--ink); padding: 24px; display: grid; gap: 18px; }
+  .book h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 30px; text-transform: uppercase; }
+  .step-label { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { border: 2px solid var(--ink); background: transparent; padding: 9px 12px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--ink); }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+  .chip:disabled { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+  .chip small { display: block; font-weight: 500; font-size: 11px; }
+  .book input { width: 100%; border: 2px solid var(--ink); background: var(--paper); padding: 12px; font: inherit; }
+  .summary { font-size: 15px; min-height: 1.5em; }
+  .book .btn { width: 100%; }
+  .demo-note { font-size: 12px; color: var(--muted); margin: 0; }
+
+  /* work grid without photos: type-driven tiles */
+  .styles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 3px solid var(--ink); border-left: 3px solid var(--ink); }
+  .style { border-right: 3px solid var(--ink); border-bottom: 3px solid var(--ink); padding: 22px 18px 20px; min-height: 210px; display: flex; flex-direction: column; justify-content: space-between; }
+  .style svg { width: 64px; height: 64px; }
+  .style h3 { font-family: var(--display); font-weight: 400; font-size: 28px; text-transform: uppercase; margin: 12px 0 4px; line-height: 1; }
+  .style p { margin: 0; font-size: 14px; color: var(--muted); }
+  .style:nth-child(2) { background: var(--red); color: var(--paper); } .style:nth-child(2) p { color: #f7d9d6; }
+
+  .quote { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 4.6vw, 52px); line-height: 1.05; text-transform: uppercase; margin: 0; }
+  .quote-by { margin-top: 14px; color: var(--muted); }
+
+  .info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .info h3 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .hours { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .hours td { padding: 7px 0; border-bottom: 1px solid #c9bfae; }
+  .hours td:last-child { text-align: right; }
+  .hours tr.today td { font-weight: 700; }
+  footer { border-top: 3px solid var(--ink); padding-block: 24px 96px; font-size: 14px; color: var(--muted); }
+  .sticky-cta { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-left, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--paper); border-top: 3px solid var(--ink); display: none; }
+  .sticky-cta .btn { width: 100%; }
+
+  @media (max-width: 860px) {
+    .two, .hero-foot, .info { grid-template-columns: 1fr; }
+    .facts { justify-content: flex-start; }
+    .styles { grid-template-columns: 1fr 1fr; }
+    .sticky-cta { display: block; }
+    footer { padding-bottom: 110px; }
+  }
 </style>
 </head>
 <body>
-<div class="demo-ribbon">Web de ejemplo de un negocio inventado, hecha por <a href="../index.html">WebBarri</a></div>
+<div class="ribbon">Web de ejemplo · negocio inventado · diseñada por <a href="../index.html">WebBarri</a></div>
+<div class="pole" aria-hidden="true"></div>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#">Barbería del Barri</a>
+    <span class="status" id="status"><span class="dot"></span><span id="status-text">Horario</span></span>
+  </div>
+</nav>
+
 <header class="hero">
   <div class="wrap">
-    <nav><a class="brand" href="#">Barbería del <span>Barri</span></a><a class="btn btn-line" href="#precios">Precios</a></nav>
-    <h1>Cortes de <span>siempre</span>,<br>estilo de ahora</h1>
-    <p>Barbería de barrio en Sants. Cortes clásicos y modernos, arreglo de barba y afeitado a navaja con toalla caliente.</p>
-    <div class="row">
-      <a class="btn" href="#reservar">💬 Reservar por WhatsApp</a>
-      <a class="btn btn-line" href="tel:+34930000000">📞 Llamar</a>
+    <h1>Corte<br>fino,<br><span class="red">barrio</span><br>de siempre.</h1>
+    <div class="hero-foot">
+      <p>Desde 2009 en Sants. Degradados, cortes a tijera, barba perfilada y afeitado a navaja con toalla caliente. Sin prisas y sin esperas: pide tu hora.</p>
+      <div>
+        <div class="facts"><span><b>4,8</b> · 312 reseñas en Google</span><span><b>L1 · L5</b> Plaça de Sants</span></div>
+        <div style="margin-top:14px;display:flex;justify-content:flex-end"><a class="btn" href="#reservar">Reservar hora</a></div>
+      </div>
     </div>
-    <div class="badges"><span>⭐ 4,8 en Google</span><span>📍 Sants, Barcelona</span><span>🕒 Lunes a sábado</span></div>
   </div>
 </header>
 
-<main>
-  <section id="precios">
-    <div class="wrap">
+<section class="band" id="reservar">
+  <div class="wrap two">
+    <div>
       <h2>Precios</h2>
-      <div class="prices">
-        <div class="price"><div>Corte clásico<small>Tijera y máquina, lavado incluido</small></div><b>14 €</b></div>
-        <div class="price"><div>Corte + barba<small>El combo más pedido</small></div><b>20 €</b></div>
-        <div class="price"><div>Arreglo de barba<small>Perfilado y aceite</small></div><b>9 €</b></div>
-        <div class="price"><div>Afeitado a navaja<small>Con toalla caliente</small></div><b>15 €</b></div>
-        <div class="price"><div>Corte infantil<small>Hasta 12 años</small></div><b>10 €</b></div>
+      <div class="ticket">
+        <h3>Servicios · IVA incluido</h3>
+        <div class="row"><span>Corte clásico<small>Tijera o máquina, lavado incluido</small></span><span class="fill"></span><b>14 €</b></div>
+        <div class="row"><span>Degradado<small>Skin fade o low fade</small></span><span class="fill"></span><b>16 €</b></div>
+        <div class="row"><span>Corte + barba<small>El combo de la casa</small></span><span class="fill"></span><b>20 €</b></div>
+        <div class="row"><span>Arreglo de barba<small>Perfilado a navaja y aceite</small></span><span class="fill"></span><b>9 €</b></div>
+        <div class="row"><span>Afeitado a navaja<small>Toalla caliente, 30 min</small></span><span class="fill"></span><b>15 €</b></div>
+        <div class="row"><span>Corte infantil<small>Hasta 12 años</small></span><span class="fill"></span><b>10 €</b></div>
       </div>
+      <p class="note">Pago en efectivo, tarjeta o Bizum.</p>
     </div>
-  </section>
 
-  <section>
-    <div class="wrap">
-      <h2>Nuestro trabajo</h2>
-      <div class="gallery">
-        <div class="g1">Degradado</div><div class="g2">Barba perfilada</div><div class="g3">Clásico</div>
-        <div class="g4">Crop texturizado</div><div class="g5">Afeitado</div><div class="g6">El local</div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <h2>Lo que dicen</h2>
-      <div class="reviews">
-        <div class="review"><b>★★★★★</b><p>«El mejor degradado del barrio y siempre puntuales.»</p></div>
-        <div class="review"><b>★★★★★</b><p>«Trato de diez. El afeitado a navaja, una pasada.»</p></div>
-        <div class="review"><b>★★★★★</b><p>«Llevo a mi hijo desde pequeño, encantados.»</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="reservar">
-    <div class="wrap two">
+    <form class="book" id="book" aria-labelledby="book-title" style="color:var(--ink)">
+      <h3 id="book-title">Reserva en 3 toques</h3>
       <div>
-        <h2>Horario</h2>
-        <table class="hours">
-          <tr><td>Lunes a viernes</td><td>10:00 – 20:00</td></tr>
-          <tr><td>Sábado</td><td>9:30 – 14:30</td></tr>
-          <tr><td>Domingo</td><td>Cerrado</td></tr>
-        </table>
-        <p style="color:var(--soft)">Carrer Inventat, 12 · 08014 Barcelona<br>Metro: Plaça de Sants (L1, L5)</p>
+        <div class="step-label">1 · Servicio</div>
+        <div class="chips" id="services"></div>
       </div>
-      <div class="map">📍 Aquí va el mapa de Google con la ubicación del negocio</div>
-    </div>
-  </section>
-</main>
+      <div>
+        <div class="step-label">2 · Día</div>
+        <div class="chips" id="days"></div>
+      </div>
+      <div>
+        <div class="step-label">3 · Hora</div>
+        <div class="chips" id="times"></div>
+      </div>
+      <div>
+        <label class="step-label" for="name">Tu nombre</label>
+        <input id="name" autocomplete="given-name" placeholder="Para apuntarte en la agenda">
+      </div>
+      <p class="summary" id="summary">Elige servicio, día y hora.</p>
+      <a class="btn" id="send" href="#" target="_blank" rel="noopener" aria-disabled="true">Confirmar por WhatsApp</a>
+      <p class="demo-note">Se abre WhatsApp con el mensaje escrito. En esta web de ejemplo los huecos libres son simulados.</p>
+    </form>
+  </div>
+</section>
 
-<footer><div class="wrap">© Barbería del Barri · Sants, Barcelona · <a href="tel:+34930000000">93 000 00 00</a></div></footer>
-<a class="wa" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20reservar%20cita">💬 Reservar cita por WhatsApp</a>
+<section>
+  <div class="wrap">
+    <h2>Lo que hacemos</h2>
+    <div class="styles">
+      <div class="style">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M14 50 50 14"/><circle cx="16" cy="16" r="7"/><circle cx="16" cy="48" r="7"/><path d="M22 20 50 50"/></svg>
+        <div><h3>Tijera</h3><p>Cortes clásicos con caída natural.</p></div>
+      </div>
+      <div class="style">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><rect x="18" y="8" width="28" height="40" rx="4"/><path d="M18 18h28M24 48v8h16v-8"/></svg>
+        <div><h3>Degradados</h3><p>Skin fade, low fade y diseños.</p></div>
+      </div>
+      <div class="style">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M10 40c10 14 34 14 44 0"/><path d="M18 40c4 6 24 6 28 0"/><path d="M20 20h24"/></svg>
+        <div><h3>Barba</h3><p>Perfilado, recorte y aceites.</p></div>
+      </div>
+      <div class="style">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M8 44 44 8l12 12-36 36z"/><path d="M16 36l12 12"/></svg>
+        <div><h3>Navaja</h3><p>Afeitado clásico con toalla caliente.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <p class="quote">«Vengo desde que abrieron. Nunca he salido de aquí con un corte que no me guste.»</p>
+    <p class="quote-by">Jordi, cliente desde 2011 · ★★★★★ en Google</p>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap info">
+    <div>
+      <h3>Horario</h3>
+      <table class="hours" id="hours">
+        <tr data-d="1"><td>Lunes</td><td>10:00 – 20:00</td></tr>
+        <tr data-d="2"><td>Martes</td><td>10:00 – 20:00</td></tr>
+        <tr data-d="3"><td>Miércoles</td><td>10:00 – 20:00</td></tr>
+        <tr data-d="4"><td>Jueves</td><td>10:00 – 20:00</td></tr>
+        <tr data-d="5"><td>Viernes</td><td>10:00 – 20:00</td></tr>
+        <tr data-d="6"><td>Sábado</td><td>9:30 – 14:30</td></tr>
+        <tr data-d="0"><td>Domingo</td><td>Cerrado</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Dónde</h3>
+      <p style="margin:0">Carrer Inventat, 12<br>08014 Barcelona (Sants)</p>
+      <p style="margin:10px 0 0"><a href="https://www.google.com/maps/search/?api=1&query=Pla%C3%A7a+de+Sants+Barcelona" target="_blank" rel="noopener">Cómo llegar →</a></p>
+    </div>
+    <div>
+      <h3>Contacto</h3>
+      <p style="margin:0">Teléfono: <b>93 000 00 00</b><br>WhatsApp: <b>600 00 00 00</b></p>
+      <p style="margin:10px 0 0"><a href="#">@barberiadelbarri</a></p>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap">© Barbería del Barri · Sants, Barcelona</div></footer>
+<div class="sticky-cta"><a class="btn" href="#reservar">Reservar hora</a></div>
+
+<script>
+(function () {
+  var WA = "34600000000";
+  var HOURS = { 0: null, 1: [600, 1200], 2: [600, 1200], 3: [600, 1200], 4: [600, 1200], 5: [600, 1200], 6: [570, 870] };
+  var SERVICES = [["Corte clásico", 30, "14 €"], ["Degradado", 30, "16 €"], ["Corte + barba", 45, "20 €"], ["Barba", 20, "9 €"], ["Afeitado", 30, "15 €"]];
+  var DAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+
+  function madridNow() {
+    var parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Madrid", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
+    var get = function (t) { return (parts.find(function (p) { return p.type === t; }) || {}).value; };
+    var wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(get("weekday"));
+    return { day: wd, minutes: Number(get("hour")) * 60 + Number(get("minute")), date: new Date(Number(get("year")), Number(get("month")) - 1, Number(get("day"))) };
+  }
+  function fmt(m) { return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0"); }
+
+  var now = madridNow();
+  var status = document.getElementById("status"), statusText = document.getElementById("status-text");
+  var today = HOURS[now.day];
+  if (today && now.minutes >= today[0] && now.minutes < today[1]) {
+    status.classList.add("open"); statusText.textContent = "Abierto · hasta las " + fmt(today[1]);
+  } else {
+    status.classList.add("closed");
+    var next = null;
+    for (var i = 0; i < 8 && !next; i++) {
+      var d = (now.day + i) % 7, h = HOURS[d];
+      if (h && (i > 0 || now.minutes < h[0])) next = (i === 0 ? "hoy" : i === 1 ? "mañana" : DAYS[d].toLowerCase()) + " a las " + fmt(h[0]);
+    }
+    statusText.textContent = "Cerrado · abre " + next;
+  }
+  var row = document.querySelector('#hours tr[data-d="' + now.day + '"]'); if (row) row.classList.add("today");
+
+  var state = { service: null, day: null, time: null };
+  function chip(label, sub, onClick, pressed, disabled) {
+    var b = document.createElement("button"); b.type = "button"; b.className = "chip";
+    b.innerHTML = label + (sub ? "<small>" + sub + "</small>" : "");
+    b.setAttribute("aria-pressed", pressed ? "true" : "false"); b.disabled = !!disabled; b.onclick = onClick; return b;
+  }
+  // Deterministic "busy" slots so the demo looks like a real diary.
+  function busy(dateKey, minutes) { var x = (dateKey * 31 + minutes * 7) % 11; return x < 4; }
+
+  function render() {
+    var s = document.getElementById("services"); s.innerHTML = "";
+    SERVICES.forEach(function (sv, i) { s.appendChild(chip(sv[0], sv[1] + " min · " + sv[2], function () { state.service = i; state.time = null; render(); }, state.service === i)); });
+
+    var d = document.getElementById("days"); d.innerHTML = "";
+    var shown = 0;
+    for (var i = 0; shown < 6 && i < 10; i++) {
+      var date = new Date(now.date); date.setDate(date.getDate() + i);
+      var wd = date.getDay(); if (!HOURS[wd]) continue;
+      if (i === 0 && now.minutes > HOURS[wd][1] - 60) continue;
+      shown++;
+      (function (date, i) {
+        var label = i === 0 ? "Hoy" : i === 1 ? "Mañana" : DAYS[date.getDay()].slice(0, 3);
+        d.appendChild(chip(label, date.getDate() + "/" + (date.getMonth() + 1), function () { state.day = date; state.time = null; render(); }, state.day && state.day.getTime() === date.getTime()));
+      })(date, i);
+    }
+
+    var t = document.getElementById("times"); t.innerHTML = "";
+    if (state.day === null) { t.innerHTML = '<span class="demo-note">Elige un día para ver las horas libres.</span>'; }
+    else {
+      var h = HOURS[state.day.getDay()], isToday = state.day.getTime() === now.date.getTime();
+      var key = state.day.getDate() + state.day.getMonth() * 31;
+      for (var m = h[0]; m <= h[1] - 30; m += 30) {
+        (function (m) {
+          var past = isToday && m <= now.minutes + 30;
+          t.appendChild(chip(fmt(m), "", function () { state.time = m; render(); }, state.time === m, past || busy(key, m)));
+        })(m);
+      }
+    }
+    update();
+  }
+  function update() {
+    var send = document.getElementById("send"), summary = document.getElementById("summary");
+    var name = document.getElementById("name").value.trim();
+    if (state.service === null || state.day === null || state.time === null) {
+      summary.textContent = "Elige servicio, día y hora."; send.setAttribute("aria-disabled", "true"); send.href = "#"; return;
+    }
+    var sv = SERVICES[state.service];
+    var when = DAYS[state.day.getDay()].toLowerCase() + " " + state.day.getDate() + "/" + (state.day.getMonth() + 1) + " a las " + fmt(state.time);
+    summary.innerHTML = "<b>" + sv[0] + "</b> · " + when + " · " + sv[2];
+    var msg = "Hola, quiero reservar " + sv[0].toLowerCase() + " el " + when + "." + (name ? " Me llamo " + name + "." : "") + " ¡Gracias!";
+    send.href = "https://wa.me/" + WA + "?text=" + encodeURIComponent(msg); send.removeAttribute("aria-disabled");
+  }
+  document.getElementById("name").addEventListener("input", update);
+  document.getElementById("send").addEventListener("click", function (e) { if (this.getAttribute("aria-disabled")) e.preventDefault(); });
+  document.getElementById("book").addEventListener("submit", function (e) { e.preventDefault(); });
+  render();
+})();
+</script>
 </body>
 </html>
