@@ -58,6 +58,13 @@ export async function startImages(data: unknown): Promise<StartResult> {
   const input = parseImageInput(data);
   if (!input) return { ok: false, error: "input" };
 
+  let productId: string | null = null;
+  if (input.productId) {
+    const [owned] = await db()<{ id: string }[]>`
+      SELECT id FROM esc_products WHERE id = ${input.productId} AND user_id = ${user.id}`;
+    productId = owned?.id ?? null;
+  }
+
   const prompts = imagePrompts(input);
   const cost = prompts.length * COST.image;
   const balance = await spendCredits(user.id, cost, `${prompts.length} fotos`);
@@ -87,6 +94,7 @@ export async function startImages(data: unknown): Promise<StartResult> {
           credits: COST.image,
           product_name: input.productName,
           format: input.format,
+          product_id: productId,
         })),
       )}`;
   }
@@ -109,8 +117,8 @@ export async function startVideo(data: unknown): Promise<StartResult> {
 
   /* Only a photo this shop already made can be animated: it keeps credits
      tied to the product flow and stops the endpoint animating arbitrary URLs. */
-  const [owned] = await db()<{ product_name: string }[]>`
-    SELECT product_name FROM esc_generations
+  const [owned] = await db()<{ product_name: string; product_id: string | null }[]>`
+    SELECT product_name, product_id FROM esc_generations
     WHERE user_id = ${user.id} AND kind = 'image' AND (result_url = ${input.imageUrl} OR source_url = ${input.imageUrl})
     LIMIT 1`;
   if (!owned) return { ok: false, error: "input" };
@@ -126,8 +134,8 @@ export async function startVideo(data: unknown): Promise<StartResult> {
       settings: { duration: 5, resolution: "720p", aspectRatio: formatById(input.format).aspectRatio },
     });
     await db()`
-      INSERT INTO esc_generations (request_id, user_id, kind, credits, product_name, format)
-      VALUES (${queued.requestId}, ${user.id}, 'video', ${COST.video}, ${owned.product_name}, ${input.format})`;
+      INSERT INTO esc_generations (request_id, user_id, kind, credits, product_name, format, product_id)
+      VALUES (${queued.requestId}, ${user.id}, 'video', ${COST.video}, ${owned.product_name}, ${input.format}, ${owned.product_id})`;
     return { ok: true, requestIds: [queued.requestId], credits: balance };
   } catch (caught) {
     console.error("[escaparate] video submit failed", caught);
@@ -209,7 +217,9 @@ function parseImageInput(data: unknown) {
   const format = FORMATS.find((item) => item.id === record.format)?.id;
   if (!sector || !style || !format) return null;
   const productName = typeof record.productName === "string" ? record.productName.slice(0, 80) : "";
-  return { photoUrl, sector: sector as SectorId, style: style as StyleId, format: format as FormatId, productName };
+  const productId =
+    typeof record.productId === "string" && /^[0-9a-f-]{36}$/i.test(record.productId) ? record.productId : null;
+  return { photoUrl, sector: sector as SectorId, style: style as StyleId, format: format as FormatId, productName, productId };
 }
 
 function parseVideoInput(data: unknown) {

@@ -169,6 +169,8 @@ export function salesCopy(input: {
   price: string;
   businessName: string;
   city: string;
+  /** e.g. "🖤 Black Friday" — leads the headline when the post is for a date. */
+  occasion?: string;
 }): SalesCopy {
   const sector = sectorById(input.sector);
   const product = input.productName.trim() || "nuestro producto estrella";
@@ -178,7 +180,7 @@ export function salesCopy(input: {
   const where = city ? ` en ${city}` : "";
   const by = shop ? ` en ${shop}` : "";
 
-  const titulo = `✨ ${capitalise(product)}${price ? ` · ${price}` : ""}`;
+  const titulo = `${input.occasion ? `${input.occasion}: ` : "✨ "}${capitalise(product)}${price ? ` · ${price}` : ""}`;
   const texto = [
     `¡Ya lo tenemos${by}! ${capitalise(product)}, ${SECTOR_PITCH[sector.id]}.`,
     price ? `Precio: ${price}.` : "",

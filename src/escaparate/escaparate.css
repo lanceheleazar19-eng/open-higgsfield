@@ -549,3 +549,75 @@ a.esc-chip {
     display: none;
   }
 }
+
+.esc-banner-occasion {
+  display: grid;
+  gap: 4px;
+  background: #fff4d6;
+}
+
+/* Catalogue + calendar */
+.esc-gallery-caption {
+  display: grid;
+  gap: 2px;
+  font-size: 14px;
+  min-width: 0;
+}
+.esc-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+.esc-timeline-item {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+.esc-timeline-item:first-child {
+  border-top: 0;
+}
+.esc-timeline-date {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  background: var(--soft);
+  border-radius: 12px;
+  padding: 8px 4px;
+  line-height: 1.1;
+}
+.esc-timeline-date strong {
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+.esc-timeline-date span {
+  font-size: 12px;
+  color: var(--tx3);
+  text-transform: uppercase;
+}
+.esc-timeline-body h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.esc-pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--tx2);
+  vertical-align: middle;
+}
+.esc-pill-hot {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+@media (max-width: 600px) {
+  .esc-logo-text {
+    display: none;
+  }
+}

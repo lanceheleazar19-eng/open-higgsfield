@@ -19,6 +19,7 @@ import {
 } from "./content";
 import { COST } from "./plans";
 import { generateCopy } from "./server/copy-actions";
+import { saveProduct } from "./server/product-actions";
 import { checkJobs, startImages, startVideo, type JobStatus, type StartResult } from "./server/generate-actions";
 
 type Slot =
@@ -50,28 +51,46 @@ const TONE_OPTIONS = [
 ] as const;
 type ToneId = (typeof TONE_OPTIONS)[number]["id"];
 
+export type CreatorProduct = {
+  id: string;
+  name: string;
+  price: string;
+  details: string;
+  sector: SectorId;
+  photoUrl: string;
+};
+
+export type CreatorOccasion = { id: string; emoji: string; title: string; idea: string; daysLeft: number };
+
 export function Creator({
   initialCredits,
   initialBusinessName = "",
   initialCity = "",
+  product,
+  occasion,
 }: {
   initialCredits: number;
   initialBusinessName?: string;
   initialCity?: string;
+  product?: CreatorProduct;
+  occasion?: CreatorOccasion;
 }) {
+  const [productId, setProductId] = useState<string | null>(product?.id ?? null);
   const [credits, setCredits] = useState(initialCredits);
   const [tone, setTone] = useState<ToneId>("cercano");
-  const [details, setDetails] = useState("");
+  const [details, setDetails] = useState(product?.details ?? "");
   const [aiCopy, setAiCopy] = useState<SalesCopy | null>(null);
   const [copyBusy, setCopyBusy] = useState(false);
   const [copyNote, setCopyNote] = useState<string | null>(null);
-  const [photo, setPhoto] = useState<{ preview: string; url: string | null; error?: string } | null>(null);
+  const [photo, setPhoto] = useState<{ preview: string; url: string | null; error?: string } | null>(
+    product ? { preview: product.photoUrl, url: product.photoUrl } : null,
+  );
   const [dragOver, setDragOver] = useState(false);
-  const [sector, setSector] = useState<SectorId>("comida");
+  const [sector, setSector] = useState<SectorId>(product?.sector ?? "comida");
   const [style, setStyle] = useState<StyleId>("estudio");
   const [format, setFormat] = useState<FormatId>("post");
-  const [productName, setProductName] = useState("");
-  const [price, setPrice] = useState("");
+  const [productName, setProductName] = useState(product?.name ?? "");
+  const [price, setPrice] = useState(product?.price ?? "");
   const [businessName, setBusinessName] = useState(initialBusinessName);
   const [city, setCity] = useState(initialCity);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -146,7 +165,7 @@ export function Creator({
   async function writeWithAi() {
     setCopyBusy(true);
     setCopyNote(null);
-    const result = await generateCopy({ sector, productName, price, businessName, city, details, tone }).catch(() => null);
+    const result = await generateCopy({ sector, productName, price, businessName, city, details, tone, occasionId: occasion?.id }).catch(() => null);
     setCopyBusy(false);
     if (!result) return setCopyNote("No hemos podido escribir los textos. Inténtalo de nuevo.");
     if (!result.ok) return setCopyNote(result.error);
@@ -159,8 +178,16 @@ export function Creator({
   }
 
   const templateCopy = useMemo(
-    () => salesCopy({ sector, productName, price, businessName, city }),
-    [sector, productName, price, businessName, city],
+    () =>
+      salesCopy({
+        sector,
+        productName,
+        price,
+        businessName,
+        city,
+        occasion: occasion ? `${occasion.emoji} ${occasion.title}` : undefined,
+      }),
+    [sector, productName, price, businessName, city, occasion],
   );
   const copy = aiCopy ?? templateCopy;
 
@@ -198,7 +225,19 @@ export function Creator({
     setRunning(true);
     setRunFormat(format);
     setSlots([0, 1, 2, 3].map(() => ({ state: "pending" })));
-    const result = await startImages({ photoUrl: photo.url, sector, style, format, productName }).catch(
+    /* Every product the shop works on lands in its catalogue, so it can come
+       back to it later without uploading the photo again. */
+    const saved = await saveProduct({
+      productId,
+      name: productName,
+      price,
+      details,
+      sector,
+      photoUrl: photo.url,
+    }).catch(() => null);
+    const savedId = saved?.ok ? saved.productId : productId;
+    if (savedId) setProductId(savedId);
+    const result = await startImages({ photoUrl: photo.url, sector, style, format, productName, productId: savedId }).catch(
       (): StartResult => ({ ok: false, error: "platform" }),
     );
     setRunning(false);
@@ -250,6 +289,21 @@ export function Creator({
           Conseguir más
         </Link>
       </div>
+      {occasion ? (
+        <div className="esc-banner esc-banner-occasion">
+          <strong>
+            {occasion.emoji} Contenido para {occasion.title}
+            {occasion.daysLeft > 0 ? ` (faltan ${occasion.daysLeft} días)` : " (¡es hoy!)"}
+          </strong>
+          <span>{occasion.idea}</span>
+        </div>
+      ) : null}
+      {product ? (
+        <p className="esc-note" style={{ margin: 0 }}>
+          Trabajando con «{product.name || "producto sin nombre"}» de tu catálogo ·{" "}
+          <Link href="/escaparate/crear">Empezar con otro producto</Link>
+        </p>
+      ) : null}
       <section className="esc-panel">
         <h2 className="esc-panel-title">1. Sube la foto de tu producto</h2>
         <label

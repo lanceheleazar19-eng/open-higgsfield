@@ -31,13 +31,21 @@ export default async function EscaparateLayout({ children }: { children: ReactNo
             <span className="esc-logo-mark" aria-hidden>
               E
             </span>
-            Escaparate
+            <span className="esc-logo-text">Escaparate</span>
           </Link>
           {user ? (
             <nav style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <Link href="/escaparate/calendario" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Calendario">
+                <span aria-hidden className="esc-show-sm">📅</span>
+                <span className="esc-hide-sm">Calendario</span>
+              </Link>
+              <Link href="/escaparate/catalogo" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Mi catálogo">
+                <span aria-hidden className="esc-show-sm">📦</span>
+                <span className="esc-hide-sm">Catálogo</span>
+              </Link>
               <Link href="/escaparate/creaciones" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Mis creaciones">
                 <span aria-hidden className="esc-show-sm">🖼️</span>
-                <span className="esc-hide-sm">Mis creaciones</span>
+                <span className="esc-hide-sm">Creaciones</span>
               </Link>
               <Link href="/escaparate/cuenta" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Mi cuenta">
                 <span aria-hidden className="esc-show-sm">👤</span>

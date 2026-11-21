@@ -1,5 +1,6 @@
 "use server";
 
+import { occasionById, todayInSpain } from "../calendar";
 import { SECTORS, salesCopy, type SalesCopy, type SectorId } from "../content";
 import { TONES, writeCopy, type Tone } from "./copywriter";
 import { db } from "./db";
@@ -36,9 +37,14 @@ export async function generateCopy(data: unknown): Promise<CopyResult> {
       WHERE id = ${user.id}`;
   }
 
-  const written = await writeCopy(input);
+  const occasion = input.occasionId ? occasionById(input.occasionId, todayInSpain()) : null;
+  const written = await writeCopy({ ...input, occasion: occasion?.brief });
   if (written) return { ok: true, copy: written, source: "ia" };
-  return { ok: true, copy: salesCopy(input), source: "plantilla" };
+  return {
+    ok: true,
+    copy: salesCopy({ ...input, occasion: occasion ? `${occasion.emoji} ${occasion.title}` : undefined }),
+    source: "plantilla",
+  };
 }
 
 function parse(data: unknown) {
@@ -56,5 +62,6 @@ function parse(data: unknown) {
     businessName: text("businessName", 80),
     city: text("city", 60),
     details: text("details", 300),
+    occasionId: text("occasionId", 40),
   };
 }

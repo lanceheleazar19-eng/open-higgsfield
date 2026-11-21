@@ -35,9 +35,17 @@ const PRICING = [
   })),
 ];
 
-export default function EscaparateLanding() {
+export default async function EscaparateLanding({ searchParams }: { searchParams: Promise<{ cuenta?: string }> }) {
+  const { cuenta } = await searchParams;
   return (
     <main>
+      {cuenta === "borrada" ? (
+        <div className="esc-wrap" style={{ paddingTop: 16 }}>
+          <p className="esc-banner" role="status">
+            Tu cuenta y todos tus datos se han borrado. ¡Gracias por haber probado Escaparate!
+          </p>
+        </div>
+      ) : null}
       <section className="esc-wrap esc-hero">
         <div>
           <span className="esc-eyebrow">Para comercios y autónomos de España</span>
@@ -98,7 +106,22 @@ export default function EscaparateLanding() {
             </div>
             <div className="esc-card">
               <h3>✍️ Texto en tu idioma</h3>
-              <p>Descripción, precio, mensaje para clientes de WhatsApp y hashtags de tu ciudad.</p>
+              <p>La IA escribe la publicación, el mensaje para tus clientes de WhatsApp y los hashtags de tu ciudad, con el tono que elijas.</p>
+            </div>
+            <div className="esc-card">
+              <h3>📅 Qué publicar cada día</h3>
+              <p>
+                Calendario con las fechas que más venden en España: rebajas, Día de la Madre, Black Friday, Navidad…{" "}
+                <Link href="/escaparate/calendario">Ver calendario</Link>
+              </p>
+            </div>
+            <div className="esc-card">
+              <h3>📦 Tu catálogo guardado</h3>
+              <p>Sube cada producto una vez y crea contenido nuevo cuando quieras, sin repetir fotos.</p>
+            </div>
+            <div className="esc-card">
+              <h3>🖼️ Todo en un sitio</h3>
+              <p>Tus fotos y vídeos quedan guardados para descargarlos cuando los necesites.</p>
             </div>
             <div className="esc-card">
               <h3>💶 Precio de barrio</h3>

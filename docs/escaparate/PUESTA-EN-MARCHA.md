@@ -98,6 +98,32 @@ cobrar dinero real.
 - **Mis creaciones:** cada foto y vídeo terminado se copia a tu Vercel Blob
   (los enlaces de la plataforma de IA caducan), así la galería no se rompe. Se
   puede filtrar, marcar favoritas y quitar de la galería.
+- **Catálogo:** cada producto con el que se crean fotos se guarda; desde «Mi
+  catálogo» se vuelve a él sin subir la foto otra vez.
+- **Calendario:** `/escaparate/calendario` (público, bueno para Google) con las
+  fechas comerciales de España calculadas para cada año, Semana Santa incluida.
+  La herramienta sugiere sola la fecha que toca y los textos la tienen en cuenta.
+- **Seguridad de subidas:** solo pueden subir archivos los comercios con sesión
+  (imágenes de hasta 15 MB) o quien use el estudio con su clave.
+- **Borrar cuenta (RGPD):** desde «Mi cuenta». Cancela la suscripción, borra
+  productos, fotos, vídeos y datos. Si Stripe no responde, no borra nada y avisa.
+- **Prueba completa:** `scripts/escaparate-e2e/README.md`.
 - **Textos con IA:** Claude escribe la publicación, el mensaje de WhatsApp y los
   hashtags en español de España, con el tono elegido, sin inventar datos que el
   comercio no ha dado.
+
+## Lista final antes de lanzar (lo que solo puedes hacer tú)
+
+- [ ] Elegir el nombre definitivo y comprobarlo en la OEPM y en el registro de
+      dominios.
+- [ ] Comprar el dominio.
+- [ ] Crear las cuentas: Vercel, Neon, Resend, Stripe, plataforma de IA y
+      Anthropic (opcional).
+- [ ] Darte de alta como autónomo (o crear una sociedad) y activar Stripe con
+      tus datos fiscales y tu cuenta bancaria.
+- [ ] Completar los datos del titular en `/escaparate/legal` y, si puedes, que
+      lo revise un gestor o abogado.
+- [ ] Probar los costes reales de la IA y ajustar precios en
+      `src/escaparate/plans.ts`.
+- [ ] Hacer una compra real de 6 € y comprobar que llegan los créditos.
+- [ ] Probarlo con 5–10 comercios de tu barrio antes de anunciarlo.

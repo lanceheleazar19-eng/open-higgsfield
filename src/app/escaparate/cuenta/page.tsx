@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { COST, PACKS, PLANS, planName } from "@/escaparate/plans";
+import { deleteAccount } from "@/escaparate/server/account-actions";
 import { signOut } from "@/escaparate/server/auth-actions";
 import { openBillingPortal, startCheckout } from "@/escaparate/server/billing-actions";
 import { db } from "@/escaparate/server/db";
@@ -16,11 +17,21 @@ const NOTICES: Record<string, { text: string; ok: boolean }> = {
   error: { text: "No hemos podido abrir el pago. Inténtalo de nuevo.", ok: false },
 };
 
-export default async function CuentaPage({ searchParams }: { searchParams: Promise<{ pago?: string }> }) {
+const DELETE_NOTICES: Record<string, string> = {
+  confirmar: "Para borrar la cuenta escribe BORRAR en la casilla.",
+  error: "No hemos podido cancelar tu suscripción. Escríbenos y la borramos a mano.",
+};
+
+export default async function CuentaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ pago?: string; borrar?: string }>;
+}) {
   const user = await safeCurrentUser();
   if (!user) redirect("/escaparate/entrar?siguiente=/escaparate/cuenta");
-  const { pago } = await searchParams;
+  const { pago, borrar } = await searchParams;
   const notice = pago ? NOTICES[pago] : undefined;
+  const deleteNotice = borrar ? DELETE_NOTICES[borrar] : undefined;
 
   const ledger = await db()<{ delta: number; reason: string; created_at: Date }[]>`
     SELECT delta, reason, created_at FROM esc_credit_ledger
@@ -35,7 +46,7 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
       </div>
 
       {notice ? (
-        <p className={notice.ok ? "esc-banner" : "esc-banner"} role="status">
+        <p className="esc-banner" role="status">
           {notice.text}
         </p>
       ) : null}
@@ -140,6 +151,30 @@ export default async function CuentaPage({ searchParams }: { searchParams: Promi
           Cerrar sesión
         </button>
       </form>
+
+      <details className="esc-panel" open={Boolean(deleteNotice)}>
+        <summary style={{ cursor: "pointer", fontWeight: 700 }}>Borrar mi cuenta</summary>
+        <form action={deleteAccount} className="esc-form" style={{ marginTop: 12 }}>
+          <p className="esc-note" style={{ margin: 0 }}>
+            Se cancelará tu suscripción, se borrarán tus productos, fotos, vídeos y créditos, y no se puede deshacer.
+            Las facturas se conservan en Stripe porque lo exige la ley.
+          </p>
+          {deleteNotice ? (
+            <p className="esc-msg-error" role="alert">
+              {deleteNotice}
+            </p>
+          ) : null}
+          <label className="esc-label">
+            Escribe BORRAR para confirmar
+            <input className="esc-input" name="confirm" autoComplete="off" />
+          </label>
+          <div>
+            <button className="esc-btn esc-btn-ghost" type="submit" style={{ color: "var(--danger)", borderColor: "var(--danger)" }}>
+              Borrar mi cuenta para siempre
+            </button>
+          </div>
+        </form>
+      </details>
     </main>
   );
 }

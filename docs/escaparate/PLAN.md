@@ -43,12 +43,15 @@ Escaparate convierte **una foto del móvil** en:
 - Galería «Mis creaciones» (guardada de forma permanente) y textos de venta
   escritos con IA según el tono del negocio.
 
-**Lo siguiente (en este orden):**
+- Catálogo de productos y calendario comercial de España («¿Qué publico hoy?»).
+- Borrado de cuenta (RGPD) y subidas protegidas.
 
-1. Catálogo de productos guardado.
-2. Calendario "qué publicar hoy" con fechas españolas: rebajas, Black Friday,
-   Navidad, Reyes, San Valentín, Día de la Madre, fiestas locales.
-3. Plantillas por sector: panadería, moda, peluquería, ferretería, bodega…
+**Ideas para después del lanzamiento** (según lo que pidan los clientes):
+
+1. Plantillas por sector: panadería, moda, peluquería, ferretería, bodega…
+2. Fiestas locales por ciudad (Fallas, Feria de Abril, San Fermín…).
+3. Publicar directamente en Instagram y en el catálogo de WhatsApp Business.
+4. Recordatorio semanal por correo con la idea de la semana.
 
 ## 3. Precios
 

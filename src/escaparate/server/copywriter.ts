@@ -54,6 +54,7 @@ export async function writeCopy(input: {
   city: string;
   details: string;
   tone: Tone;
+  occasion?: string;
 }): Promise<SalesCopy | null> {
   if (!copywriterAvailable()) return null;
   client ??= new Anthropic();
@@ -65,6 +66,7 @@ export async function writeCopy(input: {
     input.businessName ? `Comercio: ${input.businessName}` : "",
     input.city ? `Ciudad: ${input.city}` : "",
     input.details ? `Detalles que da el comercio: ${input.details}` : "",
+    input.occasion ? `Ocasión de la publicación: ${input.occasion}` : "",
     `Tono: ${TONE_GUIDE[input.tone]}`,
   ]
     .filter(Boolean)

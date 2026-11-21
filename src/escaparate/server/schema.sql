@@ -76,3 +76,18 @@ CREATE TABLE IF NOT EXISTS esc_copy_log (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS esc_copy_log_user ON esc_copy_log (user_id, created_at DESC);
+
+-- v3: product catalogue.
+CREATE TABLE IF NOT EXISTS esc_products (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES esc_users(id) ON DELETE CASCADE,
+  name        text NOT NULL DEFAULT '',
+  price       text NOT NULL DEFAULT '',
+  details     text NOT NULL DEFAULT '',
+  sector      text NOT NULL DEFAULT 'otro',
+  photo_url   text NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS esc_products_user ON esc_products (user_id, updated_at DESC);
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS product_id uuid REFERENCES esc_products(id) ON DELETE SET NULL;
