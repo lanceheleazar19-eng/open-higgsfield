@@ -4,6 +4,14 @@ La entrada más nueva va arriba.
 
 ---
 
+## 2026-11-21 · Claude · rama `claude/quirky-babbage-b5kmxc` (4)
+
+**Hecho:** modo "Manos libres" en Nexo Core. Con un toque el micrófono se queda escuchando, envía el mensaje tras 1,5 s de silencio y sigue escuchando. Si la voz está activada, para el micrófono para hablar (la plataforma no deja hablar y escuchar a la vez) y luego la barra espaciadora o 🎤 lo reactiva. El navegador exige un toque o una tecla para encender el micrófono, así que no puede empezar sin ninguna acción.
+
+**Probado:** la página carga sin errores. La voz y el micrófono no se pueden probar fuera de claude.ai.
+
+---
+
 ## 2026-11-21 · Claude · rama `claude/quirky-babbage-b5kmxc` (3)
 
 **Hecho:** Nexo Core ahora habla y escucha. Usa la capacidad `tts`: botón de voz con 4 voces y botón para callar, lee las respuestas del chat y el análisis. Usa también `dictation`: botón de micrófono que envía el mensaje al parar. Preferencia guardada en `localStorage` (`nexo-core-voz`). Capacidades declaradas: sample, tts y dictation.

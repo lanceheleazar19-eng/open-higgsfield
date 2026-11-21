@@ -96,6 +96,8 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 .vsel{display:flex;align-items:center;gap:6px;font-size:.8rem}
 .vsel select{background:var(--card-2);color:var(--ink);border:1px solid var(--line);border-radius:9px;height:32px;padding:0 8px;font:inherit}
 #micBtn{height:auto;min-width:44px}
+.hint{font-size:.8rem;margin:-4px 0 12px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
+#handsBtn[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:700}
 #micBtn[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
 .speaking #score{animation:pulse 1s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.6}}
@@ -195,7 +197,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
             </select>
           </label>
           <button type="button" class="toggle" id="hush" hidden>■ Callar</button>
+          <button type="button" class="toggle" id="handsBtn" hidden aria-pressed="false">🗣️ Manos libres</button>
         </div>
+        <p class="muted hint" id="hint" hidden>Manos libres activado: habla con normalidad y, cuando te calles, Nexo responde. Si tiene la voz activada, al terminar de hablar pulsa la <b>barra espaciadora</b> (o 🎤) y sigue la conversación.</p>
         <div class="chat-log" id="chatLog" aria-live="polite"></div>
         <form class="chat-form" id="chatForm">
           <button type="button" class="toggle" id="micBtn" hidden aria-label="Hablar con Nexo">🎤</button>
@@ -481,9 +485,11 @@ const PREF="nexo-core-voz";
 try{ const p=JSON.parse(localStorage.getItem(PREF)||"{}"); voiceOn=!!p.on; if(p.voice) $("voiceSel").value=p.voice; }catch(e){}
 function savePref(){ try{ localStorage.setItem(PREF,JSON.stringify({on:voiceOn,voice:$("voiceSel").value})); }catch(e){} }
 function paintVoice(){ const b=$("voiceBtn"); b.setAttribute("aria-pressed",String(voiceOn)); b.textContent=voiceOn?"🔊 Voz activada":"🔇 Voz apagada"; }
+function speakNow(text){ tts.speak(text.replace(/[•✓○⚡🏋️😴🧠✅]/g,"").slice(0,1900),{voice:$("voiceSel").value,language:"es"}).catch(()=>{}); }
 function say(text){
   if(!tts||!voiceOn||!text) return;
-  tts.speak(text.replace(/[•✓○⚡🏋️😴🧠✅]/g,"").slice(0,1900),{voice:$("voiceSel").value,language:"es"}).catch(()=>{});
+  if(dict&&dict.active()){ clearTimeout(silenceT); stopForSpeech=true; dict.stop().then(()=>speakNow(text),()=>speakNow(text)); }
+  else speakNow(text);
 }
 function wireTTS(t){
   tts=t; $("voicebar").hidden=false; paintVoice();
@@ -495,23 +501,52 @@ function wireTTS(t){
     if(state==="idle"&&reason==="not_granted"){ voiceOn=false; paintVoice(); savePref(); $("voicebar").hidden=true; }
   });
 }
+let dict=null, hands=false, silenceT=null, micBase="", autoSend=false, stopForSpeech=false;
+function setHands(on){
+  hands=on; const b=$("handsBtn"); b.setAttribute("aria-pressed",String(on));
+  b.textContent=on?"🗣️ Manos libres: ON":"🗣️ Manos libres"; $("hint").hidden=!on;
+}
+function startListening(){ /* must run synchronously inside a click or key press */
+  if(!dict) return; clearTimeout(silenceT);
+  if(tts) tts.stop().catch(()=>{});
+  micBase=$("chatBox").value.trim(); autoSend=false; stopForSpeech=false;
+  dict.start().catch(err=>{ if(err&&(err.code==="not_granted"||err.code==="unavailable")){ $("micBtn").hidden=true; $("handsBtn").hidden=true; setHands(false); } });
+}
+function armSilence(){
+  if(!hands) return; clearTimeout(silenceT);
+  silenceT=setTimeout(function fire(){
+    const box=$("chatBox"); if(!box.value.trim()) return;
+    if(busy){ silenceT=setTimeout(fire,500); return; }
+    micBase=""; $("chatForm").requestSubmit();
+  },1500);
+}
 function wireMic(d){
-  const mic=$("micBtn"), box=$("chatBox"); mic.hidden=false; let base="", autoSend=false;
-  d.onPartial(({text})=>{ if(text) box.value=(base?base+" ":"")+text; });
-  d.onFinal(({text})=>{ base=(base+text).replace(/^\s+/,""); box.value=base; });
+  dict=d; const mic=$("micBtn"), box=$("chatBox"); mic.hidden=false; $("handsBtn").hidden=false; $("voicebar").hidden=false;
+  if(!tts){ $("voiceBtn").hidden=true; document.querySelector(".vsel").hidden=true; }
+  d.onPartial(({text})=>{ if(text){ box.value=(micBase?micBase+" ":"")+text; armSilence(); } });
+  d.onFinal(({text})=>{ micBase=(micBase+text).replace(/^\s+/,""); box.value=micBase; armSilence(); });
   d.onState(({state,reason})=>{
-    const on=state!=="idle"; mic.setAttribute("aria-pressed",String(on)); mic.setAttribute("aria-label",on?"Dejar de hablar":"Hablar con Nexo");
+    const on=state!=="idle"; mic.setAttribute("aria-pressed",String(on)); mic.setAttribute("aria-label",on?"Dejar de escuchar":"Hablar con Nexo");
     if(state==="idle"){
-      if(reason==="unavailable"||reason==="not_granted") mic.hidden=true;
-      if(autoSend&&box.value.trim()){ autoSend=false; $("chatForm").requestSubmit(); }
+      if(reason==="unavailable"||reason==="not_granted"){ mic.hidden=true; $("handsBtn").hidden=true; setHands(false); }
+      if(stopForSpeech){ stopForSpeech=false; return; }
+      if(autoSend&&box.value.trim()){ autoSend=false; micBase=""; $("chatForm").requestSubmit(); }
     }
   });
   mic.onclick=()=>{
-    if(d.active()){ autoSend=true; d.stop().catch(()=>{}); return; }
-    if(tts) tts.stop().catch(()=>{});
-    base=box.value.trim(); autoSend=false;
-    d.start().catch(err=>{ if(err&&(err.code==="not_granted"||err.code==="unavailable")) mic.hidden=true; });
+    if(d.active()){ autoSend=!hands; clearTimeout(silenceT); d.stop().catch(()=>{}); return; }
+    startListening();
   };
+  $("handsBtn").onclick=()=>{
+    if(hands){ setHands(false); clearTimeout(silenceT); if(d.active()) d.stop().catch(()=>{}); return; }
+    setHands(true); if(!d.active()) startListening();
+  };
+  document.addEventListener("keydown",e=>{
+    if(!hands||e.code!=="Space"||e.repeat) return;
+    if(e.target.closest&&e.target.closest("input,select,textarea,button")) return;
+    e.preventDefault();
+    if(d.active()){ clearTimeout(silenceT); d.stop().catch(()=>{}); } else startListening();
+  });
 }
 
 /* ---------- boot ---------- */
