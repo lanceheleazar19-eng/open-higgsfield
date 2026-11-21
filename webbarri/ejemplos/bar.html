@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bar La Placeta · Gràcia, Barcelona</title>
+<meta name="description" content="Bar de barrio en Gràcia con terraza. Menú del día, tapas caseras y vermut los fines de semana.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fff8ee; --ink:#2a1a12; --soft:#7a6255; --tomato:#e4572e; --sun:#ffb400; --olive:#5b7a3a; --line:#f0dfc8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
+  a { color:inherit; }
+  .demo-ribbon { background:#2a1a12; color:#fff8ee; text-align:center; font-size:13px; font-weight:600; padding:6px 12px; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 16px; }
+  h1, h2 { font-family:Fraunces, Georgia, serif; letter-spacing:-.02em; }
+  .hero { background:var(--tomato); color:#fff; padding:28px 0 64px; position:relative; overflow:hidden; }
+  .hero::after { content:""; position:absolute; right:-80px; top:-80px; width:320px; height:320px; border-radius:50%; background:var(--sun); opacity:.9; }
+  .hero .wrap { position:relative; z-index:1; }
+  .brand { font-family:Fraunces, serif; font-weight:900; font-size:22px; }
+  .hero h1 { font-size:clamp(42px,8vw,84px); line-height:.95; margin:40px 0 14px; max-width:10ch; }
+  .hero p { font-size:19px; max-width:30em; margin:0 0 24px; opacity:.95; }
+  .btn { display:inline-block; padding:13px 22px; border-radius:999px; font-weight:700; text-decoration:none; }
+  .btn-light { background:#fff; color:var(--tomato); }
+  .btn-dark { background:var(--ink); color:#fff; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; }
+  .today { margin-top:-36px; position:relative; z-index:2; background:#fff; border-radius:20px; padding:24px; box-shadow:0 20px 40px rgba(42,26,18,.12); }
+  .today h2 { margin:0 0 4px; font-size:28px; }
+  .today .price { font-family:Fraunces, serif; font-size:36px; font-weight:900; color:var(--tomato); }
+  .menu-cols { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:14px; }
+  .menu-cols h3 { margin:0 0 6px; font-size:14px; text-transform:uppercase; letter-spacing:.08em; color:var(--olive); }
+  .menu-cols ul { margin:0; padding-left:18px; color:var(--soft); }
+  section { padding:60px 0; }
+  h2 { font-size:clamp(30px,5vw,44px); margin:0 0 20px; }
+  .carta { display:grid; grid-template-columns:1fr 1fr; gap:10px 36px; }
+  .item { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px dashed var(--line); }
+  .item b { white-space:nowrap; }
+  .item small { display:block; color:var(--soft); }
+  .tiles { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .tile { border-radius:18px; padding:22px; color:#fff; min-height:160px; display:flex; flex-direction:column; justify-content:flex-end; }
+  .tile h3 { margin:0; font-family:Fraunces, serif; font-size:24px; }
+  .t1 { background:var(--olive); } .t2 { background:var(--sun); color:var(--ink); } .t3 { background:var(--ink); }
+  .info { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+  .hours { width:100%; border-collapse:collapse; }
+  .hours td { padding:10px 0; border-bottom:1px solid var(--line); }
+  .hours td:last-child { text-align:right; color:var(--soft); }
+  .map { aspect-ratio:4/3; border-radius:18px; background:repeating-linear-gradient(-45deg,#f6e7d2 0 14px,#fbefdd 14px 28px); display:grid; place-items:center; text-align:center; color:var(--soft); padding:16px; }
+  footer { background:var(--ink); color:#e9d9c6; padding:28px 0 96px; font-size:14px; }
+  .wa { position:fixed; left:16px; right:16px; bottom:16px; max-width:420px; margin:0 auto; background:#25d366; color:#04210d; text-align:center; font-weight:800; padding:15px; border-radius:999px; text-decoration:none; box-shadow:0 10px 30px rgba(0,0,0,.25); }
+  @media (max-width:760px){ .menu-cols,.carta,.tiles,.info{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="demo-ribbon">Web de ejemplo de un negocio inventado, hecha por <a href="../index.html">WebBarri</a></div>
+<header class="hero">
+  <div class="wrap">
+    <div class="brand">La Placeta</div>
+    <h1>Tu bar de siempre en Gràcia</h1>
+    <p>Menú del día casero, tapas para compartir y la terraza más tranquila de la plaza. Vermut los sábados y domingos.</p>
+    <div class="row">
+      <a class="btn btn-light" href="#carta">Ver la carta</a>
+      <a class="btn btn-dark" href="tel:+34930000001">📞 Reservar mesa</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div class="today">
+      <h2>Menú del día</h2>
+      <div class="price">13,50 € <small style="display:block;font-size:15px;font-weight:400;color:var(--soft);font-family:Inter">Incluye pan, bebida y postre o café</small></div>
+      <div class="menu-cols">
+        <div><h3>Primeros</h3><ul><li>Crema de calabaza</li><li>Ensalada de la casa</li><li>Macarrones gratinados</li></ul></div>
+        <div><h3>Segundos</h3><ul><li>Pollo al horno con patatas</li><li>Merluza a la plancha</li><li>Albóndigas con sepia</li></ul></div>
+        <div><h3>Postres</h3><ul><li>Crema catalana</li><li>Flan casero</li><li>Fruta del tiempo</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="carta">
+    <div class="wrap">
+      <h2>Para picar</h2>
+      <div class="carta">
+        <div class="item"><div>Patatas bravas<small>Nuestra salsa de siempre</small></div><b>5,50 €</b></div>
+        <div class="item"><div>Croquetas caseras<small>Jamón o setas · 6 uds</small></div><b>7,00 €</b></div>
+        <div class="item"><div>Pan con tomate<small>Con aceite de oliva virgen</small></div><b>3,00 €</b></div>
+        <div class="item"><div>Calamares a la andaluza</div><b>9,50 €</b></div>
+        <div class="item"><div>Tabla de embutidos</div><b>12,00 €</b></div>
+        <div class="item"><div>Vermut de la casa<small>Con aceituna y naranja</small></div><b>3,50 €</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap tiles">
+      <div class="tile t1"><span>☀️</span><h3>Terraza en la plaza</h3></div>
+      <div class="tile t2"><span>🍸</span><h3>Vermut el finde</h3></div>
+      <div class="tile t3"><span>⚽</span><h3>Fútbol en pantalla</h3></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap info">
+      <div>
+        <h2>Ven a vernos</h2>
+        <table class="hours">
+          <tr><td>Lunes a jueves</td><td>8:00 – 23:00</td></tr>
+          <tr><td>Viernes y sábado</td><td>9:00 – 00:30</td></tr>
+          <tr><td>Domingo</td><td>10:00 – 17:00</td></tr>
+        </table>
+        <p style="color:var(--soft)">Plaça Inventada, 3 · 08012 Barcelona<br>Metro: Fontana (L3)</p>
+      </div>
+      <div class="map">📍 Aquí va el mapa de Google con la ubicación del bar</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">© Bar La Placeta · Gràcia, Barcelona · <a href="tel:+34930000001">93 000 00 01</a></div></footer>
+<a class="wa" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20reservar%20una%20mesa">💬 Reservar mesa por WhatsApp</a>
+</body>
+</html>

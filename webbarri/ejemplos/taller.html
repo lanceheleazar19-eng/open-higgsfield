@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taller Mecànic Avinguda · Sant Andreu, Barcelona</title>
+<meta name="description" content="Taller mecánico en Sant Andreu, Barcelona. Revisiones, frenos, neumáticos, pre-ITV y diagnosis. Presupuesto sin compromiso.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#f4f7fa; --ink:#0f1f2e; --soft:#536576; --blue:#0f3d63; --blue-2:#2a7ab0; --yellow:#ffc72c; --line:#dce5ee; --card:#fff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
+  a { color:inherit; }
+  .demo-ribbon { background:var(--yellow); color:#222; text-align:center; font-size:13px; font-weight:600; padding:6px 12px; }
+  .wrap { max-width:1000px; margin:0 auto; padding:0 16px; }
+  .top { background:var(--blue); color:#fff; }
+  .top .wrap { display:flex; justify-content:space-between; align-items:center; gap:12px; height:64px; }
+  .brand { font-weight:800; font-size:19px; letter-spacing:-.01em; }
+  .brand span { color:var(--yellow); }
+  .call { background:var(--yellow); color:var(--ink); font-weight:800; padding:10px 16px; border-radius:8px; text-decoration:none; white-space:nowrap; }
+  .hero { background:linear-gradient(135deg,var(--blue),var(--blue-2)); color:#fff; padding:48px 0 70px; }
+  .hero h1 { font-size:clamp(34px,6vw,60px); line-height:1.05; letter-spacing:-.03em; margin:0 0 14px; max-width:16ch; }
+  .hero p { font-size:19px; opacity:.92; max-width:32em; margin:0 0 24px; }
+  .btn { display:inline-block; padding:13px 22px; border-radius:8px; font-weight:800; text-decoration:none; }
+  .btn-y { background:var(--yellow); color:var(--ink); }
+  .btn-w { background:rgba(255,255,255,.15); color:#fff; border:2px solid rgba(255,255,255,.5); }
+  .row { display:flex; flex-wrap:wrap; gap:12px; }
+  .trust { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:-36px; }
+  .trust div { background:var(--card); border-radius:12px; padding:16px; text-align:center; box-shadow:0 10px 24px rgba(15,31,46,.08); font-weight:700; font-size:15px; }
+  .trust b { display:block; font-size:24px; color:var(--blue-2); }
+  section { padding:56px 0; }
+  h2 { font-size:clamp(28px,4.5vw,40px); letter-spacing:-.02em; margin:0 0 20px; }
+  .services { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .service { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .service h3 { margin:6px 0 4px; font-size:18px; }
+  .service p { margin:0; color:var(--soft); font-size:15px; }
+  .service .from { display:block; margin-top:10px; font-weight:800; color:var(--blue-2); }
+  .icon { font-size:28px; }
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; counter-reset:s; }
+  .step { background:var(--card); border-radius:14px; padding:20px; border-left:5px solid var(--yellow); }
+  .step::before { counter-increment:s; content:"Paso " counter(s); font-weight:800; color:var(--blue-2); font-size:13px; text-transform:uppercase; letter-spacing:.06em; }
+  .step p { margin:6px 0 0; color:var(--soft); }
+  .info { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .hours { width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; }
+  .hours td { padding:12px 16px; border-bottom:1px solid var(--line); }
+  .hours td:last-child { text-align:right; color:var(--soft); }
+  .map { aspect-ratio:4/3; border-radius:12px; background:repeating-linear-gradient(45deg,#e3ebf2 0 14px,#edf2f7 14px 28px); display:grid; place-items:center; text-align:center; color:var(--soft); padding:16px; }
+  footer { background:var(--ink); color:#b8c6d3; font-size:14px; padding:28px 0 96px; }
+  .bar { position:fixed; left:0; right:0; bottom:0; display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px 12px; background:#fff; box-shadow:0 -6px 20px rgba(0,0,0,.08); }
+  .bar a { text-align:center; padding:13px; border-radius:10px; font-weight:800; text-decoration:none; }
+  .bar .c { background:var(--blue); color:#fff; } .bar .w { background:#25d366; color:#04210d; }
+  @media (max-width:760px){ .trust{grid-template-columns:repeat(2,1fr)} .services,.steps,.info{grid-template-columns:1fr} .top .call{display:none} }
+</style>
+</head>
+<body>
+<div class="demo-ribbon">Web de ejemplo de un negocio inventado, hecha por <a href="../index.html">WebBarri</a></div>
+<div class="top"><div class="wrap"><div class="brand">Taller Mecànic <span>Avinguda</span></div><a class="call" href="tel:+34930000002">📞 93 000 00 02</a></div></div>
+<header class="hero">
+  <div class="wrap">
+    <h1>Tu coche, en buenas manos en Sant Andreu</h1>
+    <p>Mecánica general, frenos, neumáticos y pre-ITV. Presupuesto claro antes de tocar nada y sin sorpresas al pagar.</p>
+    <div class="row">
+      <a class="btn btn-y" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche">Pedir cita por WhatsApp</a>
+      <a class="btn btn-w" href="#servicios">Ver servicios</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap trust">
+    <div><b>+20</b>años en el barrio</div>
+    <div><b>4,7★</b>en Google</div>
+    <div><b>24 h</b>presupuesto</div>
+    <div><b>✔</b>Garantía en reparaciones</div>
+  </div>
+
+  <section id="servicios">
+    <div class="wrap">
+      <h2>Servicios</h2>
+      <div class="services">
+        <div class="service"><span class="icon">🛢️</span><h3>Revisión y aceite</h3><p>Cambio de aceite y filtros según fabricante.</p><span class="from">Desde 69 €</span></div>
+        <div class="service"><span class="icon">🛑</span><h3>Frenos</h3><p>Pastillas, discos y líquido de frenos.</p><span class="from">Desde 89 €</span></div>
+        <div class="service"><span class="icon">🛞</span><h3>Neumáticos</h3><p>Montaje, equilibrado y alineación.</p><span class="from">Consultar</span></div>
+        <div class="service"><span class="icon">✅</span><h3>Pre-ITV</h3><p>Revisamos todo para que pases a la primera.</p><span class="from">Desde 35 €</span></div>
+        <div class="service"><span class="icon">💻</span><h3>Diagnosis</h3><p>Lectura de averías con máquina.</p><span class="from">Desde 40 €</span></div>
+        <div class="service"><span class="icon">❄️</span><h3>Aire acondicionado</h3><p>Carga de gas y revisión del circuito.</p><span class="from">Desde 59 €</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <h2>Así trabajamos</h2>
+      <div class="steps">
+        <div class="step"><p>Nos escribes o llamas y te damos cita.</p></div>
+        <div class="step"><p>Revisamos el coche y te pasamos el presupuesto por WhatsApp.</p></div>
+        <div class="step"><p>Solo reparamos cuando nos das el OK. Sin sorpresas.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap info">
+      <div>
+        <h2>Horario</h2>
+        <table class="hours">
+          <tr><td>Lunes a viernes</td><td>8:30 – 13:30 · 15:00 – 19:00</td></tr>
+          <tr><td>Sábado</td><td>Cerrado</td></tr>
+          <tr><td>Domingo</td><td>Cerrado</td></tr>
+        </table>
+        <p style="color:var(--soft)">Avinguda Inventada, 45 · 08030 Barcelona<br>Metro: Sant Andreu (L1)</p>
+      </div>
+      <div class="map">📍 Aquí va el mapa de Google con la ubicación del taller</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">© Taller Mecànic Avinguda · Sant Andreu, Barcelona</div></footer>
+<div class="bar">
+  <a class="c" href="tel:+34930000002">📞 Llamar</a>
+  <a class="w" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20pedir%20cita%20para%20mi%20coche">💬 WhatsApp</a>
+</div>
+</body>
+</html>

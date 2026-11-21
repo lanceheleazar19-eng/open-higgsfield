@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barbería del Barri · Sants, Barcelona</title>
+<meta name="description" content="Barbería en Sants, Barcelona. Cortes clásicos y modernos, arreglo de barba y afeitado a navaja. Reserva por WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#111; --panel:#1b1b1b; --ink:#f3efe8; --soft:#b9b1a5; --gold:#c8963e; --line:#2c2c2c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
+  a { color:inherit; }
+  .demo-ribbon { background:#ffd84d; color:#222; text-align:center; font-size:13px; font-weight:600; padding:6px 12px; }
+  .demo-ribbon a { font-weight:700; }
+  .wrap { max-width:980px; margin:0 auto; padding:0 16px; }
+  h1, h2, .brand { font-family:Oswald, Impact, sans-serif; text-transform:uppercase; letter-spacing:.04em; }
+  nav { display:flex; justify-content:space-between; align-items:center; padding:18px 0; }
+  .brand { font-size:22px; font-weight:700; text-decoration:none; }
+  .brand span { color:var(--gold); }
+  .btn { display:inline-block; background:var(--gold); color:#111; font-weight:700; padding:13px 22px; border-radius:6px; text-decoration:none; }
+  .btn-line { background:transparent; color:var(--ink); border:2px solid var(--gold); }
+  .hero { min-height:72vh; display:grid; align-items:center; background:radial-gradient(circle at 75% 30%, rgba(200,150,62,.25), transparent 55%), linear-gradient(180deg,#151515,#0c0c0c); }
+  .hero h1 { font-size:clamp(44px,9vw,96px); line-height:.95; margin:0 0 16px; }
+  .hero h1 span { color:var(--gold); }
+  .hero p { color:var(--soft); font-size:19px; max-width:34em; margin:0 0 26px; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; }
+  .badges { display:flex; flex-wrap:wrap; gap:18px; margin-top:28px; color:var(--soft); font-size:15px; }
+  section { padding:64px 0; border-top:1px solid var(--line); }
+  h2 { font-size:clamp(30px,5vw,44px); margin:0 0 24px; }
+  .prices { display:grid; gap:2px; background:var(--line); border-radius:10px; overflow:hidden; }
+  .price { display:flex; justify-content:space-between; gap:16px; background:var(--panel); padding:18px 20px; }
+  .price small { display:block; color:var(--soft); }
+  .price b { color:var(--gold); font-size:20px; white-space:nowrap; }
+  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .gallery div { aspect-ratio:1; border-radius:8px; display:grid; place-items:end start; padding:12px; font-weight:600; font-size:14px; }
+  .g1 { background:linear-gradient(150deg,#3a2c1d,#141414); } .g2 { background:linear-gradient(150deg,#2b2b2b,#5b4426); } .g3 { background:linear-gradient(150deg,#4a3a2a,#1a1a1a); }
+  .g4 { background:linear-gradient(150deg,#1f1f1f,#6a5030); } .g5 { background:linear-gradient(150deg,#523a1c,#202020); } .g6 { background:linear-gradient(150deg,#262626,#3f3020); }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .hours { width:100%; border-collapse:collapse; }
+  .hours td { padding:10px 0; border-bottom:1px solid var(--line); }
+  .hours td:last-child { text-align:right; color:var(--soft); }
+  .map { aspect-ratio:4/3; border-radius:10px; background:repeating-linear-gradient(45deg,#1c1c1c 0 14px,#222 14px 28px); display:grid; place-items:center; text-align:center; color:var(--soft); padding:16px; }
+  .reviews { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .review { background:var(--panel); border-radius:10px; padding:18px; }
+  .review b { color:var(--gold); }
+  footer { padding:30px 0 90px; color:var(--soft); font-size:14px; border-top:1px solid var(--line); }
+  .wa { position:fixed; left:16px; right:16px; bottom:16px; max-width:420px; margin:0 auto; background:#25d366; color:#04210d; text-align:center; font-weight:800; padding:15px; border-radius:12px; text-decoration:none; box-shadow:0 10px 30px rgba(0,0,0,.4); }
+  @media (max-width:760px){ .two{grid-template-columns:1fr} .reviews{grid-template-columns:1fr} .gallery{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+<div class="demo-ribbon">Web de ejemplo de un negocio inventado, hecha por <a href="../index.html">WebBarri</a></div>
+<header class="hero">
+  <div class="wrap">
+    <nav><a class="brand" href="#">Barbería del <span>Barri</span></a><a class="btn btn-line" href="#precios">Precios</a></nav>
+    <h1>Cortes de <span>siempre</span>,<br>estilo de ahora</h1>
+    <p>Barbería de barrio en Sants. Cortes clásicos y modernos, arreglo de barba y afeitado a navaja con toalla caliente.</p>
+    <div class="row">
+      <a class="btn" href="#reservar">💬 Reservar por WhatsApp</a>
+      <a class="btn btn-line" href="tel:+34930000000">📞 Llamar</a>
+    </div>
+    <div class="badges"><span>⭐ 4,8 en Google</span><span>📍 Sants, Barcelona</span><span>🕒 Lunes a sábado</span></div>
+  </div>
+</header>
+
+<main>
+  <section id="precios">
+    <div class="wrap">
+      <h2>Precios</h2>
+      <div class="prices">
+        <div class="price"><div>Corte clásico<small>Tijera y máquina, lavado incluido</small></div><b>14 €</b></div>
+        <div class="price"><div>Corte + barba<small>El combo más pedido</small></div><b>20 €</b></div>
+        <div class="price"><div>Arreglo de barba<small>Perfilado y aceite</small></div><b>9 €</b></div>
+        <div class="price"><div>Afeitado a navaja<small>Con toalla caliente</small></div><b>15 €</b></div>
+        <div class="price"><div>Corte infantil<small>Hasta 12 años</small></div><b>10 €</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Nuestro trabajo</h2>
+      <div class="gallery">
+        <div class="g1">Degradado</div><div class="g2">Barba perfilada</div><div class="g3">Clásico</div>
+        <div class="g4">Crop texturizado</div><div class="g5">Afeitado</div><div class="g6">El local</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Lo que dicen</h2>
+      <div class="reviews">
+        <div class="review"><b>★★★★★</b><p>«El mejor degradado del barrio y siempre puntuales.»</p></div>
+        <div class="review"><b>★★★★★</b><p>«Trato de diez. El afeitado a navaja, una pasada.»</p></div>
+        <div class="review"><b>★★★★★</b><p>«Llevo a mi hijo desde pequeño, encantados.»</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reservar">
+    <div class="wrap two">
+      <div>
+        <h2>Horario</h2>
+        <table class="hours">
+          <tr><td>Lunes a viernes</td><td>10:00 – 20:00</td></tr>
+          <tr><td>Sábado</td><td>9:30 – 14:30</td></tr>
+          <tr><td>Domingo</td><td>Cerrado</td></tr>
+        </table>
+        <p style="color:var(--soft)">Carrer Inventat, 12 · 08014 Barcelona<br>Metro: Plaça de Sants (L1, L5)</p>
+      </div>
+      <div class="map">📍 Aquí va el mapa de Google con la ubicación del negocio</div>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">© Barbería del Barri · Sants, Barcelona · <a href="tel:+34930000000">93 000 00 00</a></div></footer>
+<a class="wa" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20reservar%20cita">💬 Reservar cita por WhatsApp</a>
+</body>
+</html>
