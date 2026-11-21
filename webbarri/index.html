@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebBarri · Páginas web para negocios de Barcelona</title>
+<meta name="description" content="Páginas web sencillas y bonitas para negocios de barrio en Barcelona. Desde 149 €, listas en una semana, con botón de WhatsApp y preparadas para Google.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fffdf8; --ink:#16130f; --soft:#6b625a; --line:#ece4d8; --card:#fff; --accent:#e4572e; --accent-2:#ffb400; --ok:#1f8a4c; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Inter, system-ui, sans-serif; line-height:1.55; }
+  a { color:inherit; }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 16px; }
+  header { position:sticky; top:0; background:rgba(255,253,248,.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); z-index:5; }
+  header .wrap { display:flex; justify-content:space-between; align-items:center; height:60px; }
+  .logo { font-weight:800; font-size:20px; text-decoration:none; letter-spacing:-.02em; }
+  .logo span { color:var(--accent); }
+  .btn { display:inline-flex; align-items:center; gap:8px; padding:12px 20px; border-radius:999px; font-weight:700; text-decoration:none; border:2px solid transparent; }
+  .btn-main { background:var(--accent); color:#fff; }
+  .btn-main:hover { filter:brightness(.95); }
+  .btn-ghost { border-color:var(--ink); }
+  .btn-small { padding:8px 14px; font-size:14px; }
+  .hero { padding:56px 0 40px; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; }
+  .tag { display:inline-block; background:#fff0d1; color:#8a5a00; font-weight:700; font-size:13px; padding:4px 12px; border-radius:999px; }
+  h1 { font-size:clamp(34px,5.6vw,58px); line-height:1.04; letter-spacing:-.03em; margin:16px 0; }
+  h1 em { font-style:normal; color:var(--accent); }
+  h2 { font-size:clamp(26px,3.8vw,38px); letter-spacing:-.02em; margin:0 0 12px; line-height:1.1; }
+  .lead { font-size:19px; color:var(--soft); margin:0 0 24px; }
+  .ctas { display:flex; flex-wrap:wrap; gap:12px; }
+  .note { color:var(--soft); font-size:14px; margin-top:12px; }
+  .phone { justify-self:center; width:min(300px,100%); aspect-ratio:9/18; border-radius:36px; background:#111; padding:12px; box-shadow:0 30px 60px rgba(0,0,0,.18); }
+  .phone-screen { width:100%; height:100%; border-radius:26px; overflow:hidden; background:linear-gradient(160deg,#1d1a17,#3b2a20); color:#fff; display:flex; flex-direction:column; }
+  .phone-hero { padding:28px 18px; background:linear-gradient(160deg,#c8963e,#7a4a1c); }
+  .phone-hero b { display:block; font-size:22px; }
+  .phone-list { padding:14px 18px; display:grid; gap:10px; font-size:13px; }
+  .phone-list div { background:rgba(255,255,255,.08); border-radius:10px; padding:10px; display:flex; justify-content:space-between; }
+  .phone-wa { margin:auto 18px 18px; background:#25d366; color:#06250f; text-align:center; font-weight:800; padding:12px; border-radius:12px; }
+  section { padding:56px 0; }
+  .alt { background:#fbf4e8; }
+  .grid { display:grid; gap:16px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px; }
+  .card h3 { margin:0 0 6px; font-size:18px; }
+  .card p { margin:0; color:var(--soft); }
+  .demo { text-decoration:none; overflow:hidden; padding:0; display:flex; flex-direction:column; transition:transform .15s; }
+  .demo:hover { transform:translateY(-3px); }
+  .demo-top { height:150px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:22px; letter-spacing:-.01em; text-align:center; padding:12px; }
+  .demo-body { padding:18px 20px 22px; }
+  .demo-body span { display:inline-block; margin-top:10px; font-weight:700; color:var(--accent); }
+  .price { font-size:40px; font-weight:800; letter-spacing:-.03em; margin:8px 0; }
+  .price small { font-size:15px; color:var(--soft); font-weight:600; }
+  .featured { border:2px solid var(--accent); position:relative; }
+  .featured::before { content:"La más pedida"; position:absolute; top:-12px; left:20px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; }
+  ul.check { list-style:none; padding:0; margin:12px 0 0; display:grid; gap:6px; }
+  ul.check li::before { content:"✓ "; color:var(--ok); font-weight:800; }
+  .steps { counter-reset:s; }
+  .steps .card::before { counter-increment:s; content:counter(s); display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--ink); color:#fff; font-weight:800; margin-bottom:12px; }
+  details { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+  details + details { margin-top:10px; }
+  summary { font-weight:700; cursor:pointer; }
+  details p { margin:10px 0 0; color:var(--soft); }
+  .final { text-align:center; }
+  footer { padding:28px 0 40px; color:var(--soft); font-size:14px; border-top:1px solid var(--line); }
+  .wa-float { position:fixed; right:16px; bottom:16px; width:56px; height:56px; border-radius:50%; background:#25d366; display:grid; place-items:center; box-shadow:0 8px 20px rgba(0,0,0,.2); z-index:9; }
+  @media (max-width:860px){ .hero{grid-template-columns:1fr;padding-top:32px} .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<!-- CAMBIA 34600000000 por tu número de WhatsApp (con 34 delante, sin espacios) en TODOS los enlaces wa.me de esta página. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="#">Web<span>Barri</span></a>
+    <a class="btn btn-main btn-small" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20una%20web%20para%20mi%20negocio">Pedir presupuesto</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <span class="tag">Para negocios de barrio en Barcelona</span>
+      <h1>Tu negocio, en Google y en el móvil <em>en una semana</em></h1>
+      <p class="lead">Hago páginas web sencillas y bonitas para peluquerías, bares, talleres, tiendas y todo tipo de negocios. Con tu horario, tus servicios, tus fotos y un botón de WhatsApp para que te escriban.</p>
+      <div class="ctas">
+        <a class="btn btn-main" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20una%20web%20para%20mi%20negocio">💬 Escríbeme por WhatsApp</a>
+        <a class="btn btn-ghost" href="#ejemplos">Ver ejemplos</a>
+      </div>
+      <p class="note">Desde 149 €. Sin permanencia. Tú no tienes que hacer nada: me pasas unas fotos y yo me encargo.</p>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="phone-screen">
+        <div class="phone-hero"><b>Barbería del Barri</b>Sants · Abierto hasta las 20:00</div>
+        <div class="phone-list">
+          <div><span>Corte clásico</span><b>14 €</b></div>
+          <div><span>Corte + barba</span><b>20 €</b></div>
+          <div><span>Arreglo de barba</span><b>9 €</b></div>
+        </div>
+        <div class="phone-wa">💬 Reservar por WhatsApp</div>
+      </div>
+    </div>
+  </div>
+
+  <section class="alt" id="ejemplos">
+    <div class="wrap">
+      <h2>Ejemplos de webs</h2>
+      <p class="lead">Así puede quedar la tuya. Ábrelos en el móvil: es donde te van a ver tus clientes.</p>
+      <div class="grid">
+        <a class="card demo" href="ejemplos/barberia.html">
+          <div class="demo-top" style="background:linear-gradient(150deg,#1b1b1b,#4a3a2a)">Barbería del Barri</div>
+          <div class="demo-body"><h3>Barbería</h3><p>Precios, horario, galería y reserva por WhatsApp.</p><span>Ver ejemplo →</span></div>
+        </a>
+        <a class="card demo" href="ejemplos/bar.html">
+          <div class="demo-top" style="background:linear-gradient(150deg,#e4572e,#ffb400)">Bar La Placeta</div>
+          <div class="demo-body"><h3>Bar / restaurante</h3><p>Carta, menú del día, terraza y cómo llegar.</p><span>Ver ejemplo →</span></div>
+        </a>
+        <a class="card demo" href="ejemplos/taller.html">
+          <div class="demo-top" style="background:linear-gradient(150deg,#0f3d63,#2a7ab0)">Taller Mecànic Avinguda</div>
+          <div class="demo-body"><h3>Taller mecánico</h3><p>Servicios, cita previa y llamada con un toque.</p><span>Ver ejemplo →</span></div>
+        </a>
+      </div>
+      <p class="note">Los ejemplos son de negocios inventados.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Qué incluye tu web</h2>
+      <div class="grid">
+        <div class="card"><h3>📱 Perfecta en el móvil</h3><p>Rápida y fácil de usar, que es como te buscan tus clientes.</p></div>
+        <div class="card"><h3>💬 Botón de WhatsApp</h3><p>Tus clientes te escriben o reservan con un toque.</p></div>
+        <div class="card"><h3>🔎 Preparada para Google</h3><p>Para que te encuentren cuando buscan tu negocio en tu barrio.</p></div>
+        <div class="card"><h3>🕒 Horario y mapa</h3><p>Dónde estás y cuándo abres, siempre a mano.</p></div>
+        <div class="card"><h3>📸 Tus fotos y servicios</h3><p>Tu carta, tus precios o tus trabajos, bien presentados.</p></div>
+        <div class="card"><h3>🌍 Castellano y catalán</h3><p>Si quieres, tu web en los dos idiomas.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="precios">
+    <div class="wrap">
+      <h2>Precios claros</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Web sencilla</h3>
+          <div class="price">149 € <small>pago único</small></div>
+          <p>Una página con todo lo importante.</p>
+          <ul class="check"><li>Quiénes sois y servicios</li><li>Horario, mapa y contacto</li><li>Botón de WhatsApp</li><li>Lista en 5–7 días</li></ul>
+        </div>
+        <div class="card featured">
+          <h3>Web completa</h3>
+          <div class="price">299 € <small>pago único</small></div>
+          <p>Para negocios que quieren lucirse.</p>
+          <ul class="check"><li>Todo lo de la sencilla</li><li>Galería de fotos</li><li>Carta, catálogo o lista de precios</li><li>Castellano y catalán</li><li>Ayuda con tu ficha de Google</li></ul>
+        </div>
+        <div class="card">
+          <h3>Mantenimiento</h3>
+          <div class="price">15 € <small>/mes</small></div>
+          <p>Opcional. Tú me escribes y yo lo cambio.</p>
+          <ul class="check"><li>Cambios de horario y precios</li><li>Ofertas y novedades</li><li>Fotos nuevas</li><li>Cancelas cuando quieras</li></ul>
+        </div>
+      </div>
+      <p class="note">El dominio (tunegocio.es) se paga aparte, unos 10–15 € al año. Te ayudo a comprarlo.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Así de fácil</h2>
+      <div class="grid steps">
+        <div class="card"><h3>Me escribes</h3><p>Por WhatsApp. Me cuentas qué negocio tienes y qué quieres.</p></div>
+        <div class="card"><h3>Me pasas fotos y datos</h3><p>Horario, servicios, precios y unas fotos del móvil. Nada más.</p></div>
+        <div class="card"><h3>Revisas y publicamos</h3><p>Te enseño la web, cambiamos lo que quieras y la ponemos en marcha.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap" style="max-width:760px">
+      <h2>Preguntas frecuentes</h2>
+      <details><summary>¿Tengo que saber algo de ordenadores?</summary><p>No. Me mandas fotos y datos por WhatsApp y yo hago todo.</p></details>
+      <details><summary>Ya tengo Instagram, ¿para qué quiero una web?</summary><p>La web aparece en Google cuando alguien busca tu tipo de negocio en tu barrio, da confianza y enlaza a tu Instagram. Se complementan.</p></details>
+      <details><summary>¿Cuánto tarda?</summary><p>Normalmente entre 5 y 7 días desde que me pasas la información.</p></details>
+      <details><summary>¿Puedo cambiar cosas después?</summary><p>Sí. Con el mantenimiento me escribes y lo cambio; sin él, te paso presupuesto por cada cambio.</p></details>
+      <details><summary>¿La web es mía?</summary><p>Sí. El dominio está a tu nombre y la web es tuya.</p></details>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2>¿Hablamos?</h2>
+      <p class="lead">Escríbeme y te digo cómo quedaría la web de tu negocio, sin compromiso.</p>
+      <a class="btn btn-main" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20una%20web%20para%20mi%20negocio">💬 Escríbeme por WhatsApp</a>
+    </div>
+  </section>
+</main>
+
+<footer><div class="wrap">© WebBarri · Páginas web para negocios de Barcelona</div></footer>
+
+<a class="wa-float" href="https://wa.me/34600000000?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20una%20web%20para%20mi%20negocio" aria-label="Escribir por WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3Z"/></svg>
+</a>
+</body>
+</html>
