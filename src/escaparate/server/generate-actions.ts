@@ -22,6 +22,7 @@ import { COST } from "../plans";
 import { grantCredits, spendCredits } from "./credits";
 import { db } from "./db";
 import { currentUser } from "./session";
+import { persistResult } from "./storage";
 
 export type StartResult =
   | { ok: true; requestIds: string[]; credits: number }
@@ -79,7 +80,14 @@ export async function startImages(data: unknown): Promise<StartResult> {
     const sql = db();
     await sql`
       INSERT INTO esc_generations ${sql(
-        requestIds.map((requestId) => ({ request_id: requestId, user_id: user.id, kind: "image", credits: COST.image })),
+        requestIds.map((requestId) => ({
+          request_id: requestId,
+          user_id: user.id,
+          kind: "image",
+          credits: COST.image,
+          product_name: input.productName,
+          format: input.format,
+        })),
       )}`;
   }
 
@@ -101,8 +109,10 @@ export async function startVideo(data: unknown): Promise<StartResult> {
 
   /* Only a photo this shop already made can be animated: it keeps credits
      tied to the product flow and stops the endpoint animating arbitrary URLs. */
-  const [owned] = await db()`
-    SELECT 1 FROM esc_generations WHERE user_id = ${user.id} AND result_url = ${input.imageUrl} LIMIT 1`;
+  const [owned] = await db()<{ product_name: string }[]>`
+    SELECT product_name FROM esc_generations
+    WHERE user_id = ${user.id} AND kind = 'image' AND (result_url = ${input.imageUrl} OR source_url = ${input.imageUrl})
+    LIMIT 1`;
   if (!owned) return { ok: false, error: "input" };
 
   const balance = await spendCredits(user.id, COST.video, "1 vídeo");
@@ -116,8 +126,8 @@ export async function startVideo(data: unknown): Promise<StartResult> {
       settings: { duration: 5, resolution: "720p", aspectRatio: formatById(input.format).aspectRatio },
     });
     await db()`
-      INSERT INTO esc_generations (request_id, user_id, kind, credits)
-      VALUES (${queued.requestId}, ${user.id}, 'video', ${COST.video})`;
+      INSERT INTO esc_generations (request_id, user_id, kind, credits, product_name, format)
+      VALUES (${queued.requestId}, ${user.id}, 'video', ${COST.video}, ${owned.product_name}, ${input.format})`;
     return { ok: true, requestIds: [queued.requestId], credits: balance };
   } catch (caught) {
     console.error("[escaparate] video submit failed", caught);
@@ -137,8 +147,10 @@ export async function checkJobs(data: unknown): Promise<{ jobs: JobStatus[]; cre
   if (!ids.length) return { jobs: [], credits: user.credits };
 
   const sql = db();
-  const rows = await sql<{ request_id: string; status: string; result_url: string | null; credits: number; refunded: boolean }[]>`
-    SELECT request_id, status, result_url, credits, refunded FROM esc_generations
+  const rows = await sql<
+    { request_id: string; kind: "image" | "video"; status: string; result_url: string | null; credits: number; refunded: boolean }[]
+  >`
+    SELECT request_id, kind, status, result_url, credits, refunded FROM esc_generations
     WHERE user_id = ${user.id} AND request_id IN ${sql(ids)}`;
 
   const client = platform();
@@ -155,8 +167,11 @@ export async function checkJobs(data: unknown): Promise<{ jobs: JobStatus[]; cre
         const status = await client.status(row.request_id);
         const url = status.images?.[0]?.url ?? status.video?.url;
         if (status.status === "completed" && url) {
-          await sql`UPDATE esc_generations SET status = 'completed', result_url = ${url} WHERE request_id = ${row.request_id}`;
-          return { requestId: row.request_id, state: "done", url };
+          const kept = (await persistResult(url, user.id, row.request_id, row.kind)) ?? url;
+          await sql`
+            UPDATE esc_generations SET status = 'completed', result_url = ${kept}, source_url = ${url}
+            WHERE request_id = ${row.request_id}`;
+          return { requestId: row.request_id, state: "done", url: kept };
         }
         if (TERMINAL_FAIL.has(status.status) || status.status === "completed") {
           const finalStatus = status.status === "completed" ? "failed" : status.status;

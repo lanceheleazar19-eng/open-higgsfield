@@ -35,8 +35,13 @@ export default async function EscaparateLayout({ children }: { children: ReactNo
           </Link>
           {user ? (
             <nav style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <Link href="/escaparate/cuenta" className="esc-btn esc-btn-ghost esc-btn-small">
-                Mi cuenta
+              <Link href="/escaparate/creaciones" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Mis creaciones">
+                <span aria-hidden className="esc-show-sm">🖼️</span>
+                <span className="esc-hide-sm">Mis creaciones</span>
+              </Link>
+              <Link href="/escaparate/cuenta" className="esc-btn esc-btn-ghost esc-btn-small" aria-label="Mi cuenta">
+                <span aria-hidden className="esc-show-sm">👤</span>
+                <span className="esc-hide-sm">Mi cuenta</span>
               </Link>
               <Link href="/escaparate/crear" className="esc-btn esc-btn-primary esc-btn-small">
                 Crear

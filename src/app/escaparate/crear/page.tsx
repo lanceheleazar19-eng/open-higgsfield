@@ -21,7 +21,7 @@ export default async function CrearPage() {
           vídeo y el texto para publicarlo.
         </p>
       </div>
-      <Creator initialCredits={user.credits} />
+      <Creator initialCredits={user.credits} initialBusinessName={user.businessName} initialCity={user.city} />
     </main>
   );
 }

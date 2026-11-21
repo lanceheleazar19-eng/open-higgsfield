@@ -10,6 +10,7 @@
     "escaparate:migrate": "node scripts/escaparate-migrate.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "@tanstack/react-virtual": "^3.14.10",
     "@vercel/blob": "^2.8.0",
     "next": "^16.0.0",

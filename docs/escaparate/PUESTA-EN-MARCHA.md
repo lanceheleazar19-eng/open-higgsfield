@@ -14,6 +14,7 @@ cobrar dinero real.
 | **Resend** | Enviar el código de acceso por correo | Gratis (3.000 correos/mes) |
 | **Stripe** | Cobrar suscripciones y packs | Sin cuota; comisión por pago |
 | **Plataforma de IA** | Generar fotos y vídeos | Pago por uso |
+| **Claude API** (Anthropic) | Escribir los textos de venta | Pago por uso, céntimos por texto |
 | **Dominio** (.es o .com) | Tu dirección web | ~10–15 €/año |
 
 ## Paso 1 — Base de datos
@@ -23,7 +24,8 @@ cobrar dinero real.
    ```bash
    DATABASE_URL="postgres://..." pnpm escaparate:migrate
    ```
-   Crea las tablas. Se puede repetir sin miedo.
+   Crea las tablas. Se puede repetir sin miedo, y hay que repetirlo cada vez que
+   actualices la app (añade las columnas nuevas).
 
 ## Paso 2 — Correo (Resend)
 
@@ -56,6 +58,14 @@ cobrar dinero real.
 - **Antes de fijar precios**, mira cuánto te cuesta de verdad cada foto y cada
   vídeo y ajusta `COST`, `monthlyCredits` y precios en `src/escaparate/plans.ts`.
 
+## Paso 4b — Textos con IA (opcional)
+
+1. Crea una cuenta en console.anthropic.com y una API key.
+2. Variable: `ANTHROPIC_API_KEY`.
+3. Sin esta clave la app sigue funcionando: los textos salen de plantillas.
+4. Cada comercio puede pedir hasta 40 textos al día (se cambia en
+   `src/escaparate/server/copy-actions.ts`). No gasta créditos del cliente.
+
 ## Paso 5 — Publicar en Vercel
 
 1. Importa el repositorio en Vercel.
@@ -85,3 +95,9 @@ cobrar dinero real.
   factura; el pack suma 60 créditos al pagarse. Cada pago se procesa una sola vez
   aunque Stripe lo envíe repetido.
 - **Historial:** en «Mi cuenta» se ve cada movimiento de créditos.
+- **Mis creaciones:** cada foto y vídeo terminado se copia a tu Vercel Blob
+  (los enlaces de la plataforma de IA caducan), así la galería no se rompe. Se
+  puede filtrar, marcar favoritas y quitar de la galería.
+- **Textos con IA:** Claude escribe la publicación, el mensaje de WhatsApp y los
+  hashtags en español de España, con el tono elegido, sin inventar datos que el
+  comercio no ha dado.

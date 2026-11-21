@@ -17,6 +17,7 @@ export type User = {
   id: string;
   email: string;
   businessName: string;
+  city: string;
   credits: number;
   plan: string;
   subscriptionStatus: string | null;
@@ -101,13 +102,14 @@ export async function currentUser(): Promise<User | null> {
       id: string;
       email: string;
       business_name: string;
+      city: string;
       credits: number;
       plan: string;
       subscription_status: string | null;
       stripe_customer_id: string | null;
     }[]
   >`
-    SELECT u.id, u.email, u.business_name, u.credits, u.plan, u.subscription_status, u.stripe_customer_id
+    SELECT u.id, u.email, u.business_name, u.city, u.credits, u.plan, u.subscription_status, u.stripe_customer_id
     FROM esc_sessions s JOIN esc_users u ON u.id = s.user_id
     WHERE s.token_hash = ${hash(token)} AND s.expires_at > now()`;
   if (!row) return null;
@@ -115,6 +117,7 @@ export async function currentUser(): Promise<User | null> {
     id: row.id,
     email: row.email,
     businessName: row.business_name,
+    city: row.city,
     credits: row.credits,
     plan: row.plan,
     subscriptionStatus: row.subscription_status,

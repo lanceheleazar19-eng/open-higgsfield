@@ -40,14 +40,15 @@ Escaparate convierte **una foto del móvil** en:
 - Pagos con Stripe: planes mensuales, packs de créditos y portal del cliente.
   Guía: `docs/escaparate/PUESTA-EN-MARCHA.md`.
 
+- Galería «Mis creaciones» (guardada de forma permanente) y textos de venta
+  escritos con IA según el tono del negocio.
+
 **Lo siguiente (en este orden):**
 
-1. Galería "Mis creaciones" con todo lo generado.
-2. Textos generados con IA, adaptados al tono de cada negocio.
-4. Catálogo de productos guardado.
-5. Calendario "qué publicar hoy" con fechas españolas: rebajas, Black Friday,
+1. Catálogo de productos guardado.
+2. Calendario "qué publicar hoy" con fechas españolas: rebajas, Black Friday,
    Navidad, Reyes, San Valentín, Día de la Madre, fiestas locales.
-6. Plantillas por sector: panadería, moda, peluquería, ferretería, bodega…
+3. Plantillas por sector: panadería, moda, peluquería, ferretería, bodega…
 
 ## 3. Precios
 

@@ -6,8 +6,19 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent 
 import { uploadMedia } from "@/generation/upload";
 import { saveFile } from "@/openhiggsfield/download";
 
-import { FORMATS, SECTORS, STYLES, formatById, salesCopy, type FormatId, type SectorId, type StyleId } from "./content";
+import {
+  FORMATS,
+  SECTORS,
+  STYLES,
+  formatById,
+  salesCopy,
+  type FormatId,
+  type SalesCopy,
+  type SectorId,
+  type StyleId,
+} from "./content";
 import { COST } from "./plans";
+import { generateCopy } from "./server/copy-actions";
 import { checkJobs, startImages, startVideo, type JobStatus, type StartResult } from "./server/generate-actions";
 
 type Slot =
@@ -32,8 +43,28 @@ const START_ERRORS: Record<Exclude<StartResult, { ok: true }>["error"], string> 
 const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
 const MAX_BYTES = 12 * 1024 * 1024;
 
-export function Creator({ initialCredits }: { initialCredits: number }) {
+const TONE_OPTIONS = [
+  { id: "cercano", label: "😊 Cercano" },
+  { id: "profesional", label: "👔 Profesional" },
+  { id: "divertido", label: "🎉 Divertido" },
+] as const;
+type ToneId = (typeof TONE_OPTIONS)[number]["id"];
+
+export function Creator({
+  initialCredits,
+  initialBusinessName = "",
+  initialCity = "",
+}: {
+  initialCredits: number;
+  initialBusinessName?: string;
+  initialCity?: string;
+}) {
   const [credits, setCredits] = useState(initialCredits);
+  const [tone, setTone] = useState<ToneId>("cercano");
+  const [details, setDetails] = useState("");
+  const [aiCopy, setAiCopy] = useState<SalesCopy | null>(null);
+  const [copyBusy, setCopyBusy] = useState(false);
+  const [copyNote, setCopyNote] = useState<string | null>(null);
   const [photo, setPhoto] = useState<{ preview: string; url: string | null; error?: string } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [sector, setSector] = useState<SectorId>("comida");
@@ -41,8 +72,8 @@ export function Creator({ initialCredits }: { initialCredits: number }) {
   const [format, setFormat] = useState<FormatId>("post");
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
-  const [businessName, setBusinessName] = useState("");
-  const [city, setCity] = useState("");
+  const [businessName, setBusinessName] = useState(initialBusinessName);
+  const [city, setCity] = useState(initialCity);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [running, setRunning] = useState(false);
   const [runFormat, setRunFormat] = useState<FormatId>("post");
@@ -112,10 +143,26 @@ export function Creator({ initialCredits }: { initialCredits: number }) {
     );
   }
 
-  const copy = useMemo(
+  async function writeWithAi() {
+    setCopyBusy(true);
+    setCopyNote(null);
+    const result = await generateCopy({ sector, productName, price, businessName, city, details, tone }).catch(() => null);
+    setCopyBusy(false);
+    if (!result) return setCopyNote("No hemos podido escribir los textos. Inténtalo de nuevo.");
+    if (!result.ok) return setCopyNote(result.error);
+    setAiCopy(result.copy);
+    setCopyNote(
+      result.source === "ia"
+        ? "Escrito con IA. Revísalo antes de publicar."
+        : "La IA no está disponible ahora mismo; te dejamos un texto de plantilla.",
+    );
+  }
+
+  const templateCopy = useMemo(
     () => salesCopy({ sector, productName, price, businessName, city }),
     [sector, productName, price, businessName, city],
   );
+  const copy = aiCopy ?? templateCopy;
 
   async function takeFile(file: File | undefined) {
     if (!file) return;
@@ -386,6 +433,29 @@ export function Creator({ initialCredits }: { initialCredits: number }) {
 
       <section className="esc-panel">
         <h2 className="esc-panel-title">Texto para vender</h2>
+        <label className="esc-label">
+          Cuéntanos algo más del producto (opcional)
+          <textarea
+            className="esc-input"
+            rows={2}
+            maxLength={300}
+            placeholder="Ej.: receta de la abuela, sin gluten, solo los fines de semana"
+            value={details}
+            onChange={(event) => setDetails(event.target.value)}
+          />
+        </label>
+        <ChipGroup
+          label="Tono"
+          options={TONE_OPTIONS.map((option) => ({ id: option.id, label: option.label }))}
+          value={tone}
+          onChange={setTone}
+        />
+        <div className="esc-hero-ctas" style={{ alignItems: "center" }}>
+          <button className="esc-btn esc-btn-primary" type="button" disabled={copyBusy} onClick={() => void writeWithAi()}>
+            {copyBusy ? "Escribiendo…" : aiCopy ? "✨ Escribir otra versión" : "✨ Escribir con IA (gratis)"}
+          </button>
+          {copyNote ? <span className="esc-note" role="status">{copyNote}</span> : null}
+        </div>
         <div className="esc-copy">
           <CopyBlock title="Publicación de Instagram" text={`${copy.titulo}\n\n${copy.texto}\n\n${copy.hashtags}`} />
           <CopyBlock title="Mensaje para tus clientes de WhatsApp" text={copy.whatsapp} />

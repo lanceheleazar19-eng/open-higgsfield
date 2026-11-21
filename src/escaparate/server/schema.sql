@@ -61,3 +61,18 @@ CREATE TABLE IF NOT EXISTS esc_stripe_events (
   type        text NOT NULL,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
+
+-- v2: gallery, saved shop details and the AI copy log.
+ALTER TABLE esc_users ADD COLUMN IF NOT EXISTS city text NOT NULL DEFAULT '';
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS product_name text NOT NULL DEFAULT '';
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS format text NOT NULL DEFAULT 'post';
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS source_url text;
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS favorite boolean NOT NULL DEFAULT false;
+ALTER TABLE esc_generations ADD COLUMN IF NOT EXISTS hidden boolean NOT NULL DEFAULT false;
+
+CREATE TABLE IF NOT EXISTS esc_copy_log (
+  id          bigserial PRIMARY KEY,
+  user_id     uuid NOT NULL REFERENCES esc_users(id) ON DELETE CASCADE,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS esc_copy_log_user ON esc_copy_log (user_id, created_at DESC);
