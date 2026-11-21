@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { COST, PLANS, SIGNUP_CREDITS } from "@/escaparate/plans";
 import { WaitlistForm } from "@/escaparate/waitlist-form";
 
 const STEPS = [
@@ -17,26 +18,21 @@ const STEPS = [
   },
 ];
 
-const PLANS = [
+const PRICING = [
   {
     name: "Gratis",
     price: "0 €",
-    note: "para probar",
-    items: ["10 fotos al mes", "Textos de venta", "Marca de agua discreta"],
+    note: "al registrarte",
+    featured: false,
+    items: [`${SIGNUP_CREDITS} créditos de regalo`, "Fotos, vídeo y textos", "Sin tarjeta"],
   },
-  {
-    name: "Comercio",
-    price: "9 €",
-    note: "/mes + IVA",
-    featured: true,
-    items: ["80 fotos al mes", "10 vídeos para Reels y estados", "Sin marca de agua", "Catálogo de productos"],
-  },
-  {
-    name: "Pro",
-    price: "24 €",
-    note: "/mes + IVA",
-    items: ["300 fotos al mes", "40 vídeos", "Varios usuarios", "Calendario de publicaciones"],
-  },
+  ...PLANS.map((plan) => ({
+    name: plan.name,
+    price: `${plan.priceEuros} €`,
+    note: "/mes, IVA incl.",
+    featured: plan.id === "comercio",
+    items: plan.perks,
+  })),
 ];
 
 export default function EscaparateLanding() {
@@ -53,13 +49,13 @@ export default function EscaparateLanding() {
           </p>
           <div className="esc-hero-ctas">
             <Link href="/escaparate/crear" className="esc-btn esc-btn-primary">
-              Probar con mi producto
+              Probar gratis con mi producto
             </Link>
             <a href="#lista" className="esc-btn esc-btn-ghost">
               Apuntarme a la lista
             </a>
           </div>
-          <p className="esc-note">Sin tarjeta. Sin permanencia. Cancela cuando quieras.</p>
+          <p className="esc-note">{SIGNUP_CREDITS} créditos de regalo al registrarte. Sin tarjeta.</p>
         </div>
         <div className="esc-ba" aria-label="Ejemplo de antes y después">
           <figure>
@@ -116,7 +112,7 @@ export default function EscaparateLanding() {
         <div className="esc-wrap">
           <h2>Precios</h2>
           <div className="esc-grid">
-            {PLANS.map((plan) => (
+            {PRICING.map((plan) => (
               <div className={`esc-card${plan.featured ? " esc-card-featured" : ""}`} key={plan.name}>
                 <h3>{plan.name}</h3>
                 <div className="esc-price">
@@ -131,15 +127,16 @@ export default function EscaparateLanding() {
             ))}
           </div>
           <p className="esc-note">
-            ¿Prefieres que lo hagamos por ti? Contenido del mes para tu negocio desde 79 €.
+            1 foto = {COST.image} crédito · 1 vídeo = {COST.video} créditos. Sin permanencia. ¿Prefieres que lo hagamos
+            por ti? Contenido del mes para tu negocio desde 79 €.
           </p>
         </div>
       </section>
 
       <section className="esc-section" id="lista">
         <div className="esc-wrap" style={{ maxWidth: 720 }}>
-          <h2>Apúntate y llévate 10 fotos gratis</h2>
-          <p className="esc-lead">Estamos abriendo el acceso poco a poco. Los primeros comercios entran antes.</p>
+          <h2>¿Aún no te decides? Apúntate a las novedades</h2>
+          <p className="esc-lead">Te avisamos de nuevas funciones, plantillas por sector y ofertas para comercios.</p>
           <WaitlistForm />
         </div>
       </section>

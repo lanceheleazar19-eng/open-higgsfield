@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { Creator } from "@/escaparate/creator";
+import { safeCurrentUser } from "@/escaparate/server/viewer";
 
 export const metadata: Metadata = {
   title: "Crear fotos de producto",
   alternates: { canonical: "/escaparate/crear" },
 };
 
-export default function CrearPage() {
+export default async function CrearPage() {
+  const user = await safeCurrentUser();
+  if (!user) redirect("/escaparate/entrar?siguiente=/escaparate/crear");
   return (
     <main className="esc-wrap">
       <div style={{ paddingTop: 32 }}>
@@ -17,7 +21,7 @@ export default function CrearPage() {
           vídeo y el texto para publicarlo.
         </p>
       </div>
-      <Creator />
+      <Creator initialCredits={user.credits} />
     </main>
   );
 }

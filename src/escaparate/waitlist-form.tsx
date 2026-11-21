@@ -30,7 +30,7 @@ export function WaitlistForm() {
   if (done) {
     return (
       <p className="esc-msg-ok" role="status">
-        ¡Apuntado! Te escribiremos en cuanto tengas tu acceso con 10 fotos gratis.
+        ¡Apuntado! Te escribiremos con las novedades.
       </p>
     );
   }
@@ -79,7 +79,7 @@ export function WaitlistForm() {
       ) : null}
       <div>
         <button className="esc-btn esc-btn-primary" type="submit" disabled={busy}>
-          {busy ? "Enviando…" : "Quiero mis 10 fotos gratis"}
+          {busy ? "Enviando…" : "Apuntarme"}
         </button>
       </div>
     </form>

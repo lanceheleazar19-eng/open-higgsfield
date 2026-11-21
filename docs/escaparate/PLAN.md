@@ -35,11 +35,15 @@ Escaparate convierte **una foto del móvil** en:
 - `/escaparate/crear` — la herramienta: subir foto → elegir sector, estilo y formato
   → 4 fotos → vídeo con un clic → textos listos para copiar.
 
+- Cuentas sin contraseña (código por correo), créditos con historial y
+  devolución automática si algo falla.
+- Pagos con Stripe: planes mensuales, packs de créditos y portal del cliente.
+  Guía: `docs/escaparate/PUESTA-EN-MARCHA.md`.
+
 **Lo siguiente (en este orden):**
 
-1. Cuentas de usuario y créditos (que el cliente no tenga que poner ninguna clave).
-2. Pagos con Stripe (tarjeta, Apple Pay, Google Pay) y facturas con IVA.
-3. Textos generados con IA, adaptados al tono de cada negocio.
+1. Galería "Mis creaciones" con todo lo generado.
+2. Textos generados con IA, adaptados al tono de cada negocio.
 4. Catálogo de productos guardado.
 5. Calendario "qué publicar hoy" con fechas españolas: rebajas, Black Friday,
    Navidad, Reyes, San Valentín, Día de la Madre, fiestas locales.
@@ -49,12 +53,16 @@ Escaparate convierte **una foto del móvil** en:
 
 | Plan | Precio | Incluye |
 |---|---|---|
-| Gratis | 0 € | 10 fotos/mes, textos, marca de agua discreta |
-| Comercio | 9 €/mes + IVA | 80 fotos, 10 vídeos, sin marca de agua, catálogo |
-| Pro | 24 €/mes + IVA | 300 fotos, 40 vídeos, varios usuarios, calendario |
+| Gratis | 0 € | 12 créditos de regalo al registrarse |
+| Comercio | 9 €/mes, IVA incl. | 100 créditos al mes |
+| Pro | 24 €/mes, IVA incl. | 350 créditos al mes |
+| Pack | 6 € (pago único) | 60 créditos que no caducan |
+
+1 foto = 1 crédito · 1 vídeo = 10 créditos. Todo se cambia en
+`src/escaparate/plans.ts`.
 
 **Costes a vigilar:** cada foto cuesta céntimos y cada vídeo corto bastante más
-(estimación: 0,20–0,50 €). Por eso los vídeos van limitados por plan. Hay que
+(estimación: 0,20–0,50 €). Por eso el vídeo cuesta 10 créditos. Hay que
 confirmar los precios reales del proveedor antes de lanzar.
 
 ## 4. Servicios (dinero desde el primer mes)

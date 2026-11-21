@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { safeCurrentUser } from "@/escaparate/server/viewer";
+
 import "@/escaparate/escaparate.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-esc", display: "swap" });
@@ -19,7 +21,8 @@ export const viewport: Viewport = {
   themeColor: "#fbf7f2",
 };
 
-export default function EscaparateLayout({ children }: { children: ReactNode }) {
+export default async function EscaparateLayout({ children }: { children: ReactNode }) {
+  const user = await safeCurrentUser();
   return (
     <div className={`esc ${inter.variable}`} lang="es-ES">
       <header className="esc-header">
@@ -30,15 +33,32 @@ export default function EscaparateLayout({ children }: { children: ReactNode }) 
             </span>
             Escaparate
           </Link>
-          <Link href="/escaparate/crear" className="esc-btn esc-btn-primary esc-btn-small">
-            Probar ahora
-          </Link>
+          {user ? (
+            <nav style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <Link href="/escaparate/cuenta" className="esc-btn esc-btn-ghost esc-btn-small">
+                Mi cuenta
+              </Link>
+              <Link href="/escaparate/crear" className="esc-btn esc-btn-primary esc-btn-small">
+                Crear
+              </Link>
+            </nav>
+          ) : (
+            <nav style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <Link href="/escaparate/entrar" className="esc-btn esc-btn-ghost esc-btn-small">
+                Entrar
+              </Link>
+              <Link href="/escaparate/crear" className="esc-btn esc-btn-primary esc-btn-small">
+                Probar gratis
+              </Link>
+            </nav>
+          )}
         </div>
       </header>
       {children}
       <footer className="esc-footer">
         <div className="esc-wrap">
-          © {new Date().getFullYear()} Escaparate · Hecho para el comercio local en España
+          © {new Date().getFullYear()} Escaparate · Hecho para el comercio local en España ·{" "}
+          <Link href="/escaparate/legal">Aviso legal y privacidad</Link>
         </div>
       </footer>
     </div>

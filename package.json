@@ -6,14 +6,18 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "brand": "node scripts/build-brand-assets.mjs"
+    "brand": "node scripts/build-brand-assets.mjs",
+    "escaparate:migrate": "node scripts/escaparate-migrate.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.10",
     "@vercel/blob": "^2.8.0",
     "next": "^16.0.0",
+    "postgres": "^4.1.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "stripe": "^23.2.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
