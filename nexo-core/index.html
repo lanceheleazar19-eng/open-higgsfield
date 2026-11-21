@@ -92,7 +92,15 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 .m.t{color:var(--muted);font-family:var(--f-mono);font-size:.8rem}
 .chat-form{display:flex;gap:8px;margin-top:12px}
 .chat-form input{flex:1;min-width:0;background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 12px;font:inherit}
-button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.voicebar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-4px 0 12px}
+.vsel{display:flex;align-items:center;gap:6px;font-size:.8rem}
+.vsel select{background:var(--card-2);color:var(--ink);border:1px solid var(--line);border-radius:9px;height:32px;padding:0 8px;font:inherit}
+#micBtn{height:auto;min-width:44px}
+#micBtn[aria-pressed="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.speaking #score{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.speaking #score{animation:none}}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 .tabbar{display:none}
 @media (max-width:860px){
   .grid{grid-template-columns:minmax(0,1fr)}
@@ -179,8 +187,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-
 
       <section class="card" id="chat">
         <h2>Habla con Nexo <span class="muted" id="aiState">conectando…</span></h2>
+        <div class="voicebar" id="voicebar" hidden>
+          <button type="button" class="toggle" id="voiceBtn" aria-pressed="false">🔇 Voz apagada</button>
+          <label class="vsel"><span class="muted">Voz</span>
+            <select id="voiceSel" aria-label="Voz de Nexo">
+              <option value="glassy">Cristal</option><option value="airy">Aire</option><option value="rounded">Grave</option><option value="buttery">Suave</option>
+            </select>
+          </label>
+          <button type="button" class="toggle" id="hush" hidden>■ Callar</button>
+        </div>
         <div class="chat-log" id="chatLog" aria-live="polite"></div>
         <form class="chat-form" id="chatForm">
+          <button type="button" class="toggle" id="micBtn" hidden aria-label="Hablar con Nexo">🎤</button>
           <input id="chatBox" autocomplete="off" placeholder="«He dormido 6 h y estoy cansado» o «¿cómo voy esta semana?»" aria-label="Mensaje para Nexo">
           <button class="btn brand" id="chatSend">Enviar</button>
         </form>
@@ -441,6 +459,7 @@ $("chatForm").addEventListener("submit",async e=>{
     if(toolsOn) opts.tools=tools();
     const r=await sample([{role:"user",content:persona()},...turns],opts);
     out.classList.remove("t"); out.textContent=clean(r.text); turns.push({role:"assistant",content:r.text});
+    say(clean(r.text));
   }catch(err){ out.classList.remove("t"); const c=err&&err.code;
     if(c==="not_granted"||c==="sampling_disabled"||c==="not_declared"){ sample=null; setAI(false); out.textContent=localAnswer(); }
     else out.textContent=(err&&err.text?clean(err.text)+"\n\n":"")+(ERR[c]||"Se ha cortado la conexión. Vuelve a intentarlo."); }
@@ -450,11 +469,50 @@ $("aiAnalyze").onclick=async()=>{
   if(!sample) return; const b=$("aiAnalyze"), o=$("aiOut"); b.disabled=true; o.hidden=false; o.textContent="Nexo está analizando tus datos…";
   try{
     const r=await sample(persona()+"\n\nAnaliza estos datos y dame 3 o 4 patrones o consejos concretos, cada uno en una línea que empiece por un emoji. Usa números de los datos. Sin introducción.",{modelTier:"default",onText:({text})=>{ o.textContent=clean(text); }});
-    o.textContent=clean(r.text);
+    o.textContent=clean(r.text); say(clean(r.text));
   }catch(err){ o.textContent=ERR[err&&err.code]||"No se pudo analizar ahora. Prueba en un rato."; if(err&&err.code==="not_granted"){ b.hidden=true; } }
   finally{ b.disabled=false; }
 };
 function setAI(on){ $("aiState").textContent=on?"● IA en línea":"modo básico"; $("aiState").style.color=on?"var(--green)":""; $("aiAnalyze").hidden=!on; }
+
+/* ---------- voice: Nexo speaks (tts) and listens (dictation) ---------- */
+let tts=null, voiceOn=false;
+const PREF="nexo-core-voz";
+try{ const p=JSON.parse(localStorage.getItem(PREF)||"{}"); voiceOn=!!p.on; if(p.voice) $("voiceSel").value=p.voice; }catch(e){}
+function savePref(){ try{ localStorage.setItem(PREF,JSON.stringify({on:voiceOn,voice:$("voiceSel").value})); }catch(e){} }
+function paintVoice(){ const b=$("voiceBtn"); b.setAttribute("aria-pressed",String(voiceOn)); b.textContent=voiceOn?"🔊 Voz activada":"🔇 Voz apagada"; }
+function say(text){
+  if(!tts||!voiceOn||!text) return;
+  tts.speak(text.replace(/[•✓○⚡🏋️😴🧠✅]/g,"").slice(0,1900),{voice:$("voiceSel").value,language:"es"}).catch(()=>{});
+}
+function wireTTS(t){
+  tts=t; $("voicebar").hidden=false; paintVoice();
+  $("voiceBtn").onclick=()=>{ voiceOn=!voiceOn; paintVoice(); savePref(); if(!voiceOn) t.stop().catch(()=>{}); else say("Voz activada, runner. Te escucho."); };
+  $("voiceSel").onchange=()=>{ savePref(); if(voiceOn) say("Así sueno ahora."); };
+  $("hush").onclick=()=>t.stop().catch(()=>{});
+  t.onState(({state,reason})=>{
+    const on=state!=="idle"; $("hush").hidden=!on; document.body.classList.toggle("speaking",state==="speaking");
+    if(state==="idle"&&reason==="not_granted"){ voiceOn=false; paintVoice(); savePref(); $("voicebar").hidden=true; }
+  });
+}
+function wireMic(d){
+  const mic=$("micBtn"), box=$("chatBox"); mic.hidden=false; let base="", autoSend=false;
+  d.onPartial(({text})=>{ if(text) box.value=(base?base+" ":"")+text; });
+  d.onFinal(({text})=>{ base=(base+text).replace(/^\s+/,""); box.value=base; });
+  d.onState(({state,reason})=>{
+    const on=state!=="idle"; mic.setAttribute("aria-pressed",String(on)); mic.setAttribute("aria-label",on?"Dejar de hablar":"Hablar con Nexo");
+    if(state==="idle"){
+      if(reason==="unavailable"||reason==="not_granted") mic.hidden=true;
+      if(autoSend&&box.value.trim()){ autoSend=false; $("chatForm").requestSubmit(); }
+    }
+  });
+  mic.onclick=()=>{
+    if(d.active()){ autoSend=true; d.stop().catch(()=>{}); return; }
+    if(tts) tts.stop().catch(()=>{});
+    base=box.value.trim(); autoSend=false;
+    d.start().catch(err=>{ if(err&&(err.code==="not_granted"||err.code==="unavailable")) mic.hidden=true; });
+  };
+}
 
 /* ---------- boot ---------- */
 load(); renderAll();
@@ -463,6 +521,8 @@ setAI(false); $("aiState").textContent="conectando…";
 const C=window.claude;
 if(C&&typeof C.use==="function"){
   C.use("sample").then(async s=>{ if(!s){ setAI(false); return; } sample=s; let lim=null; try{ lim=await s.limits(); }catch(e){} toolsOn=!!(lim&&lim.tools); setAI(true); }).catch(()=>setAI(false));
+  C.use("tts").then(t=>{ if(t) wireTTS(t); }).catch(()=>{});
+  C.use("dictation").then(d=>{ if(d) wireMic(d); }).catch(()=>{});
 } else setAI(false);
 setInterval(()=>{ if(view===today()) renderHabits(); },60000);
 })();
