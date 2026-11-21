@@ -4,6 +4,16 @@ La entrada más nueva va arriba.
 
 ---
 
+## 2026-11-21 · Claude · rama `claude/quirky-babbage-b5kmxc` (2)
+
+**Hecho:** `nexo-core/index.html`, un panel personal con IA (estilo del vídeo de referencia, diseño propio): anillo de recuperación calculado a partir de sueño, calidad, energía y estrés; registro diario; hábitos con hora (verde si están hechos, rojo si están pendientes y ya ha pasado la hora); historial de 14 días; patrones calculados en local; chat con Nexo y botón "Analizar con IA" (capacidad `sample`, herramientas registrar_dia, marcar_habito y crear_habito). Datos en `localStorage` (`nexo-core-v1`), con datos de ejemplo marcados y un botón para borrarlos.
+
+**Probado:** se renderiza a 1200 px y a 400 px sin desbordes ni errores de consola, y el registro actualiza el anillo. El chat con IA no se ha podido probar fuera de claude.ai.
+
+**Pendiente:** conectar una pulsera o el móvil (Health Connect / Apple Salud) para no meter los datos a mano; unir NEXO y Nexo Core en una sola app.
+
+---
+
 ## 2026-11-21 · Claude · rama `claude/quirky-babbage-b5kmxc`
 
 **Hecho:**

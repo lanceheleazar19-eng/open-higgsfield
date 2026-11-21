@@ -7,6 +7,7 @@ Este repositorio lo usan varios asistentes de IA por turnos. El dueño del proye
 | Carpeta | Qué es |
 | --- | --- |
 | `src/`, `public/`, `scripts/` | **OpenHiggsfield**: estudio web de generación de imágenes y vídeo con IA (Next.js 16, React 19, CSS plano, Zustand, pnpm). Ver `README.md`. |
+| `nexo-core/index.html` | **Nexo Core**: panel personal (recuperación, sueño, hábitos, patrones y chat con IA). Mismas reglas que NEXO; datos en `localStorage` (`nexo-core-v1`). |
 | `asistente/index.html` | **NEXO**: asistente personal en una sola página HTML (chat con IA, agenda de citas, enlaces a webs). Estilo cyberpunk original. Se publica como Artifact de claude.ai. |
 | `founder/` | Análisis de negocio de la idea actual (menús baratos): `idea.md`, `competitors.md`, `competitors.csv`. |
 | `ideas/ebau/` | Idea anterior (pack para la EBAU) con el informe de la junta. Archivada, no borrar. |
