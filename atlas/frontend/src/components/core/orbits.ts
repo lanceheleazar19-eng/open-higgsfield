@@ -45,7 +45,7 @@ export function rotateView([x, y, z]: Vec3, rx: number, ry: number): Vec3 {
 export function cameraDistance(aspect: number, narrow = false): number {
   const halfV = Math.tan(((FOV / 2) * Math.PI) / 180);
   const limX = narrow ? 0.86 : 0.9; // fracción del semiancho utilizable (las etiquetas del borde derecho giran hacia dentro)
-  const limY = narrow ? 0.8 : 0.84;
+  const limY = narrow ? 0.8 : 0.74;
   const pts: Vec3[] = [];
   for (const o of ORBITS) for (let i = 0; i < 48; i++) pts.push(orbitPoint(o, (i / 48) * Math.PI * 2));
   for (let camZ = 7; camZ < 30; camZ += 0.2) {

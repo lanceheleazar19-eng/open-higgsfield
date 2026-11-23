@@ -179,10 +179,10 @@ export function AtlasCore({ info, state, rippleKey, onOpen }: {
               onBlur={() => { hoverRef.current = -1; }}
               aria-label={`Abrir ${n.label}: ${inf?.metric ?? ""}`}
             >
-              <span className="node-orb"><Icon name={n.icon} size={17} /></span>
+              <span className="node-orb"><Icon name={n.icon} size={19} /></span>
               <span className="node-text">
                 <span className="node-label">{n.label}</span>
-                <span className="node-metric">{inf?.metric ?? "—"}</span>
+                <span className="node-metric"><i className={`node-dot ${inf?.alert ? "alert" : inf?.planned ? "planned" : "ok"}`} />{inf?.metric ?? "—"}</span>
               </span>
             </button>
           );

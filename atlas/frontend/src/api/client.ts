@@ -1,7 +1,7 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
-  BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
+  Profile, SystemMetrics, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
 
 export interface TaskInput {
@@ -88,6 +88,26 @@ export const api = {
   conversation: (id: number) => request<{ id: number; title: string; created_at: string; messages: StoredMessage[] }>(`/api/conversations/${id}`),
   deleteConversation: (id: number) => requestEmpty(`/api/conversations/${id}`, { method: "DELETE" }),
   exportUrl: "/api/memory/export",
+  profile: () => request<Profile>("/api/profile"),
+  updateProfile: (p: { display_name?: string; username?: string; preferences?: string }) =>
+    request<Profile>("/api/profile", { method: "PUT", body: JSON.stringify(p) }),
+  uploadAvatar: async (blob: Blob): Promise<Profile> => {
+    const fd = new FormData();
+    fd.append("file", blob, "avatar.webp");
+    let res: Response;
+    try { res = await fetch("/api/profile/avatar", { method: "POST", body: fd }); } catch {
+      throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+    }
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = (await res.json()).detail; } catch { /* sin JSON */ }
+      throw new ApiError(res.status, detail);
+    }
+    return res.json() as Promise<Profile>;
+  },
+  deleteAvatar: () => requestEmpty("/api/profile/avatar", { method: "DELETE" }),
+  avatarUrl: (version: number | null) => `/api/profile/avatar?v=${version ?? 0}`,
+  metrics: () => request<SystemMetrics>("/api/system/metrics"),
   tasks: (p: { status?: "open" | "done" | "all"; q?: string; goal_id?: number; category?: string } = {}) => {
     const qs = new URLSearchParams();
     Object.entries(p).forEach(([k, v]) => { if (v !== undefined && v !== "") qs.set(k, String(v)); });

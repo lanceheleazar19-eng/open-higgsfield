@@ -63,3 +63,5 @@ export function chatReply(text: string, mode: "ai" | "local" | "memory" = "local
     ],
   };
 }
+
+export const profileFx = { display_name: "Lance", username: "lance", preferences: "", created_at: "2026-11-23T10:00:00+00:00", has_avatar: false, avatar_version: null };

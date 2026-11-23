@@ -6,7 +6,6 @@ import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { CommandBar } from "../components/control/CommandBar";
 import { IntelPanel } from "../components/control/IntelPanel";
-import { SystemPanel } from "../components/control/SystemPanel";
 import { Transcript, type Exchange } from "../components/control/Transcript";
 import { AtlasCore, type NodeInfo } from "../components/core/AtlasCore";
 import type { CoreState } from "../components/core/scene";
@@ -244,11 +243,8 @@ export function ControlCenter() {
     <div className="control-page">
       {booting && <BootScreen health={health} onStart={(v) => void startAtlas(v)} />}
       <div className={`control ${offline ? "is-offline" : ""}`}>
-        <SystemPanel health={health} offline={offline} voice={voice} speakReplies={speakReplies} />
-
         <div className="stage">
           <header className="stage-head">
-            <p className="eyebrow">Personal Intelligence System</p>
             {d && (
               <h1 className="greet">
                 {greetingFor(d.greeting.part_of_day)}{d.greeting.name ? <>, <span className="accent">{d.greeting.name}</span></> : null}
@@ -282,11 +278,11 @@ export function ControlCenter() {
           </div>
         </div>
 
-        <IntelPanel data={d} />
+        <IntelPanel data={d} onChanged={() => void dash.reload()} />
       </div>
 
       {d && (
-        <section className="telemetry" aria-labelledby="telemetry-title">
+        <section className="telemetry" id="telemetria" aria-labelledby="telemetry-title">
           <header className="section-head">
             <p className="eyebrow">Datos registrados</p>
             <h2 id="telemetry-title">Telemetría detallada</h2>

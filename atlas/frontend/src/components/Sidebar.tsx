@@ -2,21 +2,14 @@ import { NavLink } from "react-router-dom";
 import { useAtlas } from "./AtlasContext";
 import { Icon } from "./Icon";
 import { NAV } from "./nav";
+import { SystemStatus } from "./SystemStatus";
 
 export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate: () => void }) {
-  const { modules, health, healthError } = useAtlas();
+  const { modules } = useAtlas();
   const byId = new Map(modules.map((m) => [m.id, m]));
-  const online = health?.status === "online" && !healthError;
 
   return (
     <aside className={`sidebar ${open ? "is-open" : ""}`} aria-label="Navegación principal">
-      <div className="brand">
-        <div className="brand-mark" aria-hidden="true">A</div>
-        <div>
-          <div className="brand-name">ATLAS</div>
-          <div className="brand-sub">Personal Intelligence System</div>
-        </div>
-      </div>
       <nav>
         <ul>
           {NAV.map((item) => {
@@ -39,10 +32,7 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate: () =>
           })}
         </ul>
       </nav>
-      <div className="sidebar-foot">
-        <span className={`dot ${online ? "dot-on" : "dot-off"}`} aria-hidden="true" />
-        <span>{online ? `Núcleo en línea · v${health!.version}` : "Núcleo sin conexión"}</span>
-      </div>
+      <SystemStatus />
     </aside>
   );
 }

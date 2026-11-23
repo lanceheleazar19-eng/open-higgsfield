@@ -113,3 +113,14 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   hablar sin interacción: el botón «Iniciar ATLAS» la proporciona. Desactivable en Configuración.
 - App instalable en el móvil (manifest, iconos, modo pantalla completa, márgenes de la muesca) y guía
   de acceso seguro con Tailscale (HTTPS, sin exponer ATLAS a Internet).
+
+## ATLAS 3.0 — identidad carmesí y perfil personal
+- Nueva identidad visual (carmesí sobre negro) inspirada en la referencia: cabecera con estado real del
+  sistema, fecha/hora y foto de perfil; barra lateral fija con «Estado del sistema» (CPU y RAM reales,
+  modelo IA, conexión); núcleo neuronal rojo con plataforma holográfica; nodos con línea de estado;
+  columna derecha (alertas, tareas que se pueden completar, eventos, objetivos, resumen financiero con
+  gráfico real, actividad); consola inferior con micrófono, onda de voz y comandos rápidos.
+- Sin clima: no hay fuente meteorológica conectada y no se inventa (pendiente de integración real).
+- Configuración › Perfil personal: nombre visible (es el del saludo), usuario, preferencias, fecha de
+  creación y foto con recortador circular (arrastrar + zoom). La foto se valida por su contenido,
+  se re-codifica sin metadatos (EXIF/GPS), se guarda solo en `data/avatar.webp` y nunca se envía a la IA.

@@ -1,6 +1,6 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { api } from "../api/client";
-import type { Health, ModuleInfo, Prefs } from "../api/types";
+import type { Health, ModuleInfo, Prefs, Profile } from "../api/types";
 import { useAsync } from "../api/useAsync";
 
 interface AtlasCtx {
@@ -10,6 +10,8 @@ interface AtlasCtx {
   prefs: Prefs | null;
   reloadPrefs: () => Promise<void>;
   reloadHealth: () => Promise<void>;
+  profile: Profile | null;
+  reloadProfile: () => Promise<void>;
 }
 
 const Ctx = createContext<AtlasCtx | null>(null);
@@ -18,6 +20,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
   const health = useAsync(api.health, 30_000);
   const modules = useAsync(api.modules);
   const prefs = useAsync(api.prefs);
+  const profile = useAsync(api.profile);
   return (
     <Ctx.Provider
       value={{
@@ -27,6 +30,9 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
         prefs: prefs.data,
         reloadPrefs: prefs.reload,
         reloadHealth: health.reload,
+        profile: profile.data,
+        // el nombre del perfil es el del saludo: recargar ambos
+        reloadProfile: async () => { await Promise.all([profile.reload(), prefs.reload()]); },
       }}
     >
       {children}

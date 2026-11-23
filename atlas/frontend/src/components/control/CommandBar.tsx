@@ -4,6 +4,7 @@ import { Icon } from "../Icon";
 
 export const QUICK_COMMANDS = [
   "¿Qué tengo pendiente hoy?",
+  "Analiza mi progreso en el gimnasio y en mis objetivos",
   "Organízame la semana",
   "¿Cómo voy con mis objetivos?",
   "¿Qué me toca hoy en el gimnasio?",
@@ -49,23 +50,21 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
   const micLabel = !voice.canListen ? "Micrófono no disponible en este navegador" : voice.listening ? "Dejar de escuchar" : "Hablar con ATLAS";
 
   return (
-    <div className="command">
-      <div className="quick" role="group" aria-label="Comandos rápidos">
-        {QUICK_COMMANDS.map((c) => (
-          <button key={c} type="button" className="chip" disabled={busy || offline} onClick={() => onAsk(c)}>{c}</button>
-        ))}
-      </div>
-      <form className={`bar ${voice.listening ? "is-listening" : ""}`} onSubmit={submit}>
-        <button type="button" className={`bar-btn mic ${voice.listening ? "on" : ""}`} onClick={voice.listening ? voice.stopListening : voice.listen}
+    <div className={`command ${voice.listening ? "is-listening" : ""}`}>
+      <form className="bar" onSubmit={submit}>
+        <button type="button" className={`mic ${voice.listening ? "on" : ""}`} onClick={voice.listening ? voice.stopListening : voice.listen}
           disabled={!voice.canListen || offline} aria-label={micLabel} title={micLabel} aria-pressed={voice.listening}>
-          <Icon name="mic" size={19} />
-          {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /><i /></span>}
+          <Icon name="mic" size={22} />
+          {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /></span>}
         </button>
+        <span className={`wave ${voice.listening || voice.speaking || busy ? "on" : ""}`} aria-hidden="true">
+          {Array.from({ length: 14 }, (_, i) => <i key={i} style={{ animationDelay: `${(i % 7) * 0.09}s` }} />)}
+        </span>
         <input
           ref={inputRef}
           value={voice.listening ? voice.interim : text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={voice.listening ? "Escuchando…" : "Habla o escribe a ATLAS… «apúntame…», «recuerda que…»  ( / )"}
+          placeholder={voice.listening ? "Escuchando…" : "Pregunta a ATLAS…"}
           aria-label="Mensaje para ATLAS"
           maxLength={2000}
           readOnly={voice.listening}
@@ -81,9 +80,6 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
             <Icon name={speakReplies ? "volume" : "mute"} size={18} />
           </button>
         )}
-        <button type="button" className="bar-btn brief" onClick={onBriefing} disabled={busy || offline} title="Resumen ejecutivo">
-          <Icon name="spark" size={18} /><span>Resumen</span>
-        </button>
         {busy ? (
           <button type="button" className="bar-btn send" onClick={onStop} aria-label="Detener respuesta" title="Detener respuesta">
             <Icon name="stop" size={18} />
@@ -94,6 +90,16 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           </button>
         )}
       </form>
+      <div className="console-foot">
+        <span className="listen-state"><i className={voice.listening ? "on" : ""} aria-hidden="true" />
+          {voice.listening ? "Escuchando…" : busy ? "Procesando…" : voice.speaking ? "Hablando…" : "En espera"}</span>
+        <div className="quick" role="group" aria-label="Comandos rápidos">
+          <button type="button" className="chip" onClick={onBriefing} disabled={busy || offline}><Icon name="reports" size={14} /> Resumen</button>
+          {QUICK_COMMANDS.map((c) => (
+            <button key={c} type="button" className="chip" disabled={busy || offline} onClick={() => onAsk(c)}>{c}</button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

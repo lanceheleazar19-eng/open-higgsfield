@@ -19,10 +19,10 @@ interface StateLook {
 }
 
 const LOOKS: Record<CoreState, StateLook> = {
-  idle: { color: new THREE.Color("#2f8cff"), accent: new THREE.Color("#22d3ee"), spin: 1, sparks: 18, pulseSpeed: 0.18, pulseDir: 1, glow: 1 },
-  listening: { color: new THREE.Color("#22e1ff"), accent: new THREE.Color("#7df9ff"), spin: 1.4, sparks: 40, pulseSpeed: 0.35, pulseDir: 1, glow: 1.25 },
-  thinking: { color: new THREE.Color("#4d7dff"), accent: new THREE.Color("#c4b5fd"), spin: 4, sparks: 160, pulseSpeed: 0.9, pulseDir: 1, glow: 1.55 },
-  responding: { color: new THREE.Color("#38e1ff"), accent: new THREE.Color("#ffffff"), spin: 2, sparks: 70, pulseSpeed: 0.7, pulseDir: -1, glow: 1.35 },
+  idle: { color: new THREE.Color("#e3192d"), accent: new THREE.Color("#ff5a66"), spin: 1, sparks: 22, pulseSpeed: 0.18, pulseDir: 1, glow: 1 },
+  listening: { color: new THREE.Color("#ff3346"), accent: new THREE.Color("#ffb0b8"), spin: 1.4, sparks: 45, pulseSpeed: 0.35, pulseDir: 1, glow: 1.25 },
+  thinking: { color: new THREE.Color("#ff1a2e"), accent: new THREE.Color("#ffffff"), spin: 4, sparks: 170, pulseSpeed: 0.9, pulseDir: 1, glow: 1.55 },
+  responding: { color: new THREE.Color("#ff4a5c"), accent: new THREE.Color("#ffd0d5"), spin: 2, sparks: 75, pulseSpeed: 0.7, pulseDir: -1, glow: 1.35 },
 };
 
 export interface FrameInput {
@@ -117,10 +117,10 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
   const core = new THREE.Group();
   root.add(core);
 
-  const halo = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0x2f8cff, opacity: 0.55, ...additive })));
+  const halo = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0xe3192d, opacity: 0.55, ...additive })));
   halo.scale.setScalar(4.6);
   core.add(halo);
-  const heart = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0x9fd4ff, opacity: 0.9, ...additive })));
+  const heart = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0xffc2c8, opacity: 0.9, ...additive })));
   heart.scale.setScalar(1.5);
   core.add(heart);
 
@@ -137,17 +137,17 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
 
   const linkGeo = track(new THREE.BufferGeometry());
   linkGeo.setAttribute("position", new THREE.BufferAttribute(neighbourLinks(neuronPos, 2), 3));
-  const linkMat = track(new THREE.LineBasicMaterial({ color: 0x2f8cff, opacity: 0.22, ...additive }));
+  const linkMat = track(new THREE.LineBasicMaterial({ color: 0xe3192d, opacity: 0.22, ...additive }));
   core.add(new THREE.LineSegments(linkGeo, linkMat));
 
   const shell = new THREE.LineSegments(
     track(new THREE.WireframeGeometry(track(new THREE.IcosahedronGeometry(1.42, 1)))),
-    track(new THREE.LineBasicMaterial({ color: 0x5fb0ff, opacity: 0.1, ...additive })),
+    track(new THREE.LineBasicMaterial({ color: 0xff5a66, opacity: 0.1, ...additive })),
   );
   root.add(shell);
 
   // Anillos giroscópicos alrededor del núcleo
-  const gyroMat = track(new THREE.LineBasicMaterial({ color: 0x22d3ee, opacity: 0.4, ...additive }));
+  const gyroMat = track(new THREE.LineBasicMaterial({ color: 0xff3346, opacity: 0.4, ...additive }));
   const gyros: THREE.LineLoop[] = [];
   for (const [r, rx, rz] of [[1.7, 1.2, 0.3], [1.9, 0.4, -0.9], [2.05, -0.7, 0.5]] as const) {
     const pts: THREE.Vector3[] = [];
@@ -163,8 +163,30 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     gyros.push(ring);
   }
 
+  // ---------------- Plataforma holográfica ----------------
+  const platform = new THREE.Group();
+  platform.position.y = -2.2;
+  const platMats: THREE.MeshBasicMaterial[] = [];
+  [[0.8, 0.88, 0.55], [1.3, 1.35, 0.4], [1.9, 1.94, 0.3], [2.6, 2.63, 0.2], [3.3, 3.32, 0.12]].forEach(([r1, r2, op]) => {
+    const m = track(new THREE.MeshBasicMaterial({ color: 0xff2e42, opacity: op, side: THREE.DoubleSide, ...additive }));
+    platMats.push(m);
+    const ring = new THREE.Mesh(track(new THREE.RingGeometry(r1, r2, 128)), m);
+    ring.rotation.x = -Math.PI / 2;
+    platform.add(ring);
+  });
+  const disc = new THREE.Mesh(track(new THREE.CircleGeometry(0.9, 64)),
+    track(new THREE.MeshBasicMaterial({ map: tex, color: 0xff2e42, opacity: 0.55, ...additive })));
+  disc.rotation.x = -Math.PI / 2;
+  platform.add(disc);
+  // haz vertical de luz
+  const beam = new THREE.Mesh(track(new THREE.CylinderGeometry(0.5, 0.95, 1.6, 48, 1, true)),
+    track(new THREE.MeshBasicMaterial({ color: 0xff2e42, opacity: 0.035, side: THREE.DoubleSide, ...additive })));
+  beam.position.y = 0.8;
+  platform.add(beam);
+  root.add(platform);
+
   // ---------------- Órbitas ----------------
-  const orbitMat = track(new THREE.LineBasicMaterial({ color: 0x3b82f6, opacity: 0.2, ...additive }));
+  const orbitMat = track(new THREE.LineBasicMaterial({ color: 0xd4142a, opacity: 0.2, ...additive }));
   for (const o of ORBITS) {
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i < 192; i++) pts.push(new THREE.Vector3(...orbitPoint(o, (i / 192) * Math.PI * 2)));
@@ -184,7 +206,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
   }
   const fieldGeo = track(new THREE.BufferGeometry());
   fieldGeo.setAttribute("position", new THREE.BufferAttribute(fieldPos, 3));
-  const fieldMat = track(new THREE.PointsMaterial({ size: 0.04, map: tex, color: 0x7cc4ff, opacity: 0.55, ...additive }));
+  const fieldMat = track(new THREE.PointsMaterial({ size: 0.04, map: tex, color: 0xff7f8a, opacity: 0.55, ...additive }));
   const field = new THREE.Points(fieldGeo, fieldMat);
   root.add(field);
 
@@ -200,13 +222,13 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     pulse.scale.setScalar(0.16);
     root.add(pulse);
     const planet = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: new THREE.Color(c), opacity: 0.35, ...additive })));
-    planet.scale.setScalar(0.9);
+    planet.scale.setScalar(0.6);
     root.add(planet);
     return { geo, mat, pulse, planet, t: Math.random() };
   });
 
   // Onda expansiva al recibir una consulta (mira siempre a cámara: fuera de root)
-  const rippleMat = track(new THREE.MeshBasicMaterial({ color: 0x5fd8ff, opacity: 0, side: THREE.DoubleSide, ...additive }));
+  const rippleMat = track(new THREE.MeshBasicMaterial({ color: 0xff6b78, opacity: 0, side: THREE.DoubleSide, ...additive }));
   const rippleMesh = new THREE.Mesh(track(new THREE.RingGeometry(0.992, 1, 128)), rippleMat);
   scene.add(rippleMesh);
   let rippleT = -1;
@@ -234,6 +256,8 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     shell.rotation.z += f.dt * 0.03 * spin;
     gyros.forEach((g, i) => { g.rotation.z += f.dt * (0.15 + i * 0.07) * spin * (i % 2 ? -1 : 1); });
     field.rotation.y += f.dt * 0.012 * spin;
+    platform.rotation.y += f.dt * 0.05 * spin;
+    platMats.forEach((m, i) => { m.color.copy(col); m.opacity = (0.5 - i * 0.09) * (0.8 + 0.2 * Math.sin(f.time * 1.5 - i)) * glow; });
 
     const breathe = 1 + Math.sin(f.time * (state === "listening" ? 5 : 1.6)) * (state === "listening" ? 0.06 : 0.03);
     halo.scale.setScalar(4.6 * breathe * glow);
@@ -276,7 +300,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
       l.pulse.position.lerpVectors(tmpA, tmpB, t);
       l.pulse.material.opacity = Math.sin(l.t * Math.PI) * (hot ? 1 : 0.8);
       l.planet.position.copy(tmpB);
-      l.planet.material.opacity = hot ? 0.75 : 0.32;
+      l.planet.material.opacity = hot ? 0.45 : 0.12;
     });
 
     if (rippleT >= 0) {

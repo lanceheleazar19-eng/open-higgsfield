@@ -134,6 +134,7 @@ export interface Dashboard {
     net_cents: number;
     balance_cents: number;
     top_expense_categories: { category: string; amount_cents: number }[];
+    series?: { date: string; net_cents: number }[];
   };
   fitness: {
     today_routine?: string | null;
@@ -243,3 +244,9 @@ export interface BodyEntry {
   chest_cm: number | null; arm_cm: number | null; thigh_cm: number | null; notes: string | null;
 }
 export interface ParsedLog { exercise_id: number; name: string; reps: number[]; weight: number | null; rir: number | null; warmup_sets: number; per_side: boolean; notes: string[] }
+
+export interface Profile {
+  display_name: string; username: string; preferences: string; created_at: string;
+  has_avatar: boolean; avatar_version: number | null;
+}
+export interface SystemMetrics { cpu_percent: number; ram_percent: number; ram_used_bytes: number; ram_total_bytes: number }

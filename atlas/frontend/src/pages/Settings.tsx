@@ -4,6 +4,7 @@ import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Panel } from "../components/Panel";
 import { VoiceSettings } from "../components/VoiceSettings";
+import { ProfileSettings } from "../components/ProfileSettings";
 import { NotificationSettings } from "../components/NotificationSettings";
 
 const CURRENCIES = ["EUR", "USD", "MXN", "GBP", "COP", "ARS", "CLP"];
@@ -39,14 +40,10 @@ export function Settings() {
         <p className="eyebrow">Sistema</p>
         <h1>Configuración</h1>
       </header>
+      <ProfileSettings />
       <div className="grid grid-2">
-        <Panel title="Perfil">
+        <Panel title="Región">
           <form className="form" onSubmit={submit}>
-            <label>
-              <span>¿Cómo quieres que te llame ATLAS?</span>
-              <input value={form.user_name} maxLength={80} placeholder="Tu nombre"
-                onChange={(e) => setForm({ ...form, user_name: e.target.value })} />
-            </label>
             <label>
               <span>Zona horaria</span>
               <select value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} disabled={!tzs.data}>

@@ -1,13 +1,15 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { App } from "../App";
-import { chatReply, emptyDashboard, health, mockFetch, modules, prefs } from "./fixtures";
+import { chatReply, emptyDashboard, health, mockFetch, modules, prefs, profileFx } from "./fixtures";
 
 function renderAt(path: string) {
   return render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
 }
 
 const base = {
+  "/api/profile": profileFx,
+  "/api/system/metrics": { cpu_percent: 14, ram_percent: 42, ram_used_bytes: 1, ram_total_bytes: 2 },
   "/api/system/health": health,
   "/api/system/modules": modules,
   "/api/settings": prefs,
@@ -21,8 +23,8 @@ test("dashboard vacío muestra estados vacíos honestos y no cifras inventadas",
   renderAt("/");
   expect(await screen.findByText(/Buenos días/)).toBeInTheDocument();
   expect(screen.getAllByText(/No hay tareas registradas/).length).toBeGreaterThan(0);
-  expect(screen.getByText("Sin alertas. Todo en orden.")).toBeInTheDocument();
-  expect(screen.getByText("Local (sin modelo)")).toBeInTheDocument();
+  expect(screen.queryByText(/^Alertas/)).not.toBeInTheDocument(); // sin alertas no se muestra la tarjeta
+  expect(screen.getAllByText("Modo local").length).toBeGreaterThan(0);
   expect(screen.getByText(/Aún no hay movimientos de dinero real/)).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /Dime cómo te llamas/ })).toHaveAttribute("href", "/settings");
 });
@@ -44,11 +46,11 @@ test("dashboard con datos muestra nombre, tareas atrasadas y finanzas", async ()
   });
   renderAt("/");
   expect(await screen.findByText("Lance")).toBeInTheDocument();
-  expect(screen.getAllByText("Pagar seguro").length).toBe(2); // HUD + telemetría
-  expect(screen.getByText(/Atrasada ·/)).toBeInTheDocument();
+  expect(screen.getAllByText("Pagar seguro").length).toBe(2); // columna derecha + telemetría
+  expect(screen.getAllByText(/Atrasada ·/).length).toBeGreaterThan(0);
   expect(screen.getByText("Vivienda")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "1 tarea atrasada." })).toHaveAttribute("href", "/tasks");
-  expect(screen.getByRole("button", { name: /Abrir Finance: 1500,00\s€ mes/ })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Abrir Finanzas: 1500,00\s€ mes/ })).toBeInTheDocument();
 });
 
 test("backend caído muestra estado sin conexión con reintento", async () => {
@@ -66,23 +68,46 @@ test("sidebar marca módulos planificados con su fase y abre su página", async 
   expect(screen.getByText("Win rate y P&L")).toBeInTheDocument();
 });
 
-test("configuración guarda el nombre vía PUT", async () => {
-  const calls = mockFetch({ ...base, "PUT /api/settings": { ...prefs, user_name: "Tony" } });
+test("perfil: guarda el nombre y actualiza el saludo", async () => {
+  const calls = mockFetch({ ...base, "PUT /api/profile": { ...profileFx, display_name: "Tony" } });
   renderAt("/settings");
   const input = await screen.findByPlaceholderText("Tu nombre");
   await waitFor(() => expect(input).toHaveValue("Lance"));
   fireEvent.change(input, { target: { value: "Tony" } });
-  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-  await screen.findByText("Preferencias guardadas.");
-  const put = calls.find((c) => c.init?.method === "PUT");
-  expect(JSON.parse(put!.init!.body as string)).toMatchObject({ user_name: "Tony" });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar perfil" }));
+  await screen.findByText("Perfil guardado.");
+  const put = calls.find((c) => c.url === "/api/profile" && c.init?.method === "PUT");
+  expect(JSON.parse(put!.init!.body as string)).toMatchObject({ display_name: "Tony" });
+});
+
+test("perfil: rechaza formatos no permitidos y abre el recortador con JPG/PNG/WEBP", async () => {
+  mockFetch({ ...base });
+  vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: () => "blob:foto", revokeObjectURL: () => {} }));
+  renderAt("/settings");
+  const input = await screen.findByLabelText("Elegir foto de perfil");
+  fireEvent.change(input, { target: { files: [new File(["x"], "anim.gif", { type: "image/gif" })] } });
+  expect(await screen.findByText(/Formato no permitido/)).toBeInTheDocument();
+  fireEvent.change(input, { target: { files: [new File(["x"], "yo.png", { type: "image/png" })] } });
+  expect(await screen.findByRole("img", { name: /Vista previa del recorte/ })).toBeInTheDocument();
+  expect(screen.getByLabelText("Zoom de la foto")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+  expect(screen.getByRole("button", { name: "Subir foto" })).toBeInTheDocument();
+});
+
+test("cabecera: muestra la foto de perfil y enlaza al perfil", async () => {
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard, "/api/profile": { ...profileFx, has_avatar: true, avatar_version: 42 } });
+  renderAt("/");
+  const link = await screen.findByRole("link", { name: "Mi perfil y configuración" });
+  expect(link).toHaveAttribute("href", "/settings#perfil");
+  await waitFor(() => expect(link.querySelector("img")).toHaveAttribute("src", "/api/profile/avatar?v=42"));
+  expect(screen.getByText("Sistema activo")).toBeInTheDocument();
 });
 
 test("los nodos del núcleo muestran datos reales y abren su módulo", async () => {
   mockFetch({ ...base, "/api/dashboard": { ...emptyDashboard, tasks: { ...emptyDashboard.tasks, pending: 3 } } });
   renderAt("/");
-  const node = await screen.findByRole("button", { name: "Abrir Tasks: 3 pendientes" });
-  expect(screen.getByRole("button", { name: "Abrir Memory: 3 recuerdos" })).toBeInTheDocument();
+  const node = await screen.findByRole("button", { name: "Abrir Tareas: 3 pendientes" });
+  expect(screen.getByRole("button", { name: "Abrir Memoria: 3 recuerdos" })).toBeInTheDocument();
   mockFetch({ ...base, "/api/tasks?": { items: [], categories: [] }, "/api/goals?": { items: [] },
     "/api/tasks/summary?": { period: "day", from: "", to: "", completed: 0, completed_titles: [], created: 0, due: 0, due_open: 0, overdue: 0, completion_rate: null } });
   fireEvent.click(node);
