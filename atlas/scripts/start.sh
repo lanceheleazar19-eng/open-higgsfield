@@ -50,7 +50,7 @@ if [ ! -d node_modules ] || [ "$(cat node_modules/.atlas-deps 2>/dev/null || tru
 fi
 # Recompila si no hay build, si se pide, o si el código es más nuevo que el build
 if [ ! -f dist/index.html ] || [ "${1:-}" = "--rebuild" ] || \
-   [ -n "$(find src index.html package.json -newer dist/index.html -print -quit 2>/dev/null)" ]; then
+   [ -n "$(find src index.html package.json vite.config.ts -newer dist/index.html -print -quit 2>/dev/null)" ]; then
   echo "▸ Compilando la interfaz…"
   npm run build
 fi

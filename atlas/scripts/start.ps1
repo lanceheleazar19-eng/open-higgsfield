@@ -32,7 +32,7 @@ if (-not (Test-Path "node_modules") -or -not (Test-Path $lockStamp) -or (Get-Con
 $needBuild = $Rebuild -or -not (Test-Path "dist\index.html")
 if (-not $needBuild) {
   $built = (Get-Item "dist\index.html").LastWriteTime
-  $needBuild = [bool](Get-ChildItem src, index.html, package.json -Recurse -File | Where-Object { $_.LastWriteTime -gt $built } | Select-Object -First 1)
+  $needBuild = [bool](Get-ChildItem src, index.html, package.json, vite.config.ts -Recurse -File | Where-Object { $_.LastWriteTime -gt $built } | Select-Object -First 1)
 }
 if ($needBuild) { Write-Host "> Compilando la interfaz..."; npm run build }
 
