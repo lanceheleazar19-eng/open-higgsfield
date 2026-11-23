@@ -1,0 +1,12 @@
+# ATLAS — datos personales y entornos locales (nunca a git)
+data/
+backend/.venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+.env
+*.db
+*.db-journal
+*.egg-info/
