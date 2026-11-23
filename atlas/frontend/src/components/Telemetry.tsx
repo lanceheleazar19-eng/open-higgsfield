@@ -1,105 +1,22 @@
-import { Link } from "react-router-dom";
-import { api } from "../api/client";
 import type { Dashboard as D } from "../api/types";
-import { useAsync } from "../api/useAsync";
-import { useAtlas } from "../components/AtlasContext";
-import { Clock } from "../components/Clock";
-import { CoreOrb } from "../components/CoreOrb";
-import { Icon } from "../components/Icon";
-import { Empty, Panel } from "../components/Panel";
+import { Icon } from "./Icon";
+import { Empty, Panel } from "./Panel";
 import {
-  PRIORITY_LABEL, formatDateTime, formatDay, formatMoney, greetingFor, relativeTime, weekdayInitial,
+  PRIORITY_LABEL, formatDateTime, formatDay, formatMoney, relativeTime, weekdayInitial,
 } from "../lib/format";
 
-export function Dashboard() {
-  const { data, error, loading, reload } = useAsync(api.dashboard, 60_000);
-  const { health, healthError } = useAtlas();
-  const coreState = healthError || error ? "offline" : health?.status === "degraded" ? "degraded" : "online";
-
-  if (!data && error) {
-    return (
-      <div className="offline">
-        <CoreOrb state="offline" />
-        <h1>Núcleo de ATLAS sin conexión</h1>
-        <p>{error.message}. Comprueba que el backend está en marcha (scripts/start).</p>
-        <button className="btn" onClick={() => void reload()}>Reintentar</button>
-      </div>
-    );
-  }
-  if (!data) return <div className="loading" aria-busy="true">Inicializando ATLAS…</div>;
-
+/** Telemetría detallada: los paneles de datos del dashboard original. */
+export function Telemetry({ data }: { data: D }) {
   const tz = data.greeting.timezone;
   return (
-    <div className="dash">
-      <Hero data={data} coreState={coreState} loading={loading} onRefresh={reload} aiNote={health?.ai.note} />
-      <Kpis s={data.summary} />
-      <div className="grid">
-        <TasksPanel t={data.tasks} tz={tz} />
-        <EventsPanel e={data.events} tz={tz} />
-        <FinancePanel f={data.finance} />
-        <FitnessPanel f={data.fitness} />
-        <ProjectsPanel p={data.projects} />
-        <ActivityPanel a={data.activity} />
-      </div>
+    <div className="grid">
+      <TasksPanel t={data.tasks} tz={tz} />
+      <EventsPanel e={data.events} tz={tz} />
+      <FinancePanel f={data.finance} />
+      <FitnessPanel f={data.fitness} />
+      <ProjectsPanel p={data.projects} />
+      <ActivityPanel a={data.activity} />
     </div>
-  );
-}
-
-function Hero({ data, coreState, loading, onRefresh, aiNote }: {
-  data: D; coreState: "online" | "degraded" | "offline"; loading: boolean; onRefresh: () => void; aiNote?: string;
-}) {
-  const { name, part_of_day, timezone } = data.greeting;
-  const { overdue_tasks, pending_tasks, upcoming_events, active_projects } = data.summary;
-  const brief = [
-    `${pending_tasks} ${pending_tasks === 1 ? "tarea pendiente" : "tareas pendientes"}`,
-    overdue_tasks ? `${overdue_tasks} ${overdue_tasks === 1 ? "atrasada" : "atrasadas"}` : null,
-    `${upcoming_events} ${upcoming_events === 1 ? "evento próximo" : "eventos próximos"}`,
-    `${active_projects} ${active_projects === 1 ? "proyecto activo" : "proyectos activos"}`,
-  ].filter(Boolean).join(" · ");
-
-  return (
-    <section className="hero">
-      <div className="hero-main">
-        <p className="eyebrow">Personal Intelligence System</p>
-        <h1>
-          {greetingFor(part_of_day)}{name ? <>, <span className="accent">{name}</span></> : null}.
-        </h1>
-        <p className="hero-brief">{brief}.</p>
-        {!name && <p className="hint"><Link to="/settings">Dime cómo te llamas</Link> para personalizar el saludo.</p>}
-      </div>
-      <Clock timeZone={timezone} />
-      <div className="hero-status">
-        <CoreOrb state={coreState} />
-        <dl className="status-list">
-          <div><dt>Núcleo</dt><dd className={`st-${coreState}`}>{{ online: "Operativo", degraded: "Degradado", offline: "Sin conexión" }[coreState]}</dd></div>
-          <div><dt>Memoria</dt><dd>Base de datos local</dd></div>
-          <div><dt>Cerebro IA</dt><dd className="muted">{aiNote ?? "—"}</dd></div>
-        </dl>
-        <button className="icon-btn" onClick={() => void onRefresh()} aria-label="Actualizar datos" title="Actualizar datos" disabled={loading}>
-          <span className={loading ? "spin" : ""}><Icon name="refresh" /></span>
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function Kpis({ s }: { s: D["summary"] }) {
-  const items = [
-    { label: "Tareas pendientes", value: s.pending_tasks, tone: "" },
-    { label: "Atrasadas", value: s.overdue_tasks, tone: s.overdue_tasks ? "warn" : "" },
-    { label: "Próximos eventos", value: s.upcoming_events, tone: "" },
-    { label: "Proyectos activos", value: s.active_projects, tone: "" },
-    { label: "Entrenos (7 días)", value: s.sessions_7d, tone: "" },
-  ];
-  return (
-    <ul className="kpis">
-      {items.map((k) => (
-        <li key={k.label} className={`kpi ${k.tone}`}>
-          <span className="kpi-value mono">{k.value}</span>
-          <span className="kpi-label">{k.label}</span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

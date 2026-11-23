@@ -4,6 +4,7 @@ export const health: Health = {
   status: "online", version: "0.1.0", python: "3.13",
   database: { ok: true, engine: "sqlite" },
   ai: { configured: false, provider: null, note: "Disponible en la Fase 2" },
+  storage: { db_bytes: 81920, disk_free_bytes: 50e9, disk_total_bytes: 100e9, records: 12 },
 };
 
 export const modules: ModuleInfo[] = [
@@ -26,6 +27,7 @@ export const emptyDashboard: Dashboard = {
   fitness: { sessions_7d: 0, minutes_7d: 0, days, last_session: null },
   projects: { active: 0, items: [] },
   activity: { items: [] },
+  alerts: [],
 };
 
 export function mockFetch(routes: Record<string, unknown>) {

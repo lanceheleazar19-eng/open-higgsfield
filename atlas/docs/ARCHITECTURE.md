@@ -22,6 +22,8 @@
 | Migraciones | **Alembic** | Cada fase amplía tablas sin perder tus datos. |
 | Frontend | **React 19 + TypeScript + Vite** | SPA rápida, tipada. Vite en lugar de Next.js: ATLAS es una app local de un usuario, no necesita SSR ni servidor Node en producción; FastAPI sirve el build estático → un solo proceso. |
 | Estilos | CSS propio con variables | Control total del look holográfico, sin dependencias pesadas. Fuentes empaquetadas (funciona sin Internet). |
+| 3D | **three.js** (sin React Three Fiber) | Una sola dependencia, cargada en un chunk aparte solo si hay WebGL. Los nodos son HTML proyectado con la misma matemática que la escena: texto nítido, accesibles y pulsables. |
+| Voz | Web Speech API del navegador | Sin dependencias ni claves; Chrome/Edge. Whisper/TTS locales en la Fase 9. |
 | Pruebas | pytest + Vitest + Testing Library + Playwright | Unidad, API, UI y verificación visual. |
 
 ### Descartado por ahora

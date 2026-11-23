@@ -6,6 +6,19 @@ export interface Health {
   database: { ok: boolean; engine: string };
   ai: { configured: boolean; provider: string | null; note: string };
   python: string;
+  storage: { db_bytes: number; disk_free_bytes: number; disk_total_bytes: number; records: number } | null;
+}
+
+export interface Alert {
+  level: "critical" | "warning" | "info";
+  module: string;
+  text: string;
+}
+
+export interface AssistantReply {
+  intent: string;
+  reply: string;
+  mode: "local" | "ai";
 }
 
 export interface ModuleInfo {
@@ -65,4 +78,5 @@ export interface Dashboard {
   activity: {
     items: { id: number; module: string; action: string; summary: string; created_at: string }[];
   };
+  alerts: Alert[];
 }

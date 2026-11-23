@@ -1,11 +1,13 @@
 import platform
+import shutil
 
 from fastapi import APIRouter
-from sqlalchemy import text
+from sqlalchemy import func, select, text
 
 from atlas import __version__
 from atlas.api.deps import DB
 from atlas.config import get_settings
+from atlas.models import ActivityLog, CalendarEvent, Project, Task, Transaction, WorkoutSession
 from atlas.modules import modules_as_dicts
 
 router = APIRouter(prefix="/api/system", tags=["system"])
@@ -20,6 +22,7 @@ def health(db: DB) -> dict:
         db_ok = False
     s = get_settings()
     return {
+        "storage": _storage(db, s) if db_ok else None,
         "status": "online" if db_ok else "degraded",
         "version": __version__,
         "database": {"ok": db_ok, "engine": s.db_url.split(":", 1)[0]},
@@ -32,3 +35,15 @@ def health(db: DB) -> dict:
 @router.get("/modules")
 def modules() -> list[dict]:
     return modules_as_dicts()
+
+
+def _storage(db, s) -> dict:  # noqa: ANN001
+    """Tamaño de la memoria local y espacio libre en disco (datos reales)."""
+    data_dir = s.resolved_data_dir
+    db_bytes = sum(p.stat().st_size for p in data_dir.glob("atlas.db*")) if data_dir.exists() else 0
+    usage = shutil.disk_usage(data_dir if data_dir.exists() else ".")
+    records = sum(
+        db.scalar(select(func.count()).select_from(m)) or 0
+        for m in (Task, CalendarEvent, Transaction, WorkoutSession, Project, ActivityLog)
+    )
+    return {"db_bytes": db_bytes, "disk_free_bytes": usage.free, "disk_total_bytes": usage.total, "records": records}

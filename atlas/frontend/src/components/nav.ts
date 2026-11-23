@@ -15,6 +15,8 @@ export const NAV: NavItem[] = [
   { id: "projects", path: "/projects", label: "Proyectos" },
   { id: "calendar", path: "/calendar", label: "Calendario" },
   { id: "memory", path: "/memory", label: "Memoria" },
+  { id: "research", path: "/research", label: "Investigación" },
+  { id: "agents", path: "/agents", label: "Agentes" },
   { id: "reports", path: "/reports", label: "Informes" },
   { id: "settings", path: "/settings", label: "Configuración" },
 ];

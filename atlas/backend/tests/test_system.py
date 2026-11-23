@@ -8,12 +8,14 @@ def test_health_reports_online_and_ai_not_configured(client):
     assert body["status"] == "online"
     assert body["database"] == {"ok": True, "engine": "sqlite"}
     assert body["ai"]["configured"] is False
+    assert body["storage"]["records"] == 0
+    assert body["storage"]["db_bytes"] > 0 and body["storage"]["disk_free_bytes"] > 0
 
 
 def test_modules_registry_has_all_sidebar_sections(client):
     ids = [m["id"] for m in client.get("/api/system/modules").json()]
     assert ids == ["dashboard", "ai", "tasks", "gym", "finance", "trading",
-                   "projects", "calendar", "memory", "reports", "settings"]
+                   "projects", "calendar", "memory", "research", "agents", "reports", "settings"]
     active = {m.id for m in MODULES if m.status == "active"}
     assert active == {"dashboard", "settings"}
 

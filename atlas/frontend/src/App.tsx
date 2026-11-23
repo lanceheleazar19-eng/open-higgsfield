@@ -2,7 +2,7 @@ import { Link, Route, Routes } from "react-router-dom";
 import { AtlasProvider } from "./components/AtlasContext";
 import { Layout } from "./components/Layout";
 import { NAV } from "./components/nav";
-import { Dashboard } from "./pages/Dashboard";
+import { ControlCenter } from "./pages/ControlCenter";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
@@ -13,7 +13,7 @@ export function App() {
     <AtlasProvider>
       <Routes>
         <Route element={<Layout />}>
-          <Route index element={<Dashboard />} />
+          <Route index element={<ControlCenter />} />
           <Route path="settings" element={<Settings />} />
           {NAV.filter((n) => !BUILT.has(n.id)).map((n) => (
             <Route key={n.id} path={n.path.slice(1)} element={<ModulePage id={n.id} />} />

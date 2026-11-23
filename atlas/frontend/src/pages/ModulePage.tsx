@@ -22,7 +22,7 @@ export function ModulePage({ id }: { id: string }) {
         ) : (
           <p className="muted">Cargando información del módulo…</p>
         )}
-        <p className="muted small">Este apartado aún no está activo, así que no muestra datos ni botones de acción. Mientras tanto, el <Link to="/">dashboard</Link> ya refleja cualquier dato registrado.</p>
+        <p className="muted small">Este apartado aún no está activo, así que no muestra datos ni botones de acción. Mientras tanto, el <Link to="/">centro de control</Link> ya refleja cualquier dato registrado.</p>
       </section>
     </div>
   );

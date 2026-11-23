@@ -1,4 +1,4 @@
-import type { Dashboard, Health, ModuleInfo, Prefs } from "./types";
+import type { AssistantReply, Dashboard, Health, ModuleInfo, Prefs } from "./types";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -35,5 +35,7 @@ export const api = {
   dashboard: () => request<Dashboard>("/api/dashboard"),
   prefs: () => request<Prefs>("/api/settings"),
   updatePrefs: (p: Partial<Prefs>) => request<Prefs>("/api/settings", { method: "PUT", body: JSON.stringify(p) }),
+  ask: (text: string) => request<AssistantReply>("/api/assistant/query", { method: "POST", body: JSON.stringify({ text }) }),
+  briefing: () => request<AssistantReply>("/api/assistant/briefing"),
   timezones: () => request<string[]>("/api/settings/timezones"),
 };
