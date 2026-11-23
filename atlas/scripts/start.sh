@@ -57,5 +57,5 @@ fi
 
 # ---------- Arranque ----------
 cd "$ROOT/backend"
-echo "▸ ATLAS en http://127.0.0.1:${ATLAS_PORT:-8000}  (Ctrl+C para detener)"
+echo "▸ Arrancando ATLAS… (Ctrl+C para detener)"
 exec .venv/bin/python -m atlas

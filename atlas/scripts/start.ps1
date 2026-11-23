@@ -38,5 +38,5 @@ if ($needBuild) { Write-Host "> Compilando la interfaz..."; npm run build }
 
 # ---------- Arranque ----------
 Set-Location "$Root\backend"
-Write-Host "> ATLAS en http://127.0.0.1:8000  (Ctrl+C para detener)"
+Write-Host "> Arrancando ATLAS... (Ctrl+C para detener)"
 & $Py -m atlas
