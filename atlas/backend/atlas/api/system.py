@@ -61,3 +61,12 @@ def _ai(db) -> dict:  # noqa: ANN001
         "models_installed": len(st["models"]),
         "note": st["note"] or "Cerebro conectado",
     }
+
+
+@router.get("/metrics")
+def metrics() -> dict:
+    """Uso real de CPU y RAM del ordenador donde corre ATLAS."""
+    import psutil
+    vm = psutil.virtual_memory()
+    return {"cpu_percent": psutil.cpu_percent(interval=0.2), "ram_percent": vm.percent,
+            "ram_used_bytes": vm.used, "ram_total_bytes": vm.total}

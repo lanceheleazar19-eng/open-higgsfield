@@ -62,6 +62,7 @@ def test_finance_month_bounds_and_categories(session):
     assert f["net_cents"] == 151950
     assert f["balance_cents"] == 210000 - 148049
     assert [c["category"] for c in f["top_expense_categories"]] == ["Vivienda", "Ocio"]
+    assert f["series"] == [{"date": "2026-11-01", "net_cents": 200000}, {"date": "2026-11-05", "net_cents": 197000}]
 
 
 def test_negative_amount_rejected(session):

@@ -126,7 +126,19 @@ def _finance(db: Session, today: date, currency: str) -> dict:
         .limit(4)
     ).all()
     has_data = db.scalar(select(func.count(Transaction.id))) or 0
+    # Neto acumulado día a día en el mes (para el gráfico); solo días con datos reales
+    daily = db.execute(
+        select(Transaction.occurred_on,
+               func.sum(case((Transaction.kind == "income", Transaction.amount_cents), else_=-Transaction.amount_cents)))
+        .where(Transaction.occurred_on >= month_start, Transaction.occurred_on <= today)
+        .group_by(Transaction.occurred_on).order_by(Transaction.occurred_on)
+    ).all()
+    acc, series = 0, []
+    for d, v in daily:
+        acc += int(v)
+        series.append({"date": d.isoformat(), "net_cents": acc})
     return {
+        "series": series,
         "has_data": has_data > 0,
         "currency": currency,
         "month": month_start.isoformat()[:7],

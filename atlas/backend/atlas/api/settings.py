@@ -25,9 +25,16 @@ class PrefsUpdate(BaseModel):
         return v.upper() if v else v
 
 
+PUBLIC = ("user_name", "timezone", "currency", "ai_model")
+
+
+def _public(prefs: dict) -> dict:
+    return {k: prefs[k] for k in PUBLIC}
+
+
 @router.get("")
 def read_prefs(db: DB) -> dict:
-    return get_prefs(db)
+    return _public(get_prefs(db))
 
 
 @router.put("")
@@ -39,8 +46,8 @@ def update_prefs(body: PrefsUpdate, db: DB) -> dict:
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
     if not changes:
-        return get_prefs(db)
-    prefs = set_prefs(db, changes)
+        return _public(get_prefs(db))
+    prefs = _public(set_prefs(db, changes))
     log_activity(db, "settings", "update", "Preferencias actualizadas: " + ", ".join(sorted(changes)))
     db.commit()
     return prefs
