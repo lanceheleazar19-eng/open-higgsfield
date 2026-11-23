@@ -61,3 +61,12 @@ def test_answers_and_alerts_use_real_data(session):
     assert "gastos 1.500,50 €" in fin and "neto -500,50 €" in fin and "Viajes" in fin
     assert "Reunión socio — 23/11 a las 10:45" in answer("próximos eventos", d)["reply"]
     assert answer("Buenos días, ATLAS", d)["intent"] == "briefing"
+
+
+def test_welcome_uses_real_data(client):
+    client.put("/api/settings", json={"user_name": "Lance"})
+    r = client.get("/api/assistant/welcome").json()["reply"]
+    assert ", Lance. Bienvenido de nuevo." in r and "No tienes tareas pendientes." in r
+    client.post("/api/tasks", json={"title": "Algo", "due_date": "2000-01-01"})
+    r2 = client.get("/api/assistant/welcome").json()["reply"]
+    assert "Tienes 1 tarea pendiente, 1 atrasada." in r2 and r2.endswith("¿En qué te ayudo?")

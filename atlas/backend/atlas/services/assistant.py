@@ -186,6 +186,33 @@ def _gym(d: dict, q: str) -> str:
     return "Gimnasio: hoy " + g["hoy"] + ". " + ", ".join(f"{k}: {v:g} series" for k, v in vol.items() if v) + "."
 
 
+def welcome(d: dict) -> str:
+    """Saludo breve para la pantalla de arranque (se lee en voz alta). Solo datos reales."""
+    g = d["greeting"]
+    salute = {"morning": "Buenos días", "afternoon": "Buenas tardes", "night": "Buenas noches"}[g["part_of_day"]]
+    parts = [f"{salute}{', ' + g['name'] if g['name'] else ''}. Bienvenido de nuevo. Todos los sistemas están operativos."]
+    t = d["tasks"]
+    if t["pending"]:
+        txt = f"Tienes {_plural(t['pending'], 'tarea pendiente', 'tareas pendientes')}"
+        if t["overdue"]:
+            txt += f", {_plural(t['overdue'], 'atrasada', 'atrasadas')}"
+        elif t["due_today"]:
+            txt += f", {_plural(t['due_today'], 'vence', 'vencen')} hoy"
+        parts.append(txt + ".")
+    else:
+        parts.append("No tienes tareas pendientes.")
+    routine = d["fitness"].get("today_routine")
+    parts.append(f"Hoy toca entrenar {routine}." if routine else "Hoy no tienes entrenamiento programado.")
+    ev = [e for e in d["events"]["items"] if not e["in_progress"]]
+    if ev:
+        parts.append(f"Tu próximo evento: {ev[0]['title']}, a las {_hhmm(ev[0]['start_at'])}.")
+    behind = [x for x in d.get("goals", {}).get("items", []) if x["pace"] == "behind"]
+    if behind:
+        parts.append(f"Atención: el objetivo {behind[0]['title']} va por detrás del ritmo.")
+    parts.append("¿En qué te ayudo?")
+    return " ".join(parts)
+
+
 HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega en la Fase 2). "
         "Puedo responder con tus datos registrados: «¿qué tengo pendiente hoy?», «¿qué es prioritario?», "
         "«próximos eventos», «¿cuánto he gastado este mes?», «¿cómo voy en el gimnasio?», "

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { speakText, useSystemVoices } from "../hooks/useVoice";
 import { loadVoicePrefs, pickVoice, qualityLabel, saveVoicePrefs, spanishVoices } from "../lib/speech";
+import { WELCOME_KEY, welcomeEnabled } from "./BootScreen";
 import { Panel } from "./Panel";
 
 const SAMPLE = "Hola, soy ATLAS. Así sonará mi voz cuando te responda. ¿Te gusta cómo suena?";
@@ -10,6 +11,7 @@ export function VoiceSettings() {
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
   const voices = useSystemVoices();
   const [prefs, setPrefs] = useState(loadVoicePrefs);
+  const [welcome, setWelcome] = useState(welcomeEnabled);
   const es = spanishVoices(voices);
   const active = pickVoice(voices, prefs.voiceURI);
 
@@ -39,6 +41,13 @@ export function VoiceSettings() {
             <span>Velocidad: <strong className="mono">{prefs.rate.toFixed(2)}×</strong></span>
             <input type="range" min={0.7} max={1.6} step={0.05} value={prefs.rate}
               onChange={(e) => update({ rate: Number(e.target.value) })} aria-label="Velocidad de la voz" />
+          </label>
+          <label className="check">
+            <input type="checkbox" checked={welcome} onChange={(e) => {
+              setWelcome(e.target.checked);
+              try { localStorage.setItem(WELCOME_KEY, e.target.checked ? "1" : "0"); } catch { /* sin almacenamiento */ }
+            }} />
+            Pantalla de inicio con bienvenida hablada al abrir ATLAS
           </label>
           <div className="form-actions">
             <button type="button" className="btn" onClick={() => speakText(SAMPLE)} disabled={!voices.length}>Probar voz</button>

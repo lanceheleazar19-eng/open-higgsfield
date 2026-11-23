@@ -14,7 +14,7 @@ const base = {
   "/api/settings/timezones": ["Europe/Madrid", "America/Mexico_City"],
 };
 
-afterEach(() => { vi.unstubAllGlobals(); localStorage.clear(); });
+afterEach(() => { vi.unstubAllGlobals(); localStorage.clear(); sessionStorage.clear(); });
 
 test("dashboard vacío muestra estados vacíos honestos y no cifras inventadas", async () => {
   mockFetch({ ...base, "/api/dashboard": emptyDashboard });
@@ -421,4 +421,22 @@ test("gimnasio hoy: ver objetivo, última vez y registrar una serie", async () =
   // registro por texto con vista previa
   fireEvent.change(screen.getByLabelText("Entreno en texto"), { target: { value: "inclinado 2x8 42,5kg rir 2" } });
   expect(await screen.findByText(/2×\(8\/8\)/, {}, { timeout: 3000 })).toBeInTheDocument();
+});
+
+test("pantalla de arranque: al pulsar Iniciar, ATLAS da la bienvenida en voz alta", async () => {
+  localStorage.setItem("atlas.welcome", "1");
+  const spoken: string[] = [];
+  class FakeUtterance { text: string; rate = 1; lang = ""; voice?: unknown; onend?: () => void; onerror?: () => void; onstart?: () => void;
+    constructor(t: string) { this.text = t; } }
+  vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+  vi.stubGlobal("speechSynthesis", { getVoices: () => [], cancel: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    speak: (u: FakeUtterance) => { spoken.push(u.text); u.onend?.(); } });
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard,
+    "/api/assistant/welcome": { intent: "welcome", mode: "local", reply: "Buenas tardes, Lance. Bienvenido de nuevo. ¿En qué te ayudo?" } });
+  renderAt("/");
+  expect(await screen.findByRole("dialog", { name: "Inicio de ATLAS" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Iniciar ATLAS" }));
+  await waitFor(() => expect(spoken.join(" ")).toContain("Bienvenido de nuevo"));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(sessionStorage.getItem("atlas.booted")).toBe("1");
 });

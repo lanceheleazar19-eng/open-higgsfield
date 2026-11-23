@@ -1,5 +1,6 @@
 """Aplicación FastAPI de ATLAS."""
 
+import mimetypes
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -34,6 +35,9 @@ def create_app() -> FastAPI:
 
     _mount_frontend(app, s.frontend_dist)
     return app
+
+
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 
 def _mount_frontend(app: FastAPI, dist: Path) -> None:

@@ -10,6 +10,7 @@ import { SystemPanel } from "../components/control/SystemPanel";
 import { Transcript, type Exchange } from "../components/control/Transcript";
 import { AtlasCore, type NodeInfo } from "../components/core/AtlasCore";
 import type { CoreState } from "../components/core/scene";
+import { BootScreen, alreadyBooted, welcomeEnabled } from "../components/BootScreen";
 import { Telemetry } from "../components/Telemetry";
 import { useVoice } from "../hooks/useVoice";
 import { formatMoney, greetingFor } from "../lib/format";
@@ -208,6 +209,20 @@ export function ControlCenter() {
   const voice = useVoice(converse);
   voiceRef.current = voice;
 
+  // Pantalla de arranque con bienvenida hablada (una vez por sesión del navegador)
+  const [booting, setBooting] = useState(() => welcomeEnabled() && !alreadyBooted());
+  const startAtlas = async (withVoice: boolean) => {
+    setBooting(false);
+    setRipple((r) => r + 1);
+    if (!withVoice) return;
+    try {
+      const { reply } = await api.welcome();
+      const id = ++seq.current;
+      setLog((l) => [...l, { id, question: "Inicio de sesión", reply, phase: "done", mode: "local" }]);
+      voiceRef.current?.speak(reply);
+    } catch { /* núcleo sin conexión: el banner ya lo indica */ }
+  };
+
   useEffect(() => {
     try { localStorage.setItem("atlas.speak", speakReplies ? "1" : "0"); } catch { /* sin almacenamiento */ }
   }, [speakReplies]);
@@ -227,6 +242,7 @@ export function ControlCenter() {
 
   return (
     <div className="control-page">
+      {booting && <BootScreen health={health} onStart={(v) => void startAtlas(v)} />}
       <div className={`control ${offline ? "is-offline" : ""}`}>
         <SystemPanel health={health} offline={offline} voice={voice} speakReplies={speakReplies} />
 

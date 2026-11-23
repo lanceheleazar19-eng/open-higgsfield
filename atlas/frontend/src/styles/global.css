@@ -650,6 +650,34 @@ input.full { width: 100%; margin-bottom: 12px; }
 .data-table th { text-align: left; font: 600 10px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); padding: 6px 4px; border-bottom: 1px solid var(--line-2); }
 .data-table td { padding: 6px 4px; border-bottom: 1px solid var(--line); font-family: var(--font-mono); }
 
+/* ================= Arranque ================= */
+.boot {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: radial-gradient(800px 500px at 50% 45%, rgba(30, 90, 200, .25), transparent 70%), rgba(2, 5, 13, .94);
+  backdrop-filter: blur(10px); animation: fadeIn .4s ease both;
+}
+.boot-inner { position: relative; display: grid; justify-items: center; gap: 14px; text-align: center; padding: 24px; }
+.boot-title { font: 700 clamp(44px, 9vw, 84px) var(--font-display); letter-spacing: .45em; padding-left: .45em; color: #f4fbff;
+  text-shadow: 0 0 18px rgba(125, 249, 255, .9), 0 0 60px var(--glow); }
+.boot-ring { position: absolute; top: 50%; left: 50%; width: 520px; height: 520px; transform: translate(-50%, -58%); pointer-events: none; opacity: .5; }
+.boot-ring span { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(102, 179, 255, .35); border-top-color: transparent; animation: spin 14s linear infinite; }
+.boot-ring span:nth-child(2) { inset: 50px; border-color: rgba(34, 211, 238, .3); border-left-color: transparent; animation-duration: 9s; animation-direction: reverse; }
+.boot-ring span:nth-child(3) { inset: 110px; border-color: rgba(47, 140, 255, .25); border-bottom-color: transparent; animation-duration: 6s; }
+.boot-lines { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 6px; min-width: 260px; font: 500 12.5px var(--font-mono); }
+.boot-lines li { display: flex; justify-content: space-between; gap: 24px; opacity: .25; transition: opacity .3s; letter-spacing: .08em; }
+.boot-lines li.on { opacity: 1; }
+.boot-lines li span:first-child { color: var(--text-3); text-transform: uppercase; }
+.boot-btn { padding: 12px 30px; font-size: 15px; border-radius: 999px; box-shadow: 0 0 30px var(--glow); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 600px) { .boot-ring { width: 340px; height: 340px; } }
+
+/* iPhone: respetar la muesca y la barra inferior cuando se abre como app */
+@supports (padding: env(safe-area-inset-top)) {
+  .topbar { padding-top: max(10px, env(safe-area-inset-top)); }
+  .main { padding-bottom: max(36px, env(safe-area-inset-bottom)); }
+  .toasts { bottom: max(18px, env(safe-area-inset-bottom)); }
+}
+
 /* ================= Responsive ================= */
 @media (max-width: 1180px) {
   .control { grid-template-columns: minmax(0, 1fr) minmax(250px, 290px); height: auto; min-height: 0; }

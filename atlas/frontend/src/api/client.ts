@@ -65,6 +65,7 @@ export const api = {
   updatePrefs: (p: Partial<Prefs>) => request<Prefs>("/api/settings", { method: "PUT", body: JSON.stringify(p) }),
   ask: (text: string) => request<AssistantReply>("/api/assistant/query", { method: "POST", body: JSON.stringify({ text }) }),
   briefing: () => request<AssistantReply>("/api/assistant/briefing"),
+  welcome: () => request<AssistantReply>("/api/assistant/welcome"),
   aiStatus: () => request<AiStatus>("/api/ai/status"),
   chat: chatStream,
   memories: (p: { q?: string; kind?: string; include_expired?: boolean } = {}) => {

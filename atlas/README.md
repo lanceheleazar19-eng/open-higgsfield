@@ -69,6 +69,32 @@ Interfaz en http://127.0.0.1:5173 (redirige `/api` al backend).
 Sin Ollama, ATLAS sigue funcionando en «modo local» (responde preguntas fijas sobre tus datos).
 La primera respuesta tarda más: el modelo se carga en memoria.
 
+## ATLAS en el móvil (iPhone / Android)
+
+ATLAS vive en tu ordenador; el móvil se conecta a él. La forma segura y recomendada es **Tailscale**
+(gratis): crea una red privada entre tus dispositivos, funciona en casa y fuera, y da **HTTPS**
+(imprescindible para usar el micrófono en el iPhone). ATLAS nunca queda expuesto a Internet.
+
+1. Instala Tailscale en el ordenador (https://tailscale.com/download) y en el móvil (App Store /
+   Google Play) e inicia sesión **con la misma cuenta** en ambos.
+2. En la consola de Tailscale (https://login.tailscale.com/admin/dns) activa **MagicDNS** y
+   **HTTPS Certificates**.
+3. En la Terminal del ordenador, con ATLAS arrancado (usa el puerto que te muestra, p. ej. 8001):
+
+   ```bash
+   tailscale serve --bg 8001
+   ```
+
+   En Mac, si el comando `tailscale` no existe, usa
+   `/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 8001`.
+   Te mostrará una dirección `https://tu-mac.tu-red.ts.net`.
+4. En el móvil (con Tailscale conectado) abre esa dirección en Safari → botón Compartir →
+   **Añadir a pantalla de inicio**. ATLAS aparecerá como una app.
+
+Para que funcione, el ordenador debe estar encendido con ATLAS y Ollama abiertos
+(en Mac: Ajustes → Batería → Opciones → evitar el reposo automático con el adaptador conectado).
+Consejo: fija el puerto en `backend/.env` (`ATLAS_PORT=8001`) para que la dirección no cambie.
+
 ## Pruebas
 
 ```bash

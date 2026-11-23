@@ -107,3 +107,9 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Medidas corporales (peso, grasa, cintura, pecho, brazo, muslo) con gráfico.
 - La IA recibe el resumen del gimnasio cuando la pregunta lo requiere; el modo local responde
   «¿qué me toca hoy?», «¿cuánto he progresado en…?», «¿qué músculos trabajo menos?».
+
+## Extras
+- Pantalla de arranque con bienvenida hablada (resumen real del día). Los navegadores no permiten
+  hablar sin interacción: el botón «Iniciar ATLAS» la proporciona. Desactivable en Configuración.
+- App instalable en el móvil (manifest, iconos, modo pantalla completa, márgenes de la muesca) y guía
+  de acceso seguro con Tailscale (HTTPS, sin exponer ATLAS a Internet).
