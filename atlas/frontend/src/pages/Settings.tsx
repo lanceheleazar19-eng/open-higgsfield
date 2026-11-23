@@ -4,6 +4,7 @@ import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Panel } from "../components/Panel";
 import { VoiceSettings } from "../components/VoiceSettings";
+import { NotificationSettings } from "../components/NotificationSettings";
 
 const CURRENCIES = ["EUR", "USD", "MXN", "GBP", "COP", "ARS", "CLP"];
 
@@ -67,6 +68,7 @@ export function Settings() {
           </form>
         </Panel>
         <VoiceSettings />
+        <NotificationSettings />
         <Panel title="Estado del sistema">
           {health ? (
             <dl className="kv">
