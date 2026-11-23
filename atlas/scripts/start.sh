@@ -56,6 +56,7 @@ if [ ! -f dist/index.html ] || [ "${1:-}" = "--rebuild" ] || \
 fi
 
 # ---------- Arranque ----------
+[ "${ATLAS_PREPARE_ONLY:-}" = "1" ] && exit 0  # autostart.sh solo quiere preparar
 cd "$ROOT/backend"
 echo "▸ Arrancando ATLAS… (Ctrl+C para detener)"
 exec .venv/bin/python -m atlas

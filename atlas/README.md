@@ -91,6 +91,17 @@ ATLAS vive en tu ordenador; el móvil se conecta a él. La forma segura y recome
 4. En el móvil (con Tailscale conectado) abre esa dirección en Safari → botón Compartir →
    **Añadir a pantalla de inicio**. ATLAS aparecerá como una app.
 
+### Que ATLAS arranque solo (Mac, sin Terminal abierta)
+
+```bash
+cd ~/Documents/open-higgsfield && ./atlas/scripts/autostart.sh install
+```
+
+ATLAS queda funcionando en segundo plano, arranca solo al encender el Mac y se reinicia si falla.
+Otros comandos: `autostart.sh status`, `autostart.sh logs`, `autostart.sh restart` (tras `git pull`)
+y `autostart.sh uninstall` para desactivarlo. El Mac tiene que estar encendido y despierto: con la
+tapa cerrada se duerme y el móvil no llega.
+
 Para que funcione, el ordenador debe estar encendido con ATLAS y Ollama abiertos
 (en Mac: Ajustes → Batería → Opciones → evitar el reposo automático con el adaptador conectado).
 Consejo: fija el puerto en `backend/.env` (`ATLAS_PORT=8001`) para que la dirección no cambie.
