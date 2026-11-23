@@ -1,7 +1,7 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
-  Integrations, ImportantMail, CalEvent, Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
+  Integrations, ImportantMail, TxItem, FinanceSummary, PaperTradeItem, TradingStats, HealthDayItem, HealthSetup, CalEvent, Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
 
 export interface TaskInput {
@@ -57,7 +57,31 @@ async function requestEmpty(path: string, init?: RequestInit): Promise<void> {
   if (!res.ok) throw new ApiError(res.status, `Error ${res.status}`);
 }
 
+export interface TxInput { kind: "income" | "expense"; amount_cents: number; category?: string | null; description?: string | null; occurred_on?: string | null }
+export interface TradeInput {
+  symbol: string; side: "long" | "short"; quantity: number; entry_price: number;
+  stop_loss?: number | null; take_profit?: number | null; strategy?: string | null; notes?: string | null;
+}
+
 export const api = {
+  transactions: (month?: string) => request<TxItem[]>(`/api/finance/transactions${month ? `?month=${month}` : ""}`),
+  addTransaction: (t: TxInput) => request<TxItem>("/api/finance/transactions", { method: "POST", body: JSON.stringify(t) }),
+  deleteTransaction: (id: number) => requestEmpty(`/api/finance/transactions/${id}`, { method: "DELETE" }),
+  financeSummary: (month?: string) => request<FinanceSummary>(`/api/finance/summary${month ? `?month=${month}` : ""}`),
+  financeCategories: () => request<{ expense: string[]; income: string[] }>("/api/finance/categories"),
+  setBudget: (category: string, monthly_cents: number) =>
+    request<{ category: string }>(`/api/finance/budgets/${encodeURIComponent(category)}`, { method: "PUT", body: JSON.stringify({ monthly_cents }) }),
+  deleteBudget: (category: string) => requestEmpty(`/api/finance/budgets/${encodeURIComponent(category)}`, { method: "DELETE" }),
+  trades: () => request<PaperTradeItem[]>("/api/trading/trades"),
+  openTrade: (t: TradeInput) => request<PaperTradeItem>("/api/trading/trades", { method: "POST", body: JSON.stringify(t) }),
+  closeTrade: (id: number, exit_price: number, mistakes: string[], notes?: string) =>
+    request<PaperTradeItem>(`/api/trading/trades/${id}/close`, { method: "POST", body: JSON.stringify({ exit_price, mistakes, notes: notes || null }) }),
+  deleteTrade: (id: number) => requestEmpty(`/api/trading/trades/${id}`, { method: "DELETE" }),
+  tradingStats: () => request<TradingStats>("/api/trading/stats"),
+  setPaperCapital: (amount: number) => request<{ paper_capital: number }>("/api/trading/capital", { method: "PUT", body: JSON.stringify({ amount }) }),
+  healthDays: (n = 30) => request<HealthDayItem[]>(`/api/health/days?n=${n}`),
+  healthSetup: () => request<HealthSetup>("/api/health/setup"),
+  rotateHealthToken: () => request<{ token: string }>("/api/health/token", { method: "POST" }),
   health: () => request<Health>("/api/system/health"),
   modules: () => request<ModuleInfo[]>("/api/system/modules"),
   dashboard: () => request<Dashboard>("/api/dashboard"),

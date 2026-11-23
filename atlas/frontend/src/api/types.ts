@@ -97,9 +97,10 @@ export type ChatEvent =
   | { type: "task"; action: "created" | "complete_candidate" | "not_found"; task: TaskItem | null }
   | { type: "gym"; action: "logged"; session: GymSession }
   | { type: "meal"; action: "logged" | "not_found"; entries: MealEntryItem[]; missing: string[] }
+  | { type: "finance"; action: "logged"; transaction: TxItem }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance"; model: string | null; reason?: string | null }
   | { type: "error"; message: string };
 
 export interface ChatMessage {
@@ -108,6 +109,7 @@ export interface ChatMessage {
 }
 
 export interface Dashboard {
+  trading?: { open: number; closed: number; pnl: number };
   generated_at: string;
   greeting: { name: string; part_of_day: "morning" | "afternoon" | "night"; timezone: string };
   summary: {
@@ -136,6 +138,7 @@ export interface Dashboard {
     balance_cents: number;
     top_expense_categories: { category: string; amount_cents: number }[];
     series?: { date: string; net_cents: number }[];
+    budgets?: BudgetItem[];
   };
   fitness: {
     today_routine?: string | null;
@@ -269,3 +272,35 @@ export interface Integrations {
 }
 export interface ImportantMail { id: number; sender: string; subject: string; snippet: string; reason: string | null; received_at: string }
 export interface CalEvent { id: number; title: string; location: string | null; source: string; start_at: string; end_at: string | null }
+
+export interface TxItem {
+  id: number; kind: "income" | "expense"; amount_cents: number; currency: string;
+  category: string | null; description: string | null; occurred_on: string;
+}
+export interface BudgetItem { category: string; monthly_cents: number; spent_cents: number; pct: number; status: "ok" | "warning" | "over" }
+export interface FinanceSummary {
+  month: string; income_cents: number; expense_cents: number; net_cents: number; savings_rate: number | null;
+  balance_cents: number; by_category: { category: string; cents: number }[]; budgets: BudgetItem[];
+  months: { month: string; income_cents: number; expense_cents: number; net_cents: number }[]; count: number;
+}
+export interface PaperTradeItem {
+  id: number; symbol: string; side: "long" | "short"; quantity: number; entry_price: number;
+  stop_loss: number | null; take_profit: number | null; exit_price: number | null; opened_at: string; closed_at: string | null;
+  strategy: string | null; mistakes: string[]; notes: string | null; status: "open" | "closed";
+  pnl: number | null; risk: number | null; planned_rr: number | null; r: number | null;
+}
+export interface TradeAgg {
+  trades: number; wins: number; losses: number; win_rate: number | null; pnl: number; avg_win: number | null;
+  avg_loss: number | null; profit_factor: number | null; expectancy: number | null; avg_r: number | null;
+}
+export interface TradingStats {
+  simulation: true; initial_capital: number | null; equity: number | null; return_pct: number | null;
+  max_drawdown: number; max_drawdown_pct: number | null; overall: TradeAgg; curve: { date: string; equity: number }[];
+  by_strategy: (TradeAgg & { strategy: string })[]; mistakes: { mistake: string; count: number; pnl: number }[];
+  without_stop: number; open: PaperTradeItem[]; open_risk: number;
+}
+export interface HealthDayItem {
+  day: string; steps: number | null; sleep_hours: number | null; weight_kg: number | null;
+  active_kcal: number | null; distance_km: number | null; resting_hr: number | null;
+}
+export interface HealthSetup { token: string; path: string; header: string; fields: string[] }

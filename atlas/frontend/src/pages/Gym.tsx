@@ -4,18 +4,19 @@ import type { GymExercise, GymSession, ParsedLog, RoutineData, RoutineItem } fro
 import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Icon } from "../components/Icon";
+import { HealthTab } from "../components/HealthTab";
 import { LineChart } from "../components/LineChart";
 import { Empty, Panel } from "../components/Panel";
 import { formatDayLabel } from "../lib/tasks";
 
-type Tab = "today" | "history" | "progress" | "routines" | "body";
+type Tab = "today" | "history" | "progress" | "routines" | "body" | "health";
 const DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 const kg = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(v)} kg`);
 const num = (s: string) => Number(s.replace(",", "."));
 
 export function Gym() {
   const [tab, setTab] = useState<Tab>("today");
-  const tabs: [Tab, string][] = [["today", "Hoy"], ["history", "Historial"], ["progress", "Progreso"], ["routines", "Rutinas"], ["body", "Cuerpo"]];
+  const tabs: [Tab, string][] = [["today", "Hoy"], ["history", "Historial"], ["progress", "Progreso"], ["routines", "Rutinas"], ["body", "Cuerpo"], ["health", "Salud"]];
   return (
     <div className="page page-wide">
       <header className="page-head">
@@ -33,6 +34,7 @@ export function Gym() {
       {tab === "progress" && <ProgressTab />}
       {tab === "routines" && <RoutinesTab />}
       {tab === "body" && <BodyTab />}
+      {tab === "health" && <HealthTab />}
     </div>
   );
 }

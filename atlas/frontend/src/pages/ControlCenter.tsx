@@ -31,9 +31,11 @@ function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: nu
     research: phase("research"),
     gym: { metric: d.fitness.today_routine ? `Hoy: ${d.fitness.today_routine}` : `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`, planned: false },
     finance: d.finance.has_data
-      ? { metric: `${formatMoney(d.finance.net_cents, d.finance.currency)} mes`, planned: true, alert: d.finance.net_cents < 0 }
-      : { metric: "Sin datos", planned: true },
-    trading: phase("trading"),
+      ? { metric: `${formatMoney(d.finance.net_cents, d.finance.currency)} mes`, planned: false, alert: d.finance.net_cents < 0 || d.finance.budgets?.some((b) => b.status === "over") }
+      : { metric: "Sin datos", planned: false },
+    trading: d.trading && (d.trading.open || d.trading.closed)
+      ? { metric: `Simulado ${d.trading.pnl >= 0 ? "+" : ""}${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(d.trading.pnl)}`, planned: false }
+      : { metric: "Sin operaciones", planned: false },
   };
 }
 
@@ -98,6 +100,8 @@ export function ControlCenter() {
           setConversationId(ev.conversation_id);
         } else if (ev.type === "meal") {
           patch(id, { meal: { count: ev.entries.length } });
+        } else if (ev.type === "finance") {
+          patch(id, { money: { item: ev.transaction, state: "shown" } });
         } else if (ev.type === "gym") {
           patch(id, { gym: { sets: ev.session.working_sets, tonnage: ev.session.tonnage } });
         } else if (ev.type === "task") {
@@ -190,6 +194,18 @@ export function ControlCenter() {
     }
   };
 
+  const moneyUndo = async (exId: number) => {
+    const x = logRef.current.find((e) => e.id === exId);
+    if (!x?.money) return;
+    try {
+      await api.deleteTransaction(x.money.item.id);
+      patch(exId, { money: { ...x.money, state: "undone" } });
+      void dash.reload();
+    } catch {
+      patch(exId, { money: { ...x.money, state: "error" } });
+    }
+  };
+
   const decideSuggestion = async (exId: number, idx: number, save: boolean) => {
     const x = logRef.current.find((e) => e.id === exId);
     const sg = x?.suggestions?.[idx];
@@ -266,7 +282,7 @@ export function ControlCenter() {
           )}
 
           <div className="dock">
-            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} />
+            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} onMoneyUndo={moneyUndo} />
             <CommandBar
               busy={busy}
               offline={offline}

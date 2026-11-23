@@ -38,3 +38,20 @@ export function greetingFor(part: "morning" | "afternoon" | "night"): string {
 }
 
 export const PRIORITY_LABEL = { low: "Baja", medium: "Media", high: "Alta", critical: "Crítica" } as const;
+
+/** «12,50», «12.5», «1.234,56» → céntimos. null si no es un importe válido. */
+export function parseMoneyInput(s: string): number | null {
+  let t = s.trim().replace(/[€\s]/g, "");
+  if (!t) return null;
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  if (!/^\d+(\.\d{1,2})?$/.test(t)) return null;
+  const c = Math.round(parseFloat(t) * 100);
+  return c > 0 ? c : null;
+}
+
+export function parseNum(s: string): number | null {
+  const t = s.trim().replace(",", ".");
+  if (!t) return null;
+  const v = Number(t);
+  return Number.isFinite(v) ? v : null;
+}

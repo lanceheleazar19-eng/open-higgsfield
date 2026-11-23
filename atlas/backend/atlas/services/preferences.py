@@ -18,6 +18,7 @@ DEFAULTS: dict[str, object] = {
     "nutrition_profile": None,
     "gmail_last_sync": None,
     "icloud_last_sync": None,
+    "paper_capital": None,  # capital VIRTUAL inicial del paper trading (no es dinero real)
 }
 
 

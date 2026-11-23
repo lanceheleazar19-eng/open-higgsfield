@@ -62,10 +62,10 @@ test("backend caído muestra estado sin conexión con reintento", async () => {
 
 test("sidebar marca módulos planificados con su fase y abre su página", async () => {
   mockFetch({ ...base, "/api/dashboard": emptyDashboard });
-  renderAt("/trading");
-  expect(await screen.findByText("F6")).toBeInTheDocument();
-  expect(await screen.findByText("Fase 6 · en desarrollo")).toBeInTheDocument();
-  expect(screen.getByText("Win rate y P&L")).toBeInTheDocument();
+  renderAt("/projects");
+  expect(await screen.findByText("F7")).toBeInTheDocument();
+  expect(await screen.findByText("Fase 7 · en desarrollo")).toBeInTheDocument();
+  expect(screen.getByText("Ideas y estudios de mercado")).toBeInTheDocument();
 });
 
 test("perfil: guarda el nombre y actualiza el saludo", async () => {
@@ -554,4 +554,62 @@ test("calendario: marca los eventos que se solapan", async () => {
   renderAt("/calendar");
   expect(await screen.findByText("Dentista")).toBeInTheDocument();
   expect(screen.getAllByText(/se solapa con otro evento/).length).toBe(2);
+});
+
+const finSummary = {
+  month: "2026-11", income_cents: 50000, expense_cents: 4500, net_cents: 45500, savings_rate: 91, balance_cents: 45500,
+  by_category: [{ category: "ocio", cents: 4500 }], count: 2,
+  budgets: [{ category: "ocio", monthly_cents: 5000, spent_cents: 4500, pct: 90, status: "warning" }],
+  months: [{ month: "2026-10", income_cents: 0, expense_cents: 0, net_cents: 0 }, { month: "2026-11", income_cents: 50000, expense_cents: 4500, net_cents: 45500 }],
+};
+
+test("finanzas: resumen real, presupuesto cerca del límite y nuevo gasto", async () => {
+  const calls = mockFetch({
+    ...base, "/api/finance/summary?": finSummary, "/api/finance/categories": { expense: ["comida", "ocio", "otros"], income: ["nómina", "otros"] },
+    "/api/finance/transactions?": [{ id: 1, kind: "expense", amount_cents: 4500, currency: "EUR", category: "ocio", description: "cine", occurred_on: "2026-11-23" }],
+    "POST /api/finance/transactions": { id: 2 },
+  });
+  renderAt("/finance");
+  expect(await screen.findByText(/nunca hace pagos ni transferencias/)).toBeInTheDocument();
+  expect(await screen.findByText("91 %", { exact: false })).toBeInTheDocument();
+  expect(screen.getByText(/cerca del límite/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Importe (€)"), { target: { value: "12,50" } });
+  fireEvent.change(screen.getByLabelText("Concepto"), { target: { value: "kebab" } });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  await waitFor(() => expect(calls.some((c) => c.init?.method === "POST" && c.url === "/api/finance/transactions")).toBe(true));
+  const body = JSON.parse(calls.find((c) => c.init?.method === "POST" && c.url === "/api/finance/transactions")!.init!.body as string);
+  expect(body).toMatchObject({ kind: "expense", amount_cents: 1250, description: "kebab", category: null });
+});
+
+test("trading: etiquetado como simulación y estadísticas solo de operaciones registradas", async () => {
+  const agg = { trades: 2, wins: 1, losses: 1, win_rate: 50, pnl: 20, avg_win: 30, avg_loss: -10, profit_factor: 3, expectancy: 10, avg_r: 0.5 };
+  mockFetch({
+    ...base, "/api/trading/trades": [],
+    "/api/trading/stats": { simulation: true, initial_capital: 10000, equity: 10020, return_pct: 0.2, max_drawdown: 10, max_drawdown_pct: 0.1,
+      overall: agg, curve: [], by_strategy: [{ strategy: "breakout", ...agg }], mistakes: [{ mistake: "fomo", count: 1, pnl: -10 }],
+      without_stop: 0, open: [], open_risk: 0 },
+  });
+  renderAt("/trading");
+  expect(await screen.findByText("PAPER · capital virtual")).toBeInTheDocument();
+  expect(await screen.findByText("breakout")).toBeInTheDocument();
+  expect(screen.getByText("fomo")).toBeInTheDocument();
+  expect(screen.getAllByText("50 %").length).toBe(2); // global y por estrategia
+  expect(screen.getByRole("button", { name: "Abrir (simulado)" })).toBeDisabled();
+});
+
+test("chat: un gasto apuntado se puede deshacer", async () => {
+  const tx = { id: 9, kind: "expense", amount_cents: 1250, currency: "EUR", category: "comida", description: "comida", occurred_on: "2026-11-23" };
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard, "DELETE /api/finance/transactions/9": {},
+    "POST /api/assistant/chat": { ndjson: [{ type: "meta", conversation_id: 1 }, { type: "finance", action: "logged", transaction: tx },
+      { type: "delta", text: "Apuntado gasto de 12,50 € en «comida»." }, { type: "done", mode: "finance", model: null }] },
+  });
+  renderAt("/");
+  const box = await screen.findByRole("textbox", { name: /Habla o escribe|Escribe|Mensaje/ });
+  fireEvent.change(box, { target: { value: "he gastado 12,50 en comida" } });
+  fireEvent.submit(box.closest("form")!);
+  expect(await screen.findByText(/Apuntado gasto/, {}, { timeout: 5000 })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
+  await waitFor(() => expect(calls.some((c) => c.init?.method === "DELETE" && c.url === "/api/finance/transactions/9")).toBe(true));
+  expect(await screen.findByText("Movimiento eliminado.")).toBeInTheDocument();
 });

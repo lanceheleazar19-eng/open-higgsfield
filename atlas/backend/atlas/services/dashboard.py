@@ -108,6 +108,15 @@ def _sum_cents(db: Session, kind: str, start: date | None = None, end: date | No
     return int(db.scalar(q) or 0)
 
 
+def _trading(db: Session) -> dict:
+    """Resumen del paper trading (SIMULADO) para el nodo del centro de control."""
+    from atlas.models import PaperTrade
+    from atlas.trading.service import pnl
+    closed = list(db.scalars(select(PaperTrade).where(PaperTrade.closed_at.is_not(None))))
+    return {"open": db.scalar(select(func.count(PaperTrade.id)).where(PaperTrade.closed_at.is_(None))) or 0,
+            "closed": len(closed), "pnl": round(sum(pnl(t) for t in closed), 2)}
+
+
 def _finance(db: Session, today: date, currency: str) -> dict:
     month_start = today.replace(day=1)
     next_month = (month_start + timedelta(days=32)).replace(day=1)
@@ -137,7 +146,9 @@ def _finance(db: Session, today: date, currency: str) -> dict:
     for d, v in daily:
         acc += int(v)
         series.append({"date": d.isoformat(), "net_cents": acc})
+    from atlas.finance.service import budget_status
     return {
+        "budgets": budget_status(db, month_start, next_month),
         "series": series,
         "has_data": has_data > 0,
         "currency": currency,
@@ -245,6 +256,7 @@ def build_dashboard(db: Session, prefs: dict, now: datetime | None = None) -> di
         "tasks": tasks,
         "events": events,
         "finance": _finance(db, today, str(prefs.get("currency") or "EUR")),
+        "trading": _trading(db),
         "fitness": fitness,
         "projects": projects,
         "activity": _activity(db, tz),

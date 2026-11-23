@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import type { MemoryItem, MemorySuggestion, TaskItem } from "../../api/types";
+import type { MemoryItem, MemorySuggestion, TaskItem, TxItem } from "../../api/types";
+import { formatMoney } from "../../lib/format";
 import { KIND_LABEL } from "../../lib/memory";
 
 export interface Exchange {
@@ -7,7 +8,8 @@ export interface Exchange {
   question: string;
   reply: string;
   phase: "thinking" | "streaming" | "done" | "error" | "stopped";
-  mode?: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition";
+  mode?: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance";
+  money?: { item: TxItem; state: "shown" | "undone" | "error" };
   meal?: { count: number };
   gym?: { sets: number; tonnage: number };
   model?: string | null;
@@ -25,6 +27,7 @@ function Source({ x }: { x: Exchange }) {
   if (x.mode === "tasks") return <span className="src src-task">Tareas</span>;
   if (x.mode === "gym") return <span className="src src-gym">Gimnasio</span>;
   if (x.mode === "nutrition") return <span className="src src-gym">Nutrición</span>;
+  if (x.mode === "finance") return <span className="src src-task">Finanzas</span>;
   if (x.mode === "local") return <span className="src" title={x.note ?? undefined}>Modo local</span>;
   return null;
 }
@@ -72,8 +75,21 @@ function TaskNote({ x, onTask }: { x: Exchange; onTask: (exchangeId: number, act
   return null;
 }
 
-export function Transcript({ items, onNew, onForget, onSuggestion, onTask }: {
+function MoneyNote({ x, onUndo }: { x: Exchange; onUndo: (exchangeId: number) => void }) {
+  const m = x.money!;
+  if (m.state === "undone") return <p className="mem-note">Movimiento eliminado.</p>;
+  return (
+    <p className="mem-note">
+      💶 {m.item.kind === "expense" ? "Gasto" : "Ingreso"} de {formatMoney(m.item.amount_cents, m.item.currency)} · {m.item.category} · <Link to="/finance">Ver finanzas</Link>{" "}
+      <button type="button" className="mini-btn ghost" onClick={() => onUndo(x.id)}>Deshacer</button>
+      {m.state === "error" && <span className="t-warn"> No se pudo deshacer.</span>}
+    </p>
+  );
+}
+
+export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMoneyUndo }: {
   items: Exchange[];
+  onMoneyUndo: (exchangeId: number) => void;
   onTask: (exchangeId: number, action: "undo" | "complete") => void;
   onNew: () => void;
   onForget: (exchangeId: number) => void;
@@ -99,6 +115,7 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask }: {
             </p>
             {x.memory && <MemoryNote x={x} onForget={onForget} />}
             {x.task && <TaskNote x={x} onTask={onTask} />}
+            {x.money && <MoneyNote x={x} onUndo={onMoneyUndo} />}
             {x.meal && x.meal.count > 0 && <p className="mem-note">🍽️ Comida registrada · <Link to="/nutrition">Ver nutrición</Link></p>}
             {x.gym && <p className="mem-note">🏋️ Sesión de hoy: {x.gym.sets} series · <Link to="/gym">Ver entreno</Link></p>}
             {x.suggestions?.some((s) => s.state !== "dismissed") && (

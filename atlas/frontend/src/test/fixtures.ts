@@ -11,7 +11,8 @@ export const modules: ModuleInfo[] = [
   { id: "dashboard", name: "Dashboard", phase: 1, status: "active", summary: "", planned: [] },
   { id: "tasks", name: "Tareas", phase: 4, status: "active", summary: "Tareas.", planned: [] },
   { id: "gym", name: "Gimnasio", phase: 5, status: "active", summary: "Entrenamiento.", planned: [] },
-  { id: "trading", name: "Trading", phase: 6, status: "planned", summary: "Paper trading.", planned: ["Win rate y P&L"] },
+  { id: "trading", name: "Trading", phase: 6, status: "active", summary: "Paper trading.", planned: [] },
+  { id: "projects", name: "Proyectos", phase: 7, status: "planned", summary: "Proyectos y negocios.", planned: ["Ideas y estudios de mercado"] },
   { id: "settings", name: "Configuración", phase: 1, status: "active", summary: "", planned: [] },
 ];
 

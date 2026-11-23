@@ -32,6 +32,13 @@ def build_alerts(d: dict) -> list[dict]:
     if f["has_data"] and f["expense_cents"] > f["income_cents"]:
         alerts.append({"level": "warning", "module": "finance",
                        "text": "Este mes los gastos superan a los ingresos registrados."})
+    for b in f.get("budgets", []):
+        if b["status"] == "over":
+            alerts.append({"level": "warning", "module": "finance",
+                           "text": f"Presupuesto de {b['category']} superado ({b['pct']} %)."})
+        elif b["status"] == "warning":
+            alerts.append({"level": "info", "module": "finance",
+                           "text": f"Llevas el {b['pct']} % del presupuesto de {b['category']}."})
     fit = d["fitness"]
     if fit["last_session"] and fit["sessions_7d"] == 0:
         alerts.append({"level": "info", "module": "gym",

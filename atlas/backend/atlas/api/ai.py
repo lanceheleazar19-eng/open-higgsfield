@@ -48,6 +48,9 @@ def ai_status(db: DB) -> dict:
 GYM_Q = re.compile(r"entren|gimnasio|gym|rutina|toca hoy|musculo|volumen|series|progres|mejorando|fuerza|press|curl|"
                    r"dominad|jalon|remo|triceps|biceps|pecho|espalda|hombro|pierna|1rm|estanc|peso|kilos|kg")
 NUT_Q = re.compile(r"comid|comer|dieta|calori|kcal|proteina|macro|hidrat|grasa|nutric|desayun|cena|almuerz|merienda|volumen|engord|peso")
+FIN_Q = re.compile(r"dinero|gast|ahorr|ingres|presupuest|finanz|cobr|pagad|euros|cuenta|nomina|me queda")
+TRADE_Q = re.compile(r"trad|operacion|operaciones|estrategia|win ?rate|stop|take profit|drawdown|capital virtual|paper")
+HEALTH_Q = re.compile(r"pasos|dormi|sueno|salud|cansad|descans|camin|kcal activas|pulsaciones")
 PLAN_Q = re.compile(r"organiza|planifica|plan de la semana|mi semana|esta semana|que hago (esta|la) semana")
 DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "crítica"}
@@ -56,6 +59,29 @@ PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "críti
 def _when(dt: datetime, all_day: bool) -> str:
     s = f"el {DAYS[dt.weekday()]} {dt.day}/{dt.month}"
     return s if all_day else f"{s} a las {dt:%H:%M}"
+
+
+def _money_log(db, text: str, tz: str):  # noqa: ANN001
+    """«he gastado 12,50 en comida» → registra un movimiento de DINERO REAL (solo apunte, nunca un pago)."""
+    from atlas.finance import service as fin
+    from atlas.models import Transaction
+    p = fin.parse_money_command(text)
+    if not p:
+        return None
+    t = Transaction(kind=p["kind"], amount_cents=p["amount_cents"], category=p["category"], description=p["description"],
+                    occurred_on=datetime.now(ZoneInfo(tz)).date(), currency=str(get_prefs(db)["currency"]))
+    db.add(t)
+    db.commit()
+    amount = f"{t.amount_cents / 100:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    reply = f"Apuntado {'gasto' if t.kind == 'expense' else 'ingreso'} de {amount} € en «{t.category}»."
+    if t.kind == "expense":
+        today = t.occurred_on
+        b = next((b for b in fin.budget_status(db, *fin.month_bounds(None, today)) if b["category"] == t.category), None)
+        if b:
+            reply += f" Llevas el {b['pct']} % del presupuesto de {t.category} este mes."
+            if b["status"] == "over":
+                reply += " ⚠️ Lo has superado."
+    return {"type": "finance", "action": "logged", "transaction": fin.to_dict(t)}, reply
 
 
 def _meal_log(db, text: str, tz: str):  # noqa: ANN001
@@ -167,6 +193,17 @@ def chat(body: ChatIn) -> StreamingResponse:
             db.commit()
             yield _line({"type": "meta", "conversation_id": conv.id})
 
+            # Dinero real: «he gastado 12,50 en comida» / «he cobrado 300 de nómina»
+            money_ev = _money_log(db, body.text, tz)
+            if money_ev:
+                ev, reply = money_ev
+                yield _line(ev)
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "finance", "model": None})
+                convs.add_message(db, conv, "assistant", reply, mode="local")
+                db.commit()
+                return
+
             # Registro de comidas: «he desayunado 2 huevos y una tostada»
             meal_ev = _meal_log(db, body.text, tz)
             if meal_ev:
@@ -246,6 +283,20 @@ def chat(body: ChatIn) -> StreamingResponse:
                 d["gym"] = gym_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
             if PLAN_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
                 d["week_plan"] = tasks_svc.plan_week(db, tz)
+            q = mem.normalize(body.text)
+            offline = not brain_status(prefs)["configured"]
+            today_d = date.fromisoformat(d["generated_at"][:10])
+            if FIN_Q.search(q) or offline:
+                from atlas.finance import service as fin
+                d["finanzas_dinero_real"] = fin.summary(db, today_d)
+            if TRADE_Q.search(q) or offline:
+                from atlas.trading import service as trd
+                cap = prefs.get("paper_capital")
+                st = trd.stats(db, float(cap) if cap else None)
+                d["trading_SIMULADO"] = {k: v for k, v in st.items() if k != "curve"}
+            if HEALTH_Q.search(q) or offline:
+                from atlas.api.health import snapshot as health_snapshot
+                d["apple_salud"] = health_snapshot(db, today_d)
             memory_ctx = mem.memory_context(db, body.text, tz, conversation_id=conv.id)
             db.commit()
             text, final = "", None

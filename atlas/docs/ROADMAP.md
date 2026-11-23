@@ -9,7 +9,7 @@
 | 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ✅ Completada |
 | 5A | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ✅ Completada |
 | 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ✅ Completada |
-| 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
+| 6 | Finanzas (dinero real), Trading (paper trading, separado) y Apple Salud | ✅ Completada |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
 | 8 | Calendario (iCloud) + Gmail importante | ✅ Completada |
 | 9 | Voz (micrófono, TTS, palabra de activación, interrupción) | — |
@@ -148,3 +148,17 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   página Calendario con eventos de iCloud y de ATLAS, aviso de solapes y creación de eventos
   (en iCloud solo con confirmación explícita).
 - Sincronización automática cada 30 min mientras ATLAS está abierto (y botón «Sincronizar ahora»).
+
+## Fase 6 — finanzas, trading simulado y Apple Salud
+- **Finanzas (dinero real)**: ingresos y gastos (formulario o chat: «he gastado 12,50 en comida»,
+  «he cobrado 300 de nómina», con botón Deshacer), categorías automáticas, resumen mensual, tasa de
+  ahorro, evolución de 6 meses y presupuestos por categoría con alertas al 80 % y al superarlos.
+  ATLAS solo registra: nunca hace pagos, transferencias ni se conecta al banco.
+- **Trading (SIMULACIÓN)**: tabla propia (`paper_trades`) separada del dinero real. Capital virtual,
+  operaciones largo/corto con SL/TP (validados), R:B planificado, P&L, R múltiple, win rate, profit
+  factor, expectativa, drawdown, curva de capital, estadísticas por estrategia y errores recurrentes.
+  Ninguna conexión con brókers. Webhooks de TradingView aplazados: exigirían exponer ATLAS a internet.
+- **Apple Salud**: un Atajo del iPhone envía pasos, sueño, kcal activas, distancia y peso a
+  `/api/health/ingest` con la cabecera `X-Atlas-Token` (clave en el Llavero, regenerable). El peso se
+  copia a medidas corporales (Gimnasio/Nutrición). Guía paso a paso en Gimnasio › Salud.
+- La IA recibe finanzas, trading (marcado como simulado) y salud solo cuando la pregunta lo pide.
