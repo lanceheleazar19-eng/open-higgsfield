@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { speakText, useSystemVoices } from "../hooks/useVoice";
 import { loadVoicePrefs, pickVoice, qualityLabel, saveVoicePrefs, spanishVoices } from "../lib/speech";
+import { loadHandsFree, saveHandsFree } from "../lib/wake";
 import { WELCOME_KEY, welcomeEnabled } from "./BootScreen";
 import { Panel } from "./Panel";
 
@@ -12,6 +13,10 @@ export function VoiceSettings() {
   const voices = useSystemVoices();
   const [prefs, setPrefs] = useState(loadVoicePrefs);
   const [welcome, setWelcome] = useState(welcomeEnabled);
+  const [hf, setHf] = useState(loadHandsFree);
+  const canListen = typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
+  const browser = /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "este navegador";
   const es = spanishVoices(voices);
   const active = pickVoice(voices, prefs.voiceURI);
 
@@ -56,6 +61,35 @@ export function VoiceSettings() {
           {voices.length > 0 && es.length === 0 && (
             <p className="callout">No hay voces en español instaladas en este dispositivo.</p>
           )}
+          <fieldset className="field">
+            <legend>Manos libres</legend>
+            {!canListen && <p className="callout">Este navegador no puede escuchar. Usa Chrome, Edge o Safari.</p>}
+            <label className="check">
+              <input type="checkbox" disabled={!canListen} checked={hf.wake} onChange={(e) => setHf(saveHandsFree({ wake: e.target.checked }))} />
+              «Oye ATLAS»: escuchar la palabra de activación mientras ATLAS está abierto
+            </label>
+            <label className="check">
+              <input type="checkbox" disabled={!canListen} checked={hf.continuous} onChange={(e) => setHf(saveHandsFree({ continuous: e.target.checked }))} />
+              Conversación continua: tras responderte, sigo escuchando sin pulsar nada (si te callas, lo dejo)
+            </label>
+            <p className={hf.wake ? "callout" : "muted small"}>
+              <strong>Privacidad:</strong> el reconocimiento de voz lo hace el navegador, no ATLAS.
+              {browser === "Chrome" || browser === "Edge"
+                ? ` En ${browser}, el audio se envía a los servidores de ${browser === "Chrome" ? "Google" : "Microsoft"} para pasarlo a texto.`
+                : browser === "Safari" ? " En Safari lo procesa Apple (dictado de Siri), en el dispositivo o en sus servidores según tu Mac." : ""}
+              {" "}Con «Oye ATLAS» activo, el micrófono escucha de forma continua mientras la pestaña está abierta y en primer plano. Lo que se dice antes de «ATLAS» se descarta y no se guarda.
+            </p>
+            <details className="help">
+              <summary>Órdenes de voz</summary>
+              <ul className="steps">
+                <li><strong>«ATLAS, …»</strong> o <strong>«Oye ATLAS, …»</strong> seguido de tu pregunta. Si solo dices «ATLAS», suena un pitido y te escucho.</li>
+                <li><strong>«Para» / «Calla»</strong> o <strong>«ATLAS, …»</strong> mientras hablo: me interrumpes.</li>
+                <li><strong>«Repite»</strong>, <strong>«Más despacio»</strong>, <strong>«Más rápido»</strong>.</li>
+                <li><strong>«Eso es todo»</strong> o <strong>«Gracias»</strong>: termino la conversación y vuelvo a esperar.</li>
+                <li>Tecla <strong>Esc</strong>: corta la voz y la escucha.</li>
+              </ul>
+            </details>
+          </fieldset>
           <details className="help">
             <summary>¿Suena robótica? Instala voces mejores (Mac)</summary>
             <ol className="steps">

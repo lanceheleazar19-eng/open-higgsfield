@@ -328,6 +328,8 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01e
 }
 .chip:hover:not(:disabled) { color: var(--text); border-color: rgba(255, 56, 72, .45); background: rgba(255, 56, 72, .08); }
 .chip:disabled { opacity: .5; cursor: progress; }
+.chip.on { color: var(--text); border-color: rgba(255, 56, 72, .7); background: rgba(255, 46, 66, .18); box-shadow: 0 0 10px rgba(255, 46, 66, .25); }
+.console-foot > .chip { flex: none; }
 
 .bar {
   position: relative; display: flex; align-items: center; gap: 6px;
@@ -954,3 +956,7 @@ body::before { background-image: linear-gradient(rgba(255, 64, 78, .028) 1px, tr
 .imails li { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; font-size: 13px; }
 .imails li > span { display: grid; gap: 2px; min-width: 0; }
 .imails strong { overflow: hidden; text-overflow: ellipsis; }
+
+/* Fase 9 — manos libres */
+fieldset.field { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 4px 0 0; display: grid; gap: 10px; min-width: 0; }
+fieldset.field legend { padding: 0 6px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }

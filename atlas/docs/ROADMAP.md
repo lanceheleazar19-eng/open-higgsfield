@@ -12,7 +12,7 @@
 | 6 | Finanzas (dinero real), Trading (paper trading, separado) y Apple Salud | ✅ Completada |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
 | 8 | Calendario (iCloud) + Gmail importante | ✅ Completada |
-| 9 | Voz (micrófono, TTS, palabra de activación, interrupción) | — |
+| 9 | Voz manos libres (palabra de activación, interrupción, conversación continua) | ✅ Completada |
 | 10 | Automatizaciones, notificaciones, Daily Briefing | — |
 | 11 | Seguridad, copias de seguridad, exportación, optimización | — |
 
@@ -162,3 +162,14 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   `/api/health/ingest` con la cabecera `X-Atlas-Token` (clave en el Llavero, regenerable). El peso se
   copia a medidas corporales (Gimnasio/Nutrición). Guía paso a paso en Gimnasio › Salud.
 - La IA recibe finanzas, trading (marcado como simulado) y salud solo cuando la pregunta lo pide.
+
+## Fase 9 — voz manos libres
+- **«Oye ATLAS»** (opcional, por dispositivo): escucha en segundo plano mientras la pestaña está abierta y
+  visible. «ATLAS, ¿qué tengo hoy?» en una sola frase, o «ATLAS» → pitido → tu pregunta. Lo dicho antes de
+  la palabra de activación se descarta. Botón en el centro de control y en Configuración › Voz.
+- **Interrupción por voz**: mientras ATLAS habla, «para», «calla» o «ATLAS, …» lo cortan. Filtro de eco para
+  que no se interrumpa a sí mismo con su propia voz.
+- **Conversación continua**: si preguntas por voz, responde en voz y vuelve a escuchar; si te callas, lo deja.
+- **Órdenes locales** (sin IA): «repite», «más despacio», «más rápido», «eso es todo».
+- Privacidad explicada en la interfaz: el reconocimiento lo hace el navegador (Chrome → Google,
+  Safari → Apple). Reconocimiento 100 % local (Whisper) queda como mejora futura.

@@ -73,6 +73,7 @@ export function ControlCenter() {
     setBusy(true);
     setRipple((r) => r + 1);
     voiceRef.current?.stopSpeaking();
+    voiceRef.current?.beginReply();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
     const t0 = performance.now();
@@ -83,7 +84,8 @@ export function ControlCenter() {
     let cid = convRef.current;
     let spoken = 0; // parte del texto ya enviada a la voz
     const speakNew = (final: boolean) => {
-      if (!speakRef.current) return;
+      // Si me hablaste por voz, respondo en voz aunque el altavoz de la barra esté apagado
+      if (!speakRef.current && !voiceRef.current?.conversing) return;
       const pendingText = text.slice(spoken);
       // habla hasta el último final de frase disponible (o todo, al terminar)
       const m = final ? pendingText.length : Math.max(pendingText.lastIndexOf(". "), pendingText.lastIndexOf("? "),
@@ -223,7 +225,7 @@ export function ControlCenter() {
     }
   };
 
-  const voice = useVoice(converse);
+  const voice = useVoice(converse, busy);
   voiceRef.current = voice;
 
   // Pantalla de arranque con bienvenida hablada (una vez por sesión del navegador)

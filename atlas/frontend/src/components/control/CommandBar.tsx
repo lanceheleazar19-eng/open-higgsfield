@@ -43,6 +43,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
     e.preventDefault();
     const q = text.trim();
     if (!q || busy || offline) return;
+    voice.endConversation(); // escrito → sin conversación por voz
     onAsk(q);
     setText("");
   }
@@ -92,11 +93,18 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
       </form>
       <div className="console-foot">
         <span className="listen-state"><i className={voice.listening ? "on" : ""} aria-hidden="true" />
-          {voice.listening ? "Escuchando…" : busy ? "Procesando…" : voice.speaking ? "Hablando…" : "En espera"}</span>
+          {voice.listening ? "Escuchando…" : busy ? "Procesando…" : voice.speaking ? (voice.conversing ? "Hablando… (di «para» o «ATLAS» para interrumpir)" : "Hablando…") : voice.wakeActive ? "Di «ATLAS»…" : "En espera"}</span>
+        {voice.canListen && (
+          <button type="button" className={`chip ${voice.handsFree.wake ? "on" : ""}`} aria-pressed={voice.handsFree.wake} disabled={offline}
+            title="Escucha la palabra «ATLAS» mientras esta pestaña está abierta"
+            onClick={() => voice.setHandsFree({ wake: !voice.handsFree.wake })}>
+            <Icon name="mic" size={14} /> Oye ATLAS: {voice.handsFree.wake ? "activo" : "apagado"}
+          </button>
+        )}
         <div className="quick" role="group" aria-label="Comandos rápidos">
-          <button type="button" className="chip" onClick={onBriefing} disabled={busy || offline}><Icon name="reports" size={14} /> Resumen</button>
+          <button type="button" className="chip" onClick={() => { voice.endConversation(); onBriefing(); }} disabled={busy || offline}><Icon name="reports" size={14} /> Resumen</button>
           {QUICK_COMMANDS.map((c) => (
-            <button key={c} type="button" className="chip" disabled={busy || offline} onClick={() => onAsk(c)}>{c}</button>
+            <button key={c} type="button" className="chip" disabled={busy || offline} onClick={() => { voice.endConversation(); onAsk(c); }}>{c}</button>
           ))}
         </div>
       </div>
