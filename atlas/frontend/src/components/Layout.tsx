@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Icon } from "./Icon";
+import { Reminders } from "./Reminders";
 import { Sidebar } from "./Sidebar";
 
 export function Layout() {
@@ -18,6 +19,7 @@ export function Layout() {
       <main className="main">
         <Outlet />
       </main>
+      <Reminders />
     </div>
   );
 }

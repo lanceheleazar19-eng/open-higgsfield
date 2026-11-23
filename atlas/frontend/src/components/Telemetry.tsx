@@ -4,6 +4,7 @@ import { Empty, Panel } from "./Panel";
 import {
   PRIORITY_LABEL, formatDateTime, formatDay, formatMoney, relativeTime, weekdayInitial,
 } from "../lib/format";
+import { formatDue } from "../lib/tasks";
 
 /** Telemetría detallada: los paneles de datos del dashboard original. */
 export function Telemetry({ data }: { data: D }) {
@@ -24,7 +25,7 @@ function TasksPanel({ t, tz }: { t: D["tasks"]; tz: string }) {
   return (
     <Panel title="Tareas pendientes" icon={<Icon name="tasks" />} aside={<span className="badge">{t.due_today} hoy</span>}>
       {t.items.length === 0 ? (
-        <Empty>No hay tareas registradas. El gestor de tareas llega en la Fase 4.</Empty>
+        <Empty>No hay tareas registradas. Añádelas en Tareas o dile a ATLAS «apúntame…».</Empty>
       ) : (
         <ul className="list">
           {t.items.map((i) => (
@@ -32,7 +33,7 @@ function TasksPanel({ t, tz }: { t: D["tasks"]; tz: string }) {
               <span className={`prio prio-${i.priority}`}>{PRIORITY_LABEL[i.priority]}</span>
               <span className="list-main">
                 <span className="list-title">{i.title}</span>
-                <span className="list-meta mono">{i.due_at ? (i.overdue ? "Atrasada · " : "") + formatDateTime(i.due_at, tz) : "Sin fecha"}</span>
+                <span className="list-meta mono">{i.due_at ? (i.overdue ? "Atrasada · " : "") + (i.all_day ? formatDue({ due_at: i.due_at, due_date: i.due_at.slice(0, 10), all_day: true }) : formatDateTime(i.due_at, tz)) : "Sin fecha"}</span>
               </span>
             </li>
           ))}

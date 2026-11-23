@@ -1,7 +1,16 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
-  MemorySuggestion, ModuleInfo, Prefs, StoredMessage,
+  MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
 } from "./types";
+
+export interface TaskInput {
+  title?: string; description?: string | null; priority?: Priority; category?: string | null;
+  due_at?: string | null; due_date?: string | null; reminder_at?: string | null; goal_id?: number | null;
+}
+export interface GoalInput {
+  title: string; description?: string | null; area?: string | null; kind: "numeric" | "milestones"; unit?: string | null;
+  start_value?: number; target_value?: number | null; current_value?: number | null; deadline?: string | null;
+}
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -72,6 +81,32 @@ export const api = {
   conversation: (id: number) => request<{ id: number; title: string; created_at: string; messages: StoredMessage[] }>(`/api/conversations/${id}`),
   deleteConversation: (id: number) => requestEmpty(`/api/conversations/${id}`, { method: "DELETE" }),
   exportUrl: "/api/memory/export",
+  tasks: (p: { status?: "open" | "done" | "all"; q?: string; goal_id?: number; category?: string } = {}) => {
+    const qs = new URLSearchParams();
+    Object.entries(p).forEach(([k, v]) => { if (v !== undefined && v !== "") qs.set(k, String(v)); });
+    return request<{ items: TaskItem[]; categories: string[] }>(`/api/tasks?${qs}`);
+  },
+  createTask: (t: TaskInput) => request<TaskItem>("/api/tasks", { method: "POST", body: JSON.stringify(t) }),
+  quickTask: (text: string) => request<TaskItem>("/api/tasks/quick", { method: "POST", body: JSON.stringify({ text }) }),
+  parseTask: (text: string) => request<{ title: string; priority: Priority; category: string | null; all_day: boolean; due_local: string | null }>(
+    "/api/tasks/parse", { method: "POST", body: JSON.stringify({ text }) }),
+  updateTask: (id: number, t: TaskInput) => request<TaskItem>(`/api/tasks/${id}`, { method: "PATCH", body: JSON.stringify(t) }),
+  completeTask: (id: number) => request<TaskItem>(`/api/tasks/${id}/complete`, { method: "POST" }),
+  reopenTask: (id: number) => request<TaskItem>(`/api/tasks/${id}/reopen`, { method: "POST" }),
+  deleteTask: (id: number) => requestEmpty(`/api/tasks/${id}`, { method: "DELETE" }),
+  taskSummary: (period: "day" | "week") => request<TaskSummary>(`/api/tasks/summary?period=${period}`),
+  weekPlan: (perDay = 4) => request<WeekPlan>(`/api/tasks/plan?per_day=${perDay}`),
+  applyPlan: (assignments: { task_id: number; date: string }[]) =>
+    request<{ scheduled: number }>("/api/tasks/plan/apply", { method: "POST", body: JSON.stringify({ assignments }) }),
+  dueReminders: () => request<{ items: TaskItem[] }>("/api/tasks/reminders/due"),
+  goals: (status: "active" | "all" = "active") => request<{ items: GoalItem[] }>(`/api/goals?status=${status}`),
+  goal: (id: number) => request<GoalItem>(`/api/goals/${id}`),
+  createGoal: (g: GoalInput) => request<GoalItem>("/api/goals", { method: "POST", body: JSON.stringify(g) }),
+  updateGoal: (id: number, g: Partial<GoalInput> & { status?: GoalItem["status"] }) =>
+    request<GoalItem>(`/api/goals/${id}`, { method: "PATCH", body: JSON.stringify(g) }),
+  goalProgress: (id: number, p: { value?: number; delta?: number; note?: string }) =>
+    request<GoalItem>(`/api/goals/${id}/progress`, { method: "POST", body: JSON.stringify(p) }),
+  deleteGoal: (id: number) => requestEmpty(`/api/goals/${id}`, { method: "DELETE" }),
   timezones: () => request<string[]>("/api/settings/timezones"),
 };
 

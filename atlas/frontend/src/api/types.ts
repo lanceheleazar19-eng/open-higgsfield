@@ -94,9 +94,10 @@ export interface StoredMessage {
 export type ChatEvent =
   | { type: "meta"; conversation_id: number }
   | { type: "memory"; action: "saved" | "duplicate" | "forget_candidate"; memory: MemoryItem }
+  | { type: "task"; action: "created" | "complete_candidate" | "not_found"; task: TaskItem | null }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local" | "memory"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks"; model: string | null; reason?: string | null }
   | { type: "error"; message: string };
 
 export interface ChatMessage {
@@ -118,7 +119,7 @@ export interface Dashboard {
     pending: number;
     overdue: number;
     due_today: number;
-    items: { id: number; title: string; priority: Priority; status: string; due_at: string | null; overdue: boolean }[];
+    items: { id: number; title: string; priority: Priority; status: string; due_at: string | null; all_day?: boolean; overdue: boolean }[];
   };
   events: {
     items: { id: number; title: string; location: string | null; start_at: string; end_at: string | null; in_progress: boolean }[];
@@ -147,4 +148,56 @@ export interface Dashboard {
     items: { id: number; module: string; action: string; summary: string; created_at: string }[];
   };
   alerts: Alert[];
+  goals?: { items: DashGoal[] };
+}
+
+export type Pace = "ahead" | "on_track" | "behind" | "overdue" | "achieved" | "no_deadline" | "not_started";
+
+export interface DashGoal {
+  id: number; title: string; unit: string | null; kind: "numeric" | "milestones"; progress: number | null;
+  pace: Pace; deadline: string | null; current: number; target: number | null; required_per_week?: number | null;
+}
+
+export interface TaskItem {
+  id: number;
+  title: string;
+  description: string | null;
+  priority: Priority;
+  status: "pending" | "in_progress" | "done" | "cancelled";
+  category: string | null;
+  due_at: string | null;
+  due_date: string | null;
+  all_day: boolean;
+  overdue: boolean;
+  reminder_at: string | null;
+  goal_id: number | null;
+  goal_title: string | null;
+  project_id: number | null;
+  project_name: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface GoalMetrics {
+  progress: number | null; current: number; target: number | null; start: number; elapsed_days: number;
+  pace?: Pace; remaining?: number | null; rate_per_week?: number; projected_date?: string; days_left?: number;
+  expected_progress?: number; required_per_week?: number;
+}
+
+export interface GoalItem {
+  id: number; title: string; description: string | null; area: string | null; kind: "numeric" | "milestones";
+  unit: string | null; start_value: number; target_value: number | null; current_value: number;
+  start_date: string; deadline: string | null; status: "active" | "achieved" | "paused" | "abandoned";
+  tasks_total: number; tasks_done: number; achieved_at: string | null; metrics: GoalMetrics;
+  history?: { id: number; value: number; note: string | null; recorded_at: string }[];
+}
+
+export interface PlanTask { id: number; title: string; priority: Priority; pinned: boolean; overdue: boolean; all_day: boolean; time: string | null }
+export interface WeekPlan {
+  days: { date: string; tasks: PlanTask[]; load: number; over_capacity: boolean }[];
+  if_time: PlanTask[]; later: PlanTask[]; per_day: number;
+}
+export interface TaskSummary {
+  period: "day" | "week"; from: string; to: string; completed: number; completed_titles: string[];
+  created: number; due: number; due_open: number; overdue: number; completion_rate: number | null;
 }

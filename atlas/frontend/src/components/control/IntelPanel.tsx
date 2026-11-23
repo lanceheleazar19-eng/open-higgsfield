@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import type { Dashboard } from "../../api/types";
 import { PRIORITY_LABEL, relativeTime } from "../../lib/format";
+import { PACE_LABEL } from "../../lib/tasks";
 import { Clock } from "../Clock";
 
 const LEVEL_LABEL = { critical: "Crítico", warning: "Aviso", info: "Info" } as const;
-const MODULE_ROUTE: Record<string, string> = { tasks: "/tasks", calendar: "/calendar", finance: "/finance", gym: "/gym" };
+const MODULE_ROUTE: Record<string, string> = { tasks: "/tasks", calendar: "/calendar", finance: "/finance", gym: "/gym", goals: "/tasks?tab=goals" };
 
 /** Lateral derecho: información en tiempo real detectada en tus datos. */
 export function IntelPanel({ data }: { data: Dashboard | null }) {
@@ -28,6 +29,20 @@ export function IntelPanel({ data }: { data: Dashboard | null }) {
             ))}
           </ul>
         )}
+      </section>
+      <section>
+        <h3>Objetivos {data?.goals && <span className="count">{data.goals.items.length}</span>}</h3>
+        {data?.goals && data.goals.items.length > 0 ? (
+          <ul className="hud-goals">
+            {data.goals.items.slice(0, 4).map((g) => (
+              <li key={g.id}>
+                <Link to="/tasks?tab=goals" className="hud-goal-title">{g.title}</Link>
+                <span className={`hud-goal-pace pace-${g.pace}`}>{g.progress === null ? "—" : `${Math.round(g.progress * 100)} %`} · {PACE_LABEL[g.pace]}</span>
+                <span className="mini-bar"><span style={{ width: `${Math.round((g.progress ?? 0) * 100)}%` }} /></span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="hud-note"><Link to="/tasks?tab=goals">Define tus objetivos</Link> y ATLAS medirá si vas a llegar.</p>}
       </section>
       <section>
         <h3>Tareas pendientes {data && <span className="count">{data.tasks.pending}</span>}</h3>

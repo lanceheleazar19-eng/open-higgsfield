@@ -60,10 +60,10 @@ test("backend caído muestra estado sin conexión con reintento", async () => {
 
 test("sidebar marca módulos planificados con su fase y abre su página", async () => {
   mockFetch({ ...base, "/api/dashboard": emptyDashboard });
-  renderAt("/tasks");
-  expect(await screen.findByText("F4")).toBeInTheDocument();
-  expect(await screen.findByText("Fase 4 · en desarrollo")).toBeInTheDocument();
-  expect(screen.getByText("Prioridades")).toBeInTheDocument();
+  renderAt("/gym");
+  expect(await screen.findByText("F5")).toBeInTheDocument();
+  expect(await screen.findByText("Fase 5 · en desarrollo")).toBeInTheDocument();
+  expect(screen.getByText("Series y RIR")).toBeInTheDocument();
 });
 
 test("configuración guarda el nombre vía PUT", async () => {
@@ -83,8 +83,10 @@ test("los nodos del núcleo muestran datos reales y abren su módulo", async () 
   renderAt("/");
   const node = await screen.findByRole("button", { name: "Abrir Tasks: 3 pendientes" });
   expect(screen.getByRole("button", { name: "Abrir Memory: 3 recuerdos" })).toBeInTheDocument();
+  mockFetch({ ...base, "/api/tasks?": { items: [], categories: [] }, "/api/goals?": { items: [] },
+    "/api/tasks/summary?": { period: "day", from: "", to: "", completed: 0, completed_titles: [], created: 0, due: 0, due_open: 0, overdue: 0, completion_rate: null } });
   fireEvent.click(node);
-  expect(await screen.findByText("Fase 4 · en desarrollo")).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: /Tareas y objetivos/ })).toBeInTheDocument();
 });
 
 test("comando rápido consulta al asistente y muestra la respuesta", async () => {
@@ -284,4 +286,92 @@ test("con el altavoz activo lee la respuesta por frases, con la voz y velocidad 
   expect(spoken.map((s) => s.text).join(" ")).toBe("Buenos días, Lance. Hoy tienes dos tareas. ¿Empezamos por la más urgente?");
   expect(spoken.length).toBeGreaterThan(1); // empezó a hablar antes de terminar la respuesta
   expect(spoken.every((s) => s.rate === 1.2 && s.voice === "Mónica (Mejorada)")).toBe(true);
+});
+
+const task = (over: Record<string, unknown> = {}) => ({
+  id: 1, title: "Llamar al gestor", description: null, priority: "critical", status: "pending", category: null,
+  due_at: "2030-11-27T10:00:00+01:00", due_date: "2030-11-27", all_day: false, overdue: false,
+  reminder_at: "2030-11-27T10:00:00+01:00", goal_id: null, goal_title: null, project_id: null, project_name: null,
+  created_at: "2026-11-23T10:00:00+01:00", completed_at: null, ...over,
+});
+const summaryDay = { period: "day", from: "", to: "", completed: 2, completed_titles: [], created: 1, due: 3, due_open: 1, overdue: 1, completion_rate: 0.67 };
+
+test("«apúntame…» crea la tarea y permite deshacer", async () => {
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": chatReply("Apuntado: «Llamar al gestor» para el viernes 27/11 a las 10:00.", "tasks" as never, null,
+      [{ type: "task", action: "created", task: task() }]),
+    "DELETE /api/tasks/1": {},
+  });
+  renderAt("/");
+  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "apúntame llamar al gestor el viernes a las 10" } });
+  fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+  expect(await screen.findByText(/Tarea creada/, {}, { timeout: 5000 })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
+  expect(await screen.findByText("Tarea eliminada.")).toBeInTheDocument();
+  expect(calls.some((c) => c.url === "/api/tasks/1" && c.init?.method === "DELETE")).toBe(true);
+});
+
+test("página Tareas: agrupa, completa y crea con lenguaje natural", async () => {
+  const calls = mockFetch({
+    ...base,
+    "/api/tasks?": { items: [
+      task({ id: 2, title: "Pagar seguro", priority: "high", overdue: true, due_date: "2020-01-01", due_at: "2020-01-01T23:59:59+01:00", all_day: true, reminder_at: null }),
+      task({ id: 3, title: "Estudiar inglés", priority: "medium", due_at: null, due_date: null, reminder_at: null }),
+    ], categories: ["trabajo"] },
+    "/api/goals?": { items: [] },
+    "/api/tasks/summary?": summaryDay,
+    "POST /api/tasks/2/complete": task({ id: 2, status: "done" }),
+    "POST /api/tasks/parse": { title: "Preparar oferta", priority: "high", category: "trabajo", all_day: true, due_local: "2030-11-27T23:59:59" },
+    "POST /api/tasks/quick": task({ id: 9, title: "Preparar oferta", all_day: true, due_at: "2030-11-27T23:59:59+01:00" }),
+  });
+  renderAt("/tasks");
+  expect(await screen.findByText("Pagar seguro")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /Atrasadas/ })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /Sin fecha/ })).toBeInTheDocument();
+  expect(screen.getByText("67 %")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Marcar como hecha: Pagar seguro" }));
+  expect(await screen.findByText(/Hecha: «Pagar seguro»/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Nueva tarea en lenguaje natural"), { target: { value: "preparar oferta el jueves importante #trabajo" } });
+  expect(await screen.findByText("Preparar oferta", { selector: "strong" }, { timeout: 3000 })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Añadir tarea" }));
+  expect(await screen.findByText(/Creada: «Preparar oferta»/)).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.url === "/api/tasks/quick")!.init!.body as string)).toEqual({ text: "preparar oferta el jueves importante #trabajo" });
+});
+
+test("objetivos: muestra ritmo, necesidad semanal y registra progreso", async () => {
+  const goal = {
+    id: 4, title: "Ahorrar 5000 €", description: null, area: "finanzas", kind: "numeric", unit: "€", start_value: 0,
+    target_value: 5000, current_value: 1000, start_date: "2026-01-01", deadline: "2026-12-31", status: "active",
+    tasks_total: 0, tasks_done: 0, achieved_at: null,
+    metrics: { progress: 0.2, current: 1000, target: 5000, start: 0, elapsed_days: 180, pace: "behind", remaining: 4000,
+      rate_per_week: 38.89, projected_date: "2028-07-01", days_left: 180, expected_progress: 0.5, required_per_week: 155.56 },
+  };
+  const calls = mockFetch({
+    ...base, "/api/goals?": { items: [goal] },
+    "POST /api/goals/4/progress": { ...goal, current_value: 1200 },
+  });
+  renderAt("/tasks?tab=goals");
+  fireEvent.click(await screen.findByRole("tab", { name: "Objetivos" }));
+  expect(await screen.findByText("🎯 Ahorrar 5000 €")).toBeInTheDocument();
+  expect(screen.getByText("Por detrás")).toBeInTheDocument();
+  expect(screen.getByText("20 %")).toBeInTheDocument();
+  expect(screen.getByText(/155,56 €/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Registrar progreso de Ahorrar 5000 €"), { target: { value: "200" } });
+  fireEvent.click(screen.getByRole("button", { name: "Registrar" }));
+  expect(await screen.findByText(/Progreso registrado/)).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.url === "/api/goals/4/progress")!.init!.body as string)).toEqual({ delta: 200 });
+});
+
+test("recordatorio vencido aparece como aviso con acción «Hecha»", async () => {
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "/api/tasks/reminders/due": { items: [task({ title: "Sacar al perro" })] },
+    "POST /api/tasks/1/complete": task({ status: "done" }),
+  });
+  renderAt("/");
+  expect(await screen.findByText("Sacar al perro")).toBeInTheDocument();
+  fireEvent.click(within(screen.getByRole("region", { name: "Recordatorios" })).getByRole("button", { name: "Hecha" }));
+  await waitFor(() => expect(screen.queryByText("Sacar al perro")).not.toBeInTheDocument());
+  expect(calls.some((c) => c.url === "/api/tasks/1/complete")).toBe(true);
 });

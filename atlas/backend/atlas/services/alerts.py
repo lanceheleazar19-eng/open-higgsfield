@@ -39,7 +39,8 @@ def build_alerts(d: dict) -> list[dict]:
     for g in d.get("goals", {}).get("items", []):
         if g["pace"] == "behind":
             need = g.get("required_per_week")
-            extra = f" Necesitas {abs(need):g}{(' ' + g['unit']) if g.get('unit') else ''} por semana para llegar." if need else ""
+            num = f"{abs(need):,.2f}".rstrip("0").rstrip(".").replace(",", "X").replace(".", ",").replace("X", ".")
+            extra = f" Necesitas {num}{(' ' + g['unit']) if g.get('unit') else ''} por semana para llegar." if need else ""
             alerts.append({"level": "warning", "module": "goals", "text": f"Objetivo «{g['title']}» va por detrás del ritmo.{extra}"})
         elif g["pace"] == "overdue":
             alerts.append({"level": "critical", "module": "goals", "text": f"Objetivo «{g['title']}» ha superado su fecha límite."})

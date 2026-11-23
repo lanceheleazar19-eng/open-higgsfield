@@ -25,7 +25,7 @@ function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: nu
     ai: aiModel ? { metric: aiModel, planned: false } : { metric: "Modo local", planned: false, alert: false },
     memory: memories !== undefined ? { metric: n(memories, "recuerdo", "recuerdos"), planned: false } : phase("memory"),
     agents: { metric: "0 activos", planned: true },
-    tasks: { metric: n(d.tasks.pending, "pendiente", "pendientes"), planned: true, alert: d.tasks.overdue > 0 },
+    tasks: { metric: n(d.tasks.pending, "pendiente", "pendientes"), planned: false, alert: d.tasks.overdue > 0 },
     calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: true },
     projects: { metric: n(d.projects.active, "activo", "activos"), planned: true },
     research: phase("research"),
@@ -96,6 +96,8 @@ export function ControlCenter() {
         if (ev.type === "meta") {
           cid = ev.conversation_id;
           setConversationId(ev.conversation_id);
+        } else if (ev.type === "task") {
+          patch(id, { task: { action: ev.action, item: ev.task, state: "shown" } });
         } else if (ev.type === "memory") {
           patch(id, { memory: { action: ev.action, item: ev.memory, state: "shown" } });
         } else if (ev.type === "delta") {
@@ -171,6 +173,19 @@ export function ControlCenter() {
     }
   };
 
+  const taskAction = async (exId: number, action: "undo" | "complete") => {
+    const x = logRef.current.find((e) => e.id === exId);
+    if (!x?.task?.item) return;
+    try {
+      if (action === "undo") await api.deleteTask(x.task.item.id);
+      else await api.completeTask(x.task.item.id);
+      patch(exId, { task: { ...x.task, state: action === "undo" ? "undone" : "done" } });
+      void dash.reload();
+    } catch {
+      patch(exId, { task: { ...x.task, state: "error" } });
+    }
+  };
+
   const decideSuggestion = async (exId: number, idx: number, save: boolean) => {
     const x = logRef.current.find((e) => e.id === exId);
     const sg = x?.suggestions?.[idx];
@@ -235,7 +250,7 @@ export function ControlCenter() {
           )}
 
           <div className="dock">
-            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} />
+            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} />
             <CommandBar
               busy={busy}
               offline={offline}

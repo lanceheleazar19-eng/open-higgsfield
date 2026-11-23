@@ -4,6 +4,8 @@ import { Icon } from "../Icon";
 
 export const QUICK_COMMANDS = [
   "¿Qué tengo pendiente hoy?",
+  "Organízame la semana",
+  "¿Cómo voy con mis objetivos?",
   "¿Qué tareas son prioritarias?",
   "Próximos eventos",
   "¿Cuánto he gastado este mes?",
@@ -62,7 +64,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           ref={inputRef}
           value={voice.listening ? voice.interim : text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={voice.listening ? "Escuchando…" : "Habla o escribe a ATLAS…  ( / )"}
+          placeholder={voice.listening ? "Escuchando…" : "Habla o escribe a ATLAS… «apúntame…», «recuerda que…»  ( / )"}
           aria-label="Mensaje para ATLAS"
           maxLength={2000}
           readOnly={voice.listening}

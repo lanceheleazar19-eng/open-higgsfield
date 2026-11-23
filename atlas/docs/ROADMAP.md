@@ -6,8 +6,8 @@
 | 1.5 | ATLAS 2.0: centro de control holográfico | ✅ Completada |
 | 2 | Cerebro IA con Ollama: conversación en streaming anclada a tus datos | ✅ Completada |
 | 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ✅ Completada |
-| 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ⏳ Siguiente |
-| 5 | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | — |
+| 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ✅ Completada |
+| 5 | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ⏳ Siguiente |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
 | 8 | Calendario + Google Calendar | — |
@@ -76,3 +76,18 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Página Memoria: buscar, filtrar, añadir, editar, hacer permanente, olvidar, limpiar caducados,
   exportar JSON; pestaña de conversaciones con búsqueda y borrado.
 - Misión de ATLAS en su identidad: ayudar al usuario a alcanzar su potencial, conectando consejos con sus objetivos.
+
+## Fase 4 — tareas y objetivos medibles
+- Tareas: prioridad, fecha con hora o de día completo, categoría (#etiqueta), objetivo vinculado,
+  recordatorio (aviso en pantalla + notificación del sistema mientras ATLAS está abierto).
+- Lenguaje natural en español (sin IA): «apúntame llamar al gestor el viernes a las 10, es urgente»,
+  «recuérdame comprar leche mañana», «he terminado lo del gestor» (pide confirmación).
+- Página Tareas: alta rápida con vista previa de la interpretación, grupos (atrasadas, hoy, próximas,
+  sin fecha), completar/reabrir, edición, filtros y resumen del día.
+- Semana: plan automático (atrasado y con fecha primero, resto por prioridad, tope por día);
+  «Aplicar plan» fija fechas solo a tareas sin fecha, con confirmación.
+- Objetivos numéricos (subir o bajar: ahorro, peso, clientes…) o por hitos (tareas vinculadas).
+  Cálculos reales: % de progreso, progreso esperado a hoy, ritmo (adelantado / en ritmo / por detrás /
+  fuera de plazo), cantidad necesaria por semana, ritmo real y fecha proyectada. Historial de registros.
+- Alertas de objetivos atrasados; objetivos (y plan semanal si se pide) en el contexto de la IA;
+  modo local responde «¿cómo voy con mis objetivos?» y «organízame la semana».

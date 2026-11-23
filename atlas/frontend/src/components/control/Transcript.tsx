@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { MemoryItem, MemorySuggestion } from "../../api/types";
+import type { MemoryItem, MemorySuggestion, TaskItem } from "../../api/types";
 import { KIND_LABEL } from "../../lib/memory";
 
 export interface Exchange {
@@ -7,10 +7,11 @@ export interface Exchange {
   question: string;
   reply: string;
   phase: "thinking" | "streaming" | "done" | "error" | "stopped";
-  mode?: "ai" | "local" | "memory";
+  mode?: "ai" | "local" | "memory" | "tasks";
   model?: string | null;
   note?: string | null;
   memory?: { action: "saved" | "duplicate" | "forget_candidate"; item: MemoryItem; state: "shown" | "done" | "error"; error?: string };
+  task?: { action: "created" | "complete_candidate" | "not_found"; item: TaskItem | null; state: "shown" | "done" | "undone" | "error" };
   suggestions?: (MemorySuggestion & { state: "pending" | "saved" | "dismissed" | "error" })[];
 }
 
@@ -19,6 +20,7 @@ function Source({ x }: { x: Exchange }) {
   if (x.phase === "stopped") return <span className="src">Detenido</span>;
   if (x.mode === "ai") return <span className="src src-ai">IA · {x.model}</span>;
   if (x.mode === "memory") return <span className="src src-mem">Memoria</span>;
+  if (x.mode === "tasks") return <span className="src src-task">Tareas</span>;
   if (x.mode === "local") return <span className="src" title={x.note ?? undefined}>Modo local</span>;
   return null;
 }
@@ -42,8 +44,33 @@ function MemoryNote({ x, onForget }: { x: Exchange; onForget: (id: number) => vo
   );
 }
 
-export function Transcript({ items, onNew, onForget, onSuggestion }: {
+function TaskNote({ x, onTask }: { x: Exchange; onTask: (exchangeId: number, action: "undo" | "complete") => void }) {
+  const t = x.task!;
+  if (!t.item) return null;
+  if (t.action === "created") {
+    if (t.state === "undone") return <p className="mem-note">Tarea eliminada.</p>;
+    return (
+      <p className="mem-note">
+        ✅ Tarea creada · <Link to="/tasks">Ver tareas</Link>{" "}
+        <button type="button" className="mini-btn ghost" onClick={() => onTask(x.id, "undo")}>Deshacer</button>
+      </p>
+    );
+  }
+  if (t.action === "complete_candidate") {
+    if (t.state === "done") return <p className="mem-note">✓ Hecha: «{t.item.title}»</p>;
+    return (
+      <p className="mem-note">
+        <button type="button" className="mini-btn" onClick={() => onTask(x.id, "complete")}>Marcar como hecha «{t.item.title}»</button>
+        {t.state === "error" && <span className="t-warn"> No se pudo.</span>}
+      </p>
+    );
+  }
+  return null;
+}
+
+export function Transcript({ items, onNew, onForget, onSuggestion, onTask }: {
   items: Exchange[];
+  onTask: (exchangeId: number, action: "undo" | "complete") => void;
   onNew: () => void;
   onForget: (exchangeId: number) => void;
   onSuggestion: (exchangeId: number, index: number, save: boolean) => void;
@@ -67,6 +94,7 @@ export function Transcript({ items, onNew, onForget, onSuggestion }: {
                 : <>{x.reply}{x.phase === "streaming" && <span className="caret" aria-hidden="true" />}</>}
             </p>
             {x.memory && <MemoryNote x={x} onForget={onForget} />}
+            {x.task && <TaskNote x={x} onTask={onTask} />}
             {x.suggestions?.some((s) => s.state !== "dismissed") && (
               <div className="suggest" role="group" aria-label="ATLAS propone recordar">
                 <span className="suggest-title">ATLAS propone recordar</span>

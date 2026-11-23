@@ -9,7 +9,8 @@ export const health: Health = {
 
 export const modules: ModuleInfo[] = [
   { id: "dashboard", name: "Dashboard", phase: 1, status: "active", summary: "", planned: [] },
-  { id: "tasks", name: "Tareas", phase: 4, status: "planned", summary: "Gestión de tareas.", planned: ["Prioridades"] },
+  { id: "tasks", name: "Tareas", phase: 4, status: "active", summary: "Tareas.", planned: [] },
+  { id: "gym", name: "Gimnasio", phase: 5, status: "planned", summary: "Entrenamiento.", planned: ["Series y RIR"] },
   { id: "settings", name: "Configuración", phase: 1, status: "active", summary: "", planned: [] },
 ];
 
