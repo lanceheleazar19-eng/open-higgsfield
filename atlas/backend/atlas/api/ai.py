@@ -47,6 +47,7 @@ def ai_status(db: DB) -> dict:
 
 GYM_Q = re.compile(r"entren|gimnasio|gym|rutina|toca hoy|musculo|volumen|series|progres|mejorando|fuerza|press|curl|"
                    r"dominad|jalon|remo|triceps|biceps|pecho|espalda|hombro|pierna|1rm|estanc|peso|kilos|kg")
+NUT_Q = re.compile(r"comid|comer|dieta|calori|kcal|proteina|macro|hidrat|grasa|nutric|desayun|cena|almuerz|merienda|volumen|engord|peso")
 PLAN_Q = re.compile(r"organiza|planifica|plan de la semana|mi semana|esta semana|que hago (esta|la) semana")
 DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "crítica"}
@@ -55,6 +56,35 @@ PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "críti
 def _when(dt: datetime, all_day: bool) -> str:
     s = f"el {DAYS[dt.weekday()]} {dt.day}/{dt.month}"
     return s if all_day else f"{s} a las {dt:%H:%M}"
+
+
+def _meal_log(db, text: str, tz: str):  # noqa: ANN001
+    from atlas.models import Food
+    from atlas.nutrition import service as nut
+    now = datetime.now(ZoneInfo(tz)).replace(tzinfo=None)
+    cmd = nut.parse_meal_command(text, now)
+    if not cmd:
+        return None
+    meal, body = cmd
+    items = nut.parse_meal_text(body, list(db.scalars(select(Food))))
+    found = [(i["food"], i["grams"]) for i in items if i["food"]]
+    missing = [i["name"] for i in items if not i["food"]]
+    if not found:
+        return ({"type": "meal", "action": "not_found", "entries": [], "missing": missing},
+                "No reconozco esos alimentos. Añádelos en Nutrición > Alimentos o escríbelos de otra forma.")
+    entries = nut.add_entries(db, now.date(), meal, found, "text")
+    db.commit()
+    tot = nut.day_totals(db, now.date())
+    kcal = round(sum(e.kcal for e in entries))
+    prot = round(sum(e.protein for e in entries))
+    reply = f"Registrado en {meal}: " + ", ".join(f"{e.name} ({_es(e.grams)} g)" for e in entries) + f". {kcal} kcal y {prot} g de proteína."
+    cfg = get_prefs(db).get("nutrition_profile")
+    t = nut.compute_targets(cfg, nut.latest_weight(db)) if cfg else None
+    if t:
+        reply += f" Hoy llevas {tot['kcal']} de {t['kcal']} kcal y {round(tot['protein'])} de {t['protein']} g de proteína."
+    if missing:
+        reply += " No reconocí: " + ", ".join(missing) + "."
+    return {"type": "meal", "action": "logged", "entries": [nut.entry_dict(e) for e in entries], "missing": missing}, reply
 
 
 def _es(v: float) -> str:
@@ -137,6 +167,17 @@ def chat(body: ChatIn) -> StreamingResponse:
             db.commit()
             yield _line({"type": "meta", "conversation_id": conv.id})
 
+            # Registro de comidas: «he desayunado 2 huevos y una tostada»
+            meal_ev = _meal_log(db, body.text, tz)
+            if meal_ev:
+                ev, reply = meal_ev
+                yield _line(ev)
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "nutrition", "model": None})
+                convs.add_message(db, conv, "assistant", reply, mode="local")
+                db.commit()
+                return
+
             # Registro de entrenamiento: «press inclinado 3x8 40kg rir 2»
             gym_ev = _gym_log(db, body.text, tz)
             if gym_ev:
@@ -190,6 +231,13 @@ def chat(body: ChatIn) -> StreamingResponse:
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
             d["goal_snapshot"] = goals_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
+            if NUT_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
+                from atlas.nutrition import service as nut
+                today = date.fromisoformat(d["generated_at"][:10])
+                cfg = prefs.get("nutrition_profile")
+                d["nutrition"] = {"hoy": nut.day_totals(db, today),
+                                  "objetivos": nut.compute_targets(cfg, nut.latest_weight(db)) if cfg else "perfil nutricional sin completar",
+                                  "ultimos_7_dias": nut.week_series(db, today)}
             if GYM_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
                 d["gym"] = gym_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
             if PLAN_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:

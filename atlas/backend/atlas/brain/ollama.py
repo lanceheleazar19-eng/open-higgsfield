@@ -61,6 +61,7 @@ class OllamaProvider(LLMProvider):
             raise ProviderError(f"No se pudo conectar con Ollama en {self.base_url}: {type(exc).__name__}") from exc
 
     def complete_json(self, model: str, messages: list[dict]) -> dict:
+        """`messages` puede incluir "images": [base64] (modelos de visión)."""
         payload = {"model": model, "messages": messages, "stream": False, "format": "json",
                    "options": {"temperature": 0.1, "num_ctx": 4096}, "keep_alive": "15m"}
         try:

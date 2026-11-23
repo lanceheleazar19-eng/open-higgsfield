@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import ai, assistant, dashboard, goals, gym, memory, profile, settings, system, tasks
+from atlas.api import ai, assistant, dashboard, goals, gym, memory, nutrition, profile, settings, system, tasks
 from atlas.config import get_settings
 from atlas.db import init_db
 
@@ -30,7 +30,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["*"],
     )
-    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router):
+    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

@@ -15,6 +15,7 @@ DEFAULTS: dict[str, object] = {
     "username": "",
     "personal_preferences": "",
     "profile_created_at": None,
+    "nutrition_profile": None,
 }
 
 

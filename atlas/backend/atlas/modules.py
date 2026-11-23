@@ -28,6 +28,7 @@ MODULES: list[Module] = [
     Module("gym", "Gimnasio", 5, "active", "Entrenamiento, progresión y medidas físicas.",
            ["Rutinas y ejercicios", "Series, repeticiones, peso y RIR", "Volumen semanal",
             "Progresión de fuerza", "Detección de estancamientos"]),
+    Module("nutrition", "Nutrición", 5, "active", "Comidas, macros y fotos del plato analizadas en local."),
     Module("finance", "Finanzas", 6, "planned", "Dinero real: ingresos, gastos y presupuestos.",
            ["Ingresos y gastos", "Categorías y presupuestos", "Ahorro y objetivos",
             "Alertas de gasto excesivo", "Informes y gráficos"]),

@@ -14,10 +14,10 @@ def test_health_reports_online_and_ai_not_configured(client):
 
 def test_modules_registry_has_all_sidebar_sections(client):
     ids = [m["id"] for m in client.get("/api/system/modules").json()]
-    assert ids == ["dashboard", "ai", "tasks", "gym", "finance", "trading",
+    assert ids == ["dashboard", "ai", "tasks", "gym", "nutrition", "finance", "trading",
                    "projects", "calendar", "memory", "research", "agents", "reports", "settings"]
     active = {m.id for m in MODULES if m.status == "active"}
-    assert active == {"dashboard", "ai", "memory", "tasks", "gym", "settings"}
+    assert active == {"dashboard", "ai", "memory", "tasks", "gym", "nutrition", "settings"}
 
 
 def test_root_without_frontend_build(client):

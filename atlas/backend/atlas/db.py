@@ -81,5 +81,7 @@ def init_db() -> None:
     get_engine()
     command.upgrade(alembic_config(), "head")
     from atlas.gym.library import ensure_library
+    from atlas.nutrition.service import ensure_foods
     with session_scope() as db:
         ensure_library(db)
+        ensure_foods(db)
