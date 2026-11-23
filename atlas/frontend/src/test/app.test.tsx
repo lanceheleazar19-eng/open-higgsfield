@@ -436,7 +436,33 @@ test("pantalla de arranque: al pulsar Iniciar, ATLAS da la bienvenida en voz alt
   renderAt("/");
   expect(await screen.findByRole("dialog", { name: "Inicio de ATLAS" })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Iniciar ATLAS" }));
-  await waitFor(() => expect(spoken.join(" ")).toContain("Bienvenido de nuevo"));
+  await waitFor(() => expect(spoken.join(" ")).toContain("Bienvenido de nuevo"), { timeout: 3000 });
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(sessionStorage.getItem("atlas.booted")).toBe("1");
+});
+
+test("la bienvenida espera a que el navegador cargue las voces y usa la elegida", async () => {
+  localStorage.setItem("atlas.welcome", "1");
+  localStorage.setItem("atlas.voice", "monica-enh");
+  const spoken: { text: string; voice?: string }[] = [];
+  let voices: { name: string; lang: string; voiceURI: string; localService: boolean }[] = [];
+  const listeners: (() => void)[] = [];
+  class FakeUtterance { text: string; rate = 1; lang = ""; voice?: { name: string }; onend?: () => void; onerror?: () => void; onstart?: () => void;
+    constructor(t: string) { this.text = t; } }
+  vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+  vi.stubGlobal("speechSynthesis", {
+    getVoices: () => voices, cancel: vi.fn(),
+    addEventListener: (_: string, fn: () => void) => listeners.push(fn), removeEventListener: vi.fn(),
+    speak: (u: FakeUtterance) => { spoken.push({ text: u.text, voice: u.voice?.name }); u.onend?.(); },
+  });
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard,
+    "/api/assistant/welcome": { intent: "welcome", mode: "local", reply: "Bienvenido de nuevo." } });
+  renderAt("/");
+  fireEvent.click(await screen.findByRole("button", { name: "Iniciar ATLAS" }));
+  await new Promise((r) => setTimeout(r, 100));
+  expect(spoken).toEqual([]); // aún no hay voces: espera en lugar de usar la voz por defecto
+  voices = [{ name: "Eddy (Spanish (Spain))", lang: "es-ES", voiceURI: "eddy", localService: true },
+    { name: "Mónica (Mejorada)", lang: "es-ES", voiceURI: "monica-enh", localService: true }];
+  listeners.forEach((fn) => fn());
+  await waitFor(() => expect(spoken).toEqual([{ text: "Bienvenido de nuevo.", voice: "Mónica (Mejorada)" }]));
 });

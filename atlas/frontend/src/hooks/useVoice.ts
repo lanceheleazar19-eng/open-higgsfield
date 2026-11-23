@@ -110,23 +110,42 @@ export function useVoice(onFinal: (text: string) => void): Voice {
   return { canListen: !!Ctor, canSpeak, listening, speaking, interim, error, listen, stopListening, speak, enqueue, stopSpeaking };
 }
 
+/** Chrome carga las voces de forma asíncrona: al abrir la página getVoices() está vacío.
+ *  Espera a que estén disponibles (máx. 1,5 s) para no usar la voz por defecto del navegador. */
+export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
+  const synth = window.speechSynthesis;
+  const now = synth.getVoices();
+  if (now.length) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      synth.removeEventListener?.("voiceschanged", done);
+      resolve(synth.getVoices());
+    };
+    const timer = setTimeout(done, timeoutMs);
+    synth.addEventListener?.("voiceschanged", done);
+  });
+}
+
 /** Lee un texto frase a frase con la voz y velocidad elegidas en Configuración (interrumpe lo anterior). */
 export function speakText(text: string, onStart?: () => void, onEnd?: () => void, override?: { voiceURI?: string | null; rate?: number }) {
   window.speechSynthesis.cancel();
-  const synth = window.speechSynthesis;
-  const prefs = { ...loadVoicePrefs(), ...override };
-  const voice = pickVoice(synth.getVoices(), prefs.voiceURI ?? null);
-  const chunks = speechChunks(text);
-  if (!chunks.length) return;
-  chunks.forEach((chunk, i) => {
-    const u = new SpeechSynthesisUtterance(chunk);
-    u.lang = voice?.lang ?? "es-ES";
-    if (voice) u.voice = voice;
-    u.rate = prefs.rate;
-    if (i === 0) u.onstart = () => onStart?.();
-    if (i === chunks.length - 1) { u.onend = () => onEnd?.(); }
-    u.onerror = () => onEnd?.();
-    synth.speak(u);
+  void voicesReady().then((voices) => {
+    const synth = window.speechSynthesis;
+    const prefs = { ...loadVoicePrefs(), ...override };
+    const voice = pickVoice(voices, prefs.voiceURI ?? null);
+    const chunks = speechChunks(text);
+    if (!chunks.length) return;
+    chunks.forEach((chunk, i) => {
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.lang = voice?.lang ?? "es-ES";
+      if (voice) u.voice = voice;
+      u.rate = prefs.rate;
+      if (i === 0) u.onstart = () => onStart?.();
+      if (i === chunks.length - 1) { u.onend = () => onEnd?.(); }
+      u.onerror = () => onEnd?.();
+      synth.speak(u);
+    });
   });
 }
 
@@ -144,10 +163,17 @@ export function useSystemVoices(): SpeechSynthesisVoice[] {
 }
 
 /** Encola cada trozo como locución independiente; onStart/onEnd se llaman por trozo. */
+let queueTail: Promise<unknown> = Promise.resolve();
+
 function queueSpeech(text: string, onChunkStart: () => void, onChunkEnd: () => void) {
+  // Encadenado para conservar el orden de las frases aunque las voces tarden en cargar
+  queueTail = queueTail.then(() => voicesReady()).then((voices) => speakChunks(voices, text, onChunkStart, onChunkEnd));
+}
+
+function speakChunks(voices: SpeechSynthesisVoice[], text: string, onChunkStart: () => void, onChunkEnd: () => void) {
   const synth = window.speechSynthesis;
   const prefs = loadVoicePrefs();
-  const voice = pickVoice(synth.getVoices(), prefs.voiceURI);
+  const voice = pickVoice(voices, prefs.voiceURI);
   for (const chunk of speechChunks(text)) {
     const u = new SpeechSynthesisUtterance(chunk);
     u.lang = voice?.lang ?? "es-ES";
