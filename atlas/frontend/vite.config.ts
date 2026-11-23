@@ -4,6 +4,8 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  // three.js (~550 KB) va en su propio chunk y solo se carga si hay WebGL
+  build: { chunkSizeWarningLimit: 700 },
   server: {
     host: "127.0.0.1",
     port: 5173,
