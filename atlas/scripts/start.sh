@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-# Arranca ATLAS (Linux / macOS). Instala dependencias la primera vez.
+# Arranca ATLAS (macOS / Linux). Instala o actualiza lo necesario automáticamente.
+# Uso: ./scripts/start.sh            (añade --rebuild para forzar recompilar la interfaz)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$ROOT/backend"
 
+hash_of() { (shasum -a 256 "$@" 2>/dev/null || sha256sum "$@") | awk '{print $1}' | tr -d '\n'; }
+
+# ---------- Backend (Python) ----------
+cd "$ROOT/backend"
 if [ ! -x .venv/bin/python ]; then
   echo "▸ Creando entorno Python…"
   if command -v uv >/dev/null; then
@@ -23,20 +27,35 @@ if [ ! -x .venv/bin/python ]; then
     "$PY" -m venv .venv
   fi
 fi
-if ! .venv/bin/python -c "import atlas" 2>/dev/null; then
-  echo "▸ Instalando backend…"
+# Reinstala dependencias solo si pyproject.toml ha cambiado desde la última vez
+DEPS_HASH="$(hash_of pyproject.toml)"
+if [ "$(cat .venv/.atlas-deps 2>/dev/null || true)" != "$DEPS_HASH" ]; then
+  echo "▸ Instalando dependencias del backend…"
   if command -v uv >/dev/null; then uv pip install -q --python .venv -e ".[dev]"; else .venv/bin/pip install -q -e ".[dev]"; fi
+  echo "$DEPS_HASH" > .venv/.atlas-deps
 fi
-[ -f .env ] || cp .env.example .env
+if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
 
+# ---------- Frontend (interfaz) ----------
 cd "$ROOT/frontend"
 if ! command -v npm >/dev/null; then
   echo "✖ Falta Node.js. Instálalo desde https://nodejs.org (versión LTS) y vuelve a ejecutar este script."
   exit 1
 fi
-if [ ! -d node_modules ]; then echo "▸ Instalando frontend…"; npm install --no-fund --no-audit; fi
-if [ ! -f dist/index.html ] || [ "${1:-}" = "--rebuild" ]; then echo "▸ Compilando interfaz…"; npm run build; fi
+LOCK_HASH="$(hash_of package-lock.json)"
+if [ ! -d node_modules ] || [ "$(cat node_modules/.atlas-deps 2>/dev/null || true)" != "$LOCK_HASH" ]; then
+  echo "▸ Instalando dependencias de la interfaz…"
+  npm install --no-fund --no-audit
+  echo "$LOCK_HASH" > node_modules/.atlas-deps
+fi
+# Recompila si no hay build, si se pide, o si el código es más nuevo que el build
+if [ ! -f dist/index.html ] || [ "${1:-}" = "--rebuild" ] || \
+   [ -n "$(find src index.html package.json -newer dist/index.html -print -quit 2>/dev/null)" ]; then
+  echo "▸ Compilando la interfaz…"
+  npm run build
+fi
 
+# ---------- Arranque ----------
 cd "$ROOT/backend"
-echo "▸ ATLAS en http://127.0.0.1:${ATLAS_PORT:-8000}"
+echo "▸ ATLAS en http://127.0.0.1:${ATLAS_PORT:-8000}  (Ctrl+C para detener)"
 exec .venv/bin/python -m atlas

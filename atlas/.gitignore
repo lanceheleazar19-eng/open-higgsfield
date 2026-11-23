@@ -10,3 +10,6 @@ frontend/dist/
 *.db
 *.db-journal
 *.egg-info/
+
+# El .gitignore raíz del repo ignora .env*; la plantilla sí debe subirse
+!.env.example
