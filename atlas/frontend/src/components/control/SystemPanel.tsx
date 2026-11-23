@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { Health } from "../../api/types";
 import { formatBytes } from "../../lib/bytes";
 import type { Voice } from "../../hooks/useVoice";
@@ -25,10 +26,11 @@ export function SystemPanel({ health, offline, voice, speakReplies }: {
       <section>
         <h3>Cerebro IA</h3>
         <dl>
-          <Row k="Modo" v={health?.ai.configured ? "Modelo de IA" : "Local (sin modelo)"} tone={health?.ai.configured ? "ok" : "dim"} />
-          <Row k="Modelos conectados" v={health?.ai.provider ?? "Ninguno"} tone={health?.ai.provider ? "ok" : "dim"} />
+          <Row k="Modo" v={health?.ai.configured ? "IA local (Ollama)" : "Local (sin modelo)"} tone={health?.ai.configured ? "ok" : "dim"} />
+          <Row k="Modelo activo" v={health?.ai.model ?? "Ninguno"} tone={health?.ai.model ? "ok" : "dim"} />
+          <Row k="Modelos instalados" v={health ? String(health.ai.models_installed) : "—"} />
         </dl>
-        {!health?.ai.configured && <p className="hud-note">{health?.ai.note ?? "Disponible en la Fase 2"}</p>}
+        {health && !health.ai.configured && <p className="hud-note">{health.ai.note} <Link to="/ai">Configurar</Link></p>}
       </section>
       <section>
         <h3>Memoria</h3>

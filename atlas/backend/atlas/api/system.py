@@ -9,6 +9,8 @@ from atlas.api.deps import DB
 from atlas.config import get_settings
 from atlas.models import ActivityLog, CalendarEvent, Project, Task, Transaction, WorkoutSession
 from atlas.modules import modules_as_dicts
+from atlas.brain.orchestrator import brain_status
+from atlas.services.preferences import get_prefs
 
 router = APIRouter(prefix="/api/system", tags=["system"])
 
@@ -26,8 +28,7 @@ def health(db: DB) -> dict:
         "status": "online" if db_ok else "degraded",
         "version": __version__,
         "database": {"ok": db_ok, "engine": s.db_url.split(":", 1)[0]},
-        # Fase 2 conectará el cerebro. Se informa honestamente que aún no existe.
-        "ai": {"configured": False, "provider": None, "note": "Disponible en la Fase 2"},
+        "ai": _ai(db),
         "python": platform.python_version(),
     }
 
@@ -47,3 +48,14 @@ def _storage(db, s) -> dict:  # noqa: ANN001
         for m in (Task, CalendarEvent, Transaction, WorkoutSession, Project, ActivityLog)
     )
     return {"db_bytes": db_bytes, "disk_free_bytes": usage.free, "disk_total_bytes": usage.total, "records": records}
+
+
+def _ai(db) -> dict:  # noqa: ANN001
+    st = brain_status(get_prefs(db))
+    return {
+        "configured": st["configured"],
+        "provider": st["provider"] if st["reachable"] else None,
+        "model": st["model"],
+        "models_installed": len(st["models"]),
+        "note": st["note"] or "Cerebro conectado",
+    }

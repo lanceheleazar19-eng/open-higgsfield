@@ -4,7 +4,7 @@ export interface Health {
   status: "online" | "degraded";
   version: string;
   database: { ok: boolean; engine: string };
-  ai: { configured: boolean; provider: string | null; note: string };
+  ai: { configured: boolean; provider: string | null; model: string | null; models_installed: number; note: string };
   python: string;
   storage: { db_bytes: number; disk_free_bytes: number; disk_total_bytes: number; records: number } | null;
 }
@@ -34,6 +34,30 @@ export interface Prefs {
   user_name: string;
   timezone: string;
   currency: string;
+  ai_model: string;
+}
+
+export interface AiStatus {
+  provider: string;
+  url: string | null;
+  reachable: boolean;
+  models: { name: string; size_bytes: number; parameter_size: string | null; family: string | null }[];
+  model: string | null;
+  preferred: string | null;
+  configured: boolean;
+  error: string | null;
+  note: string | null;
+}
+
+export type ChatEvent =
+  | { type: "status"; state: "thinking"; model: string }
+  | { type: "delta"; text: string }
+  | { type: "done"; mode: "ai" | "local"; model: string | null; reason?: string | null }
+  | { type: "error"; message: string };
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
 export interface Dashboard {

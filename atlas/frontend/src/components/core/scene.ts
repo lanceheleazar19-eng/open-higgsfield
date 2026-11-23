@@ -207,7 +207,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
 
   // Onda expansiva al recibir una consulta (mira siempre a cámara: fuera de root)
   const rippleMat = track(new THREE.MeshBasicMaterial({ color: 0x5fd8ff, opacity: 0, side: THREE.DoubleSide, ...additive }));
-  const rippleMesh = new THREE.Mesh(track(new THREE.RingGeometry(0.97, 1, 96)), rippleMat);
+  const rippleMesh = new THREE.Mesh(track(new THREE.RingGeometry(0.992, 1, 128)), rippleMat);
   scene.add(rippleMesh);
   let rippleT = -1;
 
@@ -283,7 +283,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
       rippleT += f.dt;
       const p = rippleT / 1.4;
       rippleMesh.scale.setScalar(1.2 + p * 3.8);
-      rippleMat.opacity = Math.max(0, 0.55 * (1 - p));
+      rippleMat.opacity = Math.max(0, 0.9 * (1 - p) * (1 - p));
       rippleMat.color.copy(acc);
       if (p >= 1) { rippleT = -1; rippleMat.opacity = 0; }
     }

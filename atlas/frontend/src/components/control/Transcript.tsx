@@ -1,33 +1,22 @@
-import { useEffect, useState } from "react";
-
 export interface Exchange {
   id: number;
   question: string;
-  reply: string | null; // null = procesando
-  error?: boolean;
+  reply: string;
+  phase: "thinking" | "streaming" | "done" | "error" | "stopped";
+  mode?: "ai" | "local";
+  model?: string | null;
+  note?: string | null;
 }
 
-/** Muestra la respuesta revelándose progresivamente (mientras el núcleo «responde»). */
-function Reveal({ text, onDone }: { text: string; onDone: () => void }) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    setN(0);
-    const step = Math.max(2, Math.ceil(text.length / 90));
-    const id = setInterval(() => {
-      setN((v) => {
-        const next = Math.min(text.length, v + step);
-        if (next >= text.length) { clearInterval(id); onDone(); }
-        return next;
-      });
-    }, 22);
-    return () => clearInterval(id);
-  }, [text]); // eslint-disable-line react-hooks/exhaustive-deps
-  return <>{text.slice(0, n)}{n < text.length && <span className="caret" aria-hidden="true" />}</>;
+function Source({ x }: { x: Exchange }) {
+  if (x.phase === "error") return <span className="src src-err">Error</span>;
+  if (x.phase === "stopped") return <span className="src">Detenido</span>;
+  if (x.mode === "ai") return <span className="src src-ai">IA · {x.model}</span>;
+  if (x.mode === "local") return <span className="src" title={x.note ?? undefined}>Modo local</span>;
+  return null;
 }
 
-export function Transcript({ items, revealId, onRevealed, onClear }: {
-  items: Exchange[]; revealId: number | null; onRevealed: () => void; onClear: () => void;
-}) {
+export function Transcript({ items, onClear }: { items: Exchange[]; onClear: () => void }) {
   if (items.length === 0) return null;
   return (
     <section className="transcript" aria-label="Conversación con ATLAS" aria-live="polite">
@@ -36,12 +25,13 @@ export function Transcript({ items, revealId, onRevealed, onClear }: {
         <button type="button" className="link-btn" onClick={onClear}>Limpiar</button>
       </header>
       <ol>
-        {items.slice(-3).map((x) => (
+        {items.slice(-4).map((x) => (
           <li key={x.id}>
-            <p className="q">{x.question}</p>
-            <p className={`a ${x.error ? "t-warn" : ""}`}>
-              {x.reply === null ? <span className="thinking-dots" aria-label="Procesando"><i /><i /><i /></span>
-                : x.id === revealId ? <Reveal text={x.reply} onDone={onRevealed} /> : x.reply}
+            <p className="q">{x.question} <Source x={x} /></p>
+            <p className={`a ${x.phase === "error" ? "t-warn" : ""}`}>
+              {x.phase === "thinking"
+                ? <span className="thinking-dots" aria-label="Procesando"><i /><i /><i /></span>
+                : <>{x.reply}{x.phase === "streaming" && <span className="caret" aria-hidden="true" />}</>}
             </p>
           </li>
         ))}

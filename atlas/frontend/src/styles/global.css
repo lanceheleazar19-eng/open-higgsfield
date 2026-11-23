@@ -300,6 +300,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.01e
 .transcript .q { margin: 0; font-size: 12.5px; color: var(--text-3); }
 .transcript .q::before { content: "› "; color: var(--blue-2); }
 .transcript .a { margin: 2px 0 0; font-size: 14px; white-space: pre-line; }
+.src { margin-left: 6px; font: 600 9.5px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+.src-ai { color: var(--cyan); border-color: rgba(34, 211, 238, .35); }
+.src-err { color: var(--amber); border-color: rgba(251, 191, 36, .4); }
+.callout { margin: 0 0 12px; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: var(--amber); background: rgba(251, 191, 36, .06); border: 1px solid rgba(251, 191, 36, .25); }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13.5px; color: var(--text-2); }
 .caret { display: inline-block; width: 7px; height: 1em; margin-left: 2px; vertical-align: text-bottom; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: blink .7s steps(2) infinite; }
 .thinking-dots { display: inline-flex; gap: 5px; padding: 4px 0; }
 .thinking-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: bounce 1s ease-in-out infinite; }

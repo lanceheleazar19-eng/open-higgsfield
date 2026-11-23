@@ -11,6 +11,7 @@ DEFAULTS: dict[str, object] = {
     "user_name": "",
     "timezone": None,  # None => ATLAS_TIMEZONE del entorno
     "currency": "EUR",
+    "ai_model": "",  # "" => elección automática
 }
 
 

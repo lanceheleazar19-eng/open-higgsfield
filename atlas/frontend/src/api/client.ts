@@ -1,4 +1,4 @@
-import type { AssistantReply, Dashboard, Health, ModuleInfo, Prefs } from "./types";
+import type { AiStatus, AssistantReply, ChatEvent, ChatMessage, Dashboard, Health, ModuleInfo, Prefs } from "./types";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -37,5 +37,39 @@ export const api = {
   updatePrefs: (p: Partial<Prefs>) => request<Prefs>("/api/settings", { method: "PUT", body: JSON.stringify(p) }),
   ask: (text: string) => request<AssistantReply>("/api/assistant/query", { method: "POST", body: JSON.stringify({ text }) }),
   briefing: () => request<AssistantReply>("/api/assistant/briefing"),
+  aiStatus: () => request<AiStatus>("/api/ai/status"),
+  chat: chatStream,
   timezones: () => request<string[]>("/api/settings/timezones"),
 };
+
+/** Conversación en streaming (NDJSON): llama a `onEvent` por cada evento recibido. */
+async function chatStream(text: string, history: ChatMessage[], onEvent: (e: ChatEvent) => void, signal?: AbortSignal): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch("/api/assistant/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, history }),
+      signal,
+    });
+  } catch (e) {
+    if ((e as Error).name === "AbortError") throw e;
+    throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+  }
+  if (!res.ok || !res.body) throw new ApiError(res.status, `Error ${res.status} del núcleo`);
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (value) buf += decoder.decode(value, { stream: true });
+    let nl: number;
+    while ((nl = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, nl).trim();
+      buf = buf.slice(nl + 1);
+      if (line) onEvent(JSON.parse(line) as ChatEvent);
+    }
+    if (done) break;
+  }
+  if (buf.trim()) onEvent(JSON.parse(buf) as ChatEvent);
+}

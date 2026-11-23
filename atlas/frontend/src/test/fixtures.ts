@@ -3,7 +3,7 @@ import type { Dashboard, Health, ModuleInfo, Prefs } from "../api/types";
 export const health: Health = {
   status: "online", version: "0.1.0", python: "3.13",
   database: { ok: true, engine: "sqlite" },
-  ai: { configured: false, provider: null, note: "Disponible en la Fase 2" },
+  ai: { configured: false, provider: null, model: null, models_installed: 0, note: "Ollama no detectado." },
   storage: { db_bytes: 81920, disk_free_bytes: 50e9, disk_total_bytes: 100e9, records: 12 },
 };
 
@@ -13,7 +13,7 @@ export const modules: ModuleInfo[] = [
   { id: "settings", name: "Configuración", phase: 1, status: "active", summary: "", planned: [] },
 ];
 
-export const prefs: Prefs = { user_name: "Lance", timezone: "Europe/Madrid", currency: "EUR" };
+export const prefs: Prefs = { user_name: "Lance", timezone: "Europe/Madrid", currency: "EUR", ai_model: "" };
 
 const days = Array.from({ length: 7 }, (_, i) => ({ date: `2026-11-${17 + i}`, sessions: 0 }));
 
@@ -37,8 +37,24 @@ export function mockFetch(routes: Record<string, unknown>) {
     const key = `${init?.method ?? "GET"} ${url}`;
     const body = key in routes ? routes[key] : routes[url];
     if (body === undefined) return new Response("{}", { status: 404 });
+    if (body && typeof body === "object" && "ndjson" in body) {
+      const lines = (body as { ndjson: unknown[] }).ndjson.map((e) => JSON.stringify(e) + "\n").join("");
+      return new Response(lines, { status: 200, headers: { "Content-Type": "application/x-ndjson" } });
+    }
     return new Response(JSON.stringify(body), { status: 200, headers: { "Content-Type": "application/json" } });
   });
   vi.stubGlobal("fetch", fn);
   return calls;
+}
+
+/** Respuesta en streaming del cerebro, troceada como la envía el backend. */
+export function chatReply(text: string, mode: "ai" | "local" = "local", model: string | null = null) {
+  const chunks = mode === "ai" ? text.match(/.{1,8}/g) ?? [] : [text];
+  return {
+    ndjson: [
+      ...(mode === "ai" ? [{ type: "status", state: "thinking", model }] : []),
+      ...chunks.map((t) => ({ type: "delta", text: t })),
+      { type: "done", mode, model },
+    ],
+  };
 }

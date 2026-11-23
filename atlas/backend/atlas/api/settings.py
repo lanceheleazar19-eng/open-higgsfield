@@ -12,6 +12,7 @@ class PrefsUpdate(BaseModel):
     user_name: str | None = Field(default=None, max_length=80)
     timezone: str | None = None
     currency: str | None = Field(default=None, min_length=3, max_length=3)
+    ai_model: str | None = Field(default=None, max_length=200)  # "" = automático
 
     @field_validator("user_name")
     @classmethod

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     data_dir: Path = ATLAS_ROOT / "data"
     database_url: str | None = None  # p.ej. postgresql+psycopg://... en el futuro
     timezone: str = "Europe/Madrid"
+    ollama_url: str = "http://127.0.0.1:11434"
     frontend_dist: Path = ATLAS_ROOT / "frontend" / "dist"
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 

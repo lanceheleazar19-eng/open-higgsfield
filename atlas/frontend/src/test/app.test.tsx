@@ -1,7 +1,7 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { App } from "../App";
-import { emptyDashboard, health, mockFetch, modules, prefs } from "./fixtures";
+import { chatReply, emptyDashboard, health, mockFetch, modules, prefs } from "./fixtures";
 
 function renderAt(path: string) {
   return render(<MemoryRouter initialEntries={[path]}><App /></MemoryRouter>);
@@ -90,20 +90,20 @@ test("los nodos del núcleo muestran datos reales y abren su módulo", async () 
 test("comando rápido consulta al asistente y muestra la respuesta", async () => {
   const calls = mockFetch({
     ...base, "/api/dashboard": emptyDashboard,
-    "POST /api/assistant/query": { intent: "tasks", mode: "local", reply: "No tienes tareas pendientes registradas." },
+    "POST /api/assistant/chat": chatReply("No tienes tareas pendientes registradas."),
   });
   renderAt("/");
   fireEvent.click(await screen.findByRole("button", { name: "¿Qué tengo pendiente hoy?" }));
   expect(await screen.findByText("No tienes tareas pendientes registradas.", {}, { timeout: 5000 })).toBeInTheDocument();
   const post = calls.find((c) => c.init?.method === "POST");
-  expect(JSON.parse(post!.init!.body as string)).toEqual({ text: "¿Qué tengo pendiente hoy?" });
+  expect(JSON.parse(post!.init!.body as string)).toEqual({ text: "¿Qué tengo pendiente hoy?", history: [] });
+  expect(within(screen.getByRole("region", { name: "Conversación con ATLAS" })).getByText("Modo local")).toBeInTheDocument();
 });
 
 test("barra de conversación: texto libre y resumen ejecutivo", async () => {
   const calls = mockFetch({
     ...base, "/api/dashboard": emptyDashboard,
-    "POST /api/assistant/query": { intent: "unknown", mode: "local", reply: "Sin modelo aún." },
-    "/api/assistant/briefing": { intent: "briefing", mode: "local", reply: "Resumen listo." },
+    "POST /api/assistant/chat": chatReply("Hola, Lance. Todo en orden.", "ai", "qwen2.5:7b"),
   });
   renderAt("/");
   const input = await screen.findByLabelText("Mensaje para ATLAS");
@@ -111,10 +111,18 @@ test("barra de conversación: texto libre y resumen ejecutivo", async () => {
   expect(send).toBeDisabled();
   fireEvent.change(input, { target: { value: "Hola ATLAS" } });
   fireEvent.click(send);
-  expect(await screen.findByText("Sin modelo aún.", {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(await screen.findByText("Hola, Lance. Todo en orden.", {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(screen.getByText("IA · qwen2.5:7b")).toBeInTheDocument();
+  await waitFor(() => expect(screen.getByRole("button", { name: "Resumen" })).toBeEnabled());
   fireEvent.click(screen.getByRole("button", { name: "Resumen" }));
-  expect(await screen.findByText("Resumen listo.", {}, { timeout: 5000 })).toBeInTheDocument();
-  expect(calls.some((c) => c.url === "/api/assistant/briefing")).toBe(true);
+  // la segunda petición lleva el hilo de la conversación
+  await waitFor(() => expect(calls.filter((c) => c.init?.method === "POST").length).toBe(2));
+  const body = JSON.parse(calls.filter((c) => c.init?.method === "POST")[1].init!.body as string);
+  expect(body.text).toMatch(/resumen ejecutivo/);
+  expect(body.history).toEqual([
+    { role: "user", content: "Hola ATLAS" },
+    { role: "assistant", content: "Hola, Lance. Todo en orden." },
+  ]);
 });
 
 test("micrófono deshabilitado y explicado si el navegador no soporta voz", async () => {
@@ -122,4 +130,38 @@ test("micrófono deshabilitado y explicado si el navegador no soporta voz", asyn
   renderAt("/");
   const mic = await screen.findByRole("button", { name: "Micrófono no disponible en este navegador" });
   expect(mic).toBeDisabled();
+});
+
+test("página de IA: estado de Ollama, modelos y selección", async () => {
+  const calls = mockFetch({
+    ...base,
+    "/api/ai/status": {
+      provider: "ollama", url: "http://127.0.0.1:11434", reachable: true, configured: true, model: "qwen2.5:7b",
+      preferred: null, error: null, note: null,
+      models: [
+        { name: "qwen2.5:7b", size_bytes: 4.7e9, parameter_size: "7.6B", family: "qwen2" },
+        { name: "llama3.2:3b", size_bytes: 2e9, parameter_size: "3.2B", family: "llama" },
+      ],
+    },
+    "PUT /api/settings": { ...prefs, ai_model: "llama3.2:3b" },
+  });
+  renderAt("/ai");
+  expect(await screen.findByText("Conectado")).toBeInTheDocument();
+  const select = await screen.findByLabelText("Modelo que usa ATLAS");
+  expect(screen.getByRole("option", { name: "Automático (qwen2.5:7b)" })).toBeInTheDocument();
+  fireEvent.change(select, { target: { value: "llama3.2:3b" } });
+  await screen.findByText("Modelo fijado: llama3.2:3b");
+  const put = calls.find((c) => c.init?.method === "PUT");
+  expect(JSON.parse(put!.init!.body as string)).toEqual({ ai_model: "llama3.2:3b" });
+});
+
+test("página de IA sin Ollama explica cómo activarlo", async () => {
+  mockFetch({
+    ...base,
+    "/api/ai/status": { provider: "ollama", url: "http://127.0.0.1:11434", reachable: false, configured: false, model: null,
+      preferred: null, error: "x", note: "Ollama no detectado.", models: [] },
+  });
+  renderAt("/ai");
+  expect(await screen.findByText("No detectado")).toBeInTheDocument();
+  expect(screen.getByText("ollama pull qwen2.5:7b")).toBeInTheDocument();
 });

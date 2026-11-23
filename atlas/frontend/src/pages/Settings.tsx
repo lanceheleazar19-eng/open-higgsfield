@@ -10,6 +10,7 @@ export function Settings() {
   const { prefs, reloadPrefs, health } = useAtlas();
   const tzs = useAsync(api.timezones);
   const [form, setForm] = useState({ user_name: "", timezone: "", currency: "EUR" });
+  // ai_model se gestiona en la página de Inteligencia artificial
   const [state, setState] = useState<{ kind: "idle" | "saving" | "ok" | "error"; msg?: string }>({ kind: "idle" });
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export function Settings() {
               <div><dt>Versión</dt><dd className="mono">{health.version}</dd></div>
               <div><dt>Núcleo</dt><dd>{health.status === "online" ? "Operativo" : "Degradado"}</dd></div>
               <div><dt>Base de datos</dt><dd className="mono">{health.database.engine} · {health.database.ok ? "OK" : "Error"}</dd></div>
-              <div><dt>Cerebro IA</dt><dd>{health.ai.configured ? health.ai.provider : health.ai.note}</dd></div>
+              <div><dt>Cerebro IA</dt><dd>{health.ai.configured ? `Ollama · ${health.ai.model}` : health.ai.note}</dd></div>
               <div><dt>Python</dt><dd className="mono">{health.python}</dd></div>
             </dl>
           ) : (

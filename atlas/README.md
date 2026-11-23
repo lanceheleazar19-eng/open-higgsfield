@@ -6,7 +6,7 @@ Asistente personal de IA local: centro de control de tareas, entrenamiento,
 finanzas, trading (simulado), proyectos, calendario y memoria. Todos los datos
 se guardan **solo en tu ordenador** (`atlas/data/`).
 
-**Estado actual: Fase 1 completada** (arquitectura + dashboard). Ver
+**Estado actual: Fase 2 completada** (centro de control holográfico + cerebro de IA con Ollama). Ver
 [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Requisitos
@@ -49,6 +49,21 @@ cd frontend && npm run dev
 ```
 
 Interfaz en http://127.0.0.1:5173 (redirige `/api` al backend).
+
+## Cerebro de IA (Ollama)
+
+1. Instala y abre [Ollama](https://ollama.com). Debe estar en marcha (icono en la bandeja del sistema).
+2. Descarga un modelo en PowerShell:
+
+   ```powershell
+   ollama pull qwen2.5:7b
+   ```
+
+   (≈4,7 GB, necesita unos 8 GB de RAM libres. Para equipos modestos: `qwen2.5:3b`.)
+3. Arranca ATLAS. En **Inteligencia artificial** verás «Conectado» y podrás elegir el modelo.
+
+Sin Ollama, ATLAS sigue funcionando en «modo local» (responde preguntas fijas sobre tus datos).
+La primera respuesta tarda más: el modelo se carga en memoria.
 
 ## Pruebas
 

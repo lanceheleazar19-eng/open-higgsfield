@@ -18,7 +18,7 @@ class Module:
 
 MODULES: list[Module] = [
     Module("dashboard", "Dashboard", 1, "active", "Centro de control con el estado del día."),
-    Module("ai", "Inteligencia artificial", 2, "planned",
+    Module("ai", "Inteligencia artificial", 2, "active",
            "Cerebro conversacional multi-modelo (Ollama local + APIs externas).",
            ["Conversación natural", "Proveedor intercambiable (Ollama, Anthropic, OpenAI…)",
             "Lectura de PDF, Excel e imágenes", "Investigación web", "Herramientas sobre tus datos"]),

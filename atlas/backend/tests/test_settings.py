@@ -1,6 +1,6 @@
 def test_defaults(client):
     prefs = client.get("/api/settings").json()
-    assert prefs == {"user_name": "", "timezone": "Europe/Madrid", "currency": "EUR"}
+    assert prefs == {"user_name": "", "timezone": "Europe/Madrid", "currency": "EUR", "ai_model": ""}
 
 
 def test_update_and_persist(client):

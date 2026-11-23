@@ -4,8 +4,8 @@
 |---|---|---|
 | 1 | Arquitectura, estructura, dashboard, configuración | ✅ Completada |
 | 1.5 | ATLAS 2.0: centro de control holográfico | ✅ Completada |
-| 2 | Cerebro IA: proveedores intercambiables (Ollama / Anthropic / OpenAI-compatible), chat con streaming, herramientas | ⏳ Siguiente |
-| 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | — |
+| 2 | Cerebro IA con Ollama: conversación en streaming anclada a tus datos | ✅ Completada |
+| 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ⏳ Siguiente |
 | 4 | Gestor de tareas (prioridades, fechas, atrasos, objetivos, resúmenes) | — |
 | 5 | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | — |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
@@ -47,3 +47,19 @@ dashboard en cuanto su fase los permita registrar.
 - Sin WebGL hay una versión CSS; sin movimiento si el sistema pide «reducir movimiento»;
   el render se pausa fuera de pantalla.
 - La telemetría detallada (paneles del dashboard original) sigue debajo del centro de control.
+
+## Fase 2 — cerebro de IA
+- `atlas/brain/`: interfaz `LLMProvider` + proveedor **Ollama** (`/api/tags`, `/api/chat` en streaming).
+  Añadir otro proveedor (Anthropic, OpenAI-compatible) = una clase nueva, sin tocar el resto.
+- Orquestador: elige modelo (preferencia del usuario o automático: qwen2.5 → llama3.1 → …, descarta
+  modelos de embeddings), construye el prompt de identidad de ATLAS y una **instantánea de tus datos
+  reales** (importes y fechas ya formateados) en cada consulta. Reglas: no inventar cifras, separar
+  dinero real y trading, no ejecutar acciones.
+- `POST /api/assistant/chat` (NDJSON: status → delta* → done/error), con historial de la conversación.
+- Si Ollama no responde o falla antes de contestar → responde el intérprete local (marcado «Modo local»).
+- Interfaz: respuesta en streaming, botón Detener, etiqueta del modelo en cada respuesta, página
+  «Inteligencia artificial» con estado y selector de modelo. El resumen ejecutivo lo redacta la IA.
+- Pruebas con un servidor que imita el protocolo real de Ollama.
+
+Pendiente para fases posteriores: uso de herramientas (crear tareas, etc.) con confirmación,
+memoria entre sesiones (Fase 3), Internet y documentos (Investigación).

@@ -11,8 +11,10 @@ export const QUICK_COMMANDS = [
   "Proyectos activos",
 ];
 
-export function CommandBar({ busy, voice, speakReplies, onToggleSpeak, onAsk, onBriefing }: {
+export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggleSpeak, onAsk, onBriefing }: {
   busy: boolean;
+  offline: boolean;
+  onStop: () => void;
   voice: Voice;
   speakReplies: boolean;
   onToggleSpeak: () => void;
@@ -36,7 +38,7 @@ export function CommandBar({ busy, voice, speakReplies, onToggleSpeak, onAsk, on
   function submit(e: FormEvent) {
     e.preventDefault();
     const q = text.trim();
-    if (!q || busy) return;
+    if (!q || busy || offline) return;
     onAsk(q);
     setText("");
   }
@@ -47,12 +49,12 @@ export function CommandBar({ busy, voice, speakReplies, onToggleSpeak, onAsk, on
     <div className="command">
       <div className="quick" role="group" aria-label="Comandos rápidos">
         {QUICK_COMMANDS.map((c) => (
-          <button key={c} type="button" className="chip" disabled={busy} onClick={() => onAsk(c)}>{c}</button>
+          <button key={c} type="button" className="chip" disabled={busy || offline} onClick={() => onAsk(c)}>{c}</button>
         ))}
       </div>
       <form className={`bar ${voice.listening ? "is-listening" : ""}`} onSubmit={submit}>
         <button type="button" className={`bar-btn mic ${voice.listening ? "on" : ""}`} onClick={voice.listening ? voice.stopListening : voice.listen}
-          disabled={!voice.canListen} aria-label={micLabel} title={micLabel} aria-pressed={voice.listening}>
+          disabled={!voice.canListen || offline} aria-label={micLabel} title={micLabel} aria-pressed={voice.listening}>
           <Icon name="mic" size={19} />
           {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /><i /></span>}
         </button>
@@ -76,12 +78,18 @@ export function CommandBar({ busy, voice, speakReplies, onToggleSpeak, onAsk, on
             <Icon name={speakReplies ? "volume" : "mute"} size={18} />
           </button>
         )}
-        <button type="button" className="bar-btn brief" onClick={onBriefing} disabled={busy} title="Resumen ejecutivo">
+        <button type="button" className="bar-btn brief" onClick={onBriefing} disabled={busy || offline} title="Resumen ejecutivo">
           <Icon name="spark" size={18} /><span>Resumen</span>
         </button>
-        <button type="submit" className="bar-btn send" disabled={busy || !text.trim() || voice.listening} aria-label="Enviar">
-          <Icon name="send" size={18} />
-        </button>
+        {busy ? (
+          <button type="button" className="bar-btn send" onClick={onStop} aria-label="Detener respuesta" title="Detener respuesta">
+            <Icon name="stop" size={18} />
+          </button>
+        ) : (
+          <button type="submit" className="bar-btn send" disabled={offline || !text.trim() || voice.listening} aria-label="Enviar">
+            <Icon name="send" size={18} />
+          </button>
+        )}
       </form>
     </div>
   );
