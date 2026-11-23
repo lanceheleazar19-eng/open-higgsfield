@@ -11,7 +11,7 @@
 | 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ✅ Completada |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
-| 8 | Calendario + Google Calendar | — |
+| 8 | Calendario (iCloud) + Gmail importante | ✅ Completada |
 | 9 | Voz (micrófono, TTS, palabra de activación, interrupción) | — |
 | 10 | Automatizaciones, notificaciones, Daily Briefing | — |
 | 11 | Seguridad, copias de seguridad, exportación, optimización | — |
@@ -136,3 +136,15 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   usa el último peso de Gimnasio › Cuerpo). Totales del día, semana con línea de objetivo,
   recomendaciones (proteína restante con alimentos concretos, hidratos antes de entrenar, etc.).
 - La IA recibe la nutrición de hoy y de la semana cuando la pregunta lo requiere.
+
+## Fase 8 — integraciones (Gmail + calendario de iCloud)
+- Configuración › Integraciones: conectar con contraseñas de aplicación (Google / Apple), guardadas en el
+  Llavero del sistema (keyring; archivo 600 como respaldo). Desconectar borra las credenciales.
+- Gmail (IMAP, solo lectura, no marca como leído): guarda remitente, asunto y un extracto de los correos
+  recientes. Importantes = marca «Importante» de Gmail + reglas (pagos, estudios, citas…, descarta
+  boletines/no-reply) + IA local para los dudosos. Se muestran en el centro de control y la bienvenida
+  hablada los menciona SOLO si hay alguno. La IA los conoce cuando se pregunta por el correo.
+- iCloud Calendar (CalDAV): importa −1/+60 días con recurrencias, actualiza y elimina lo borrado;
+  página Calendario con eventos de iCloud y de ATLAS, aviso de solapes y creación de eventos
+  (en iCloud solo con confirmación explícita).
+- Sincronización automática cada 30 min mientras ATLAS está abierto (y botón «Sincronizar ahora»).

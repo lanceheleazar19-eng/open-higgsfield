@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAsync } from "../../api/useAsync";
 import { Link } from "react-router-dom";
 import { api } from "../../api/client";
 import type { Dashboard } from "../../api/types";
@@ -37,6 +38,7 @@ function FinanceChart({ series }: { series: { date: string; net_cents: number }[
 /** Columna derecha: tareas, eventos, objetivos, finanzas y actividad (todo con datos reales). */
 export function IntelPanel({ data, onChanged }: { data: Dashboard | null; onChanged: () => void }) {
   const [done, setDone] = useState<Set<number>>(new Set());
+  const mail = useAsync(api.importantMail, 300_000);
   if (!data) return <aside className="intel" aria-label="Información en tiempo real" />;
   const tz = data.greeting.timezone;
   const f = data.finance;
@@ -55,6 +57,18 @@ export function IntelPanel({ data, onChanged }: { data: Dashboard | null; onChan
               <li key={i} className={`alert alert-${a.level}`}>
                 <span className="alert-level">{LEVEL_LABEL[a.level]}</span>
                 <Link to={MODULE_ROUTE[a.module] ?? "/"}>{a.text}</Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
+      {mail.data && mail.data.items.length > 0 && (
+        <Card title={`Correos importantes (${mail.data.items.length})`}>
+          <ul className="imails">
+            {mail.data.items.slice(0, 4).map((m) => (
+              <li key={m.id}>
+                <span><strong>{m.subject}</strong><span className="mem-meta">{m.sender.replace(/<.*>/, "").trim() || m.sender}{m.reason ? ` · ${m.reason}` : ""}</span></span>
+                <button className="mini-btn ghost" aria-label={`Marcar como visto: ${m.subject}`} onClick={async () => { await api.dismissMail(m.id); await mail.reload(); }}>✓</button>
               </li>
             ))}
           </ul>

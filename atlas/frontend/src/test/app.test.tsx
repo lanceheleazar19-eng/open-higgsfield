@@ -526,3 +526,32 @@ test("nutrición: la foto propone alimentos y no guarda hasta confirmar", async 
   expect(screen.getByLabelText("Alimento para «salsa rara»")).toHaveValue("");
   expect(calls.some((c) => c.url === "/api/nutrition/entries")).toBe(false);
 });
+
+const integ = (g = false, i = false) => ({ gmail: { connected: g, address: g ? "yo@gmail.com" : null, last_sync: null }, icloud: { connected: i, user: i ? "yo@icloud.com" : null, last_sync: null } });
+
+test("integraciones: conectar Gmail con contraseña de aplicación", async () => {
+  const calls = mockFetch({ ...base, "/api/integrations": integ(), "POST /api/integrations/gmail": integ(true) });
+  renderAt("/settings");
+  fireEvent.change(await screen.findByLabelText("Tu dirección de Gmail"), { target: { value: "yo@gmail.com" } });
+  fireEvent.change(screen.getAllByLabelText("Contraseña de aplicación (no tu contraseña normal)")[0], { target: { value: "abcd efgh ijkl mnop" } });
+  fireEvent.click(screen.getAllByRole("button", { name: "Conectar" })[0]);
+  expect(await screen.findByText("Conectado.")).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.url === "/api/integrations/gmail")!.init!.body as string)).toEqual({ user: "yo@gmail.com", app_password: "abcd efgh ijkl mnop" });
+});
+
+test("centro de control: correos importantes solo cuando los hay", async () => {
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard,
+    "/api/email/important": { connected: true, items: [{ id: 1, sender: "Banco X <a@b.es>", subject: "Tu pago vence el viernes", snippet: "", reason: "pago", received_at: "2026-11-24T09:00:00+01:00" }] } });
+  renderAt("/");
+  expect(await screen.findByText("Tu pago vence el viernes")).toBeInTheDocument();
+  expect(screen.getByText("Correos importantes (1)")).toBeInTheDocument();
+});
+
+test("calendario: marca los eventos que se solapan", async () => {
+  mockFetch({ ...base, "/api/calendar": { connected: true, conflicts: [[1, 2]], items: [
+    { id: 1, title: "Clase", location: null, source: "icloud", start_at: "2030-01-10T16:00:00+01:00", end_at: "2030-01-10T18:00:00+01:00" },
+    { id: 2, title: "Dentista", location: null, source: "local", start_at: "2030-01-10T17:00:00+01:00", end_at: "2030-01-10T17:30:00+01:00" }] } });
+  renderAt("/calendar");
+  expect(await screen.findByText("Dentista")).toBeInTheDocument();
+  expect(screen.getAllByText(/se solapa con otro evento/).length).toBe(2);
+});

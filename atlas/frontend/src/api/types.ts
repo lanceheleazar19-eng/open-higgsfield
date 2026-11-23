@@ -262,3 +262,10 @@ export interface FoodItem { id: number; name: string; kcal: number; protein: num
 export interface MealProposal { food: FoodItem | null; grams: number | null; text: string; kcal?: number; protein?: number; carbs?: number; fat?: number }
 export interface MealEntryItem extends Macros { id: number; date: string; meal: string; food_id: number | null; name: string; grams: number; source: string }
 export interface NutritionDay { date: string; entries: MealEntryItem[]; totals: Macros; targets: NutritionTargets | null; tips: string[]; suggested_meal: string }
+
+export interface Integrations {
+  gmail: { connected: boolean; address: string | null; last_sync: string | null };
+  icloud: { connected: boolean; user: string | null; last_sync: string | null };
+}
+export interface ImportantMail { id: number; sender: string; subject: string; snippet: string; reason: string | null; received_at: string }
+export interface CalEvent { id: number; title: string; location: string | null; source: string; start_at: string; end_at: string | null }

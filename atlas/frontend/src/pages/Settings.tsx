@@ -5,6 +5,7 @@ import { useAtlas } from "../components/AtlasContext";
 import { Panel } from "../components/Panel";
 import { VoiceSettings } from "../components/VoiceSettings";
 import { ProfileSettings } from "../components/ProfileSettings";
+import { IntegrationsSettings } from "../components/IntegrationsSettings";
 import { NotificationSettings } from "../components/NotificationSettings";
 
 const CURRENCIES = ["EUR", "USD", "MXN", "GBP", "COP", "ARS", "CLP"];
@@ -41,6 +42,7 @@ export function Settings() {
         <h1>Configuración</h1>
       </header>
       <ProfileSettings />
+      <div id="integraciones"><IntegrationsSettings /></div>
       <div className="grid grid-2">
         <Panel title="Región">
           <form className="form" onSubmit={submit}>

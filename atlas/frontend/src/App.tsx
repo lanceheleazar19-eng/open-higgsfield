@@ -8,10 +8,11 @@ import { Memory } from "./pages/Memory";
 import { Tasks } from "./pages/Tasks";
 import { Gym } from "./pages/Gym";
 import { Nutrition } from "./pages/Nutrition";
+import { Calendar } from "./pages/Calendar";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
-const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition"]);
+const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar"]);
 
 export function App() {
   return (
@@ -25,6 +26,7 @@ export function App() {
           <Route path="tasks" element={<Tasks />} />
           <Route path="gym" element={<Gym />} />
           <Route path="nutrition" element={<Nutrition />} />
+          <Route path="calendar" element={<Calendar />} />
           {NAV.filter((n) => !BUILT.has(n.id)).map((n) => (
             <Route key={n.id} path={n.path.slice(1)} element={<ModulePage id={n.id} />} />
           ))}

@@ -1,7 +1,7 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
-  Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
+  Integrations, ImportantMail, CalEvent, Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
 
 export interface TaskInput {
@@ -108,6 +108,17 @@ export const api = {
   deleteAvatar: () => requestEmpty("/api/profile/avatar", { method: "DELETE" }),
   avatarUrl: (version: number | null) => `/api/profile/avatar?v=${version ?? 0}`,
   metrics: () => request<SystemMetrics>("/api/system/metrics"),
+  integrations: () => request<Integrations>("/api/integrations"),
+  connectIntegration: (name: "gmail" | "icloud", user: string, app_password: string) =>
+    request<Integrations>(`/api/integrations/${name}`, { method: "POST", body: JSON.stringify({ user, app_password }) }),
+  disconnectIntegration: (name: "gmail" | "icloud") => requestEmpty(`/api/integrations/${name}`, { method: "DELETE" }),
+  syncIntegrations: () => request<Record<string, unknown>>("/api/integrations/sync", { method: "POST" }),
+  importantMail: () => request<{ items: ImportantMail[]; connected: boolean }>("/api/email/important"),
+  dismissMail: (id: number) => requestEmpty(`/api/email/${id}/dismiss`, { method: "POST" }),
+  calendar: () => request<{ items: CalEvent[]; conflicts: [number, number][]; connected: boolean }>("/api/calendar"),
+  createEvent: (e: { title: string; start_at: string; end_at: string; location?: string | null; to_icloud: boolean }) =>
+    request<CalEvent>("/api/calendar", { method: "POST", body: JSON.stringify(e) }),
+  deleteEvent: (id: number) => requestEmpty(`/api/calendar/${id}`, { method: "DELETE" }),
   nutritionProfile: () => request<{ profile: NutritionProfile | null; targets: NutritionTargets | null; latest_weight: number | null }>("/api/nutrition/profile"),
   saveNutritionProfile: (p: NutritionProfile) => request<{ profile: NutritionProfile; targets: NutritionTargets | null }>("/api/nutrition/profile", { method: "PUT", body: JSON.stringify(p) }),
   nutritionDay: () => request<NutritionDay>("/api/nutrition/day"),
