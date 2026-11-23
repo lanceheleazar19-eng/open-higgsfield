@@ -28,11 +28,15 @@ se guardan **solo en tu ordenador** (`atlas/data/`).
 
 Si PowerShell bloquea el script: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
-**Linux / macOS:**
+**macOS / Linux:**
 
 ```bash
 ./scripts/start.sh
 ```
+
+En Mac, si no tienes Python 3.11+, instala [uv](https://docs.astral.sh/uv/)
+(`curl -LsSf https://astral.sh/uv/install.sh | sh`): el script lo usará para
+obtener un Python moderno automáticamente.
 
 La primera vez instala las dependencias y compila la interfaz. Después abre
 **http://127.0.0.1:8000**. Tras cambiar código del frontend, usa `-Rebuild` /
