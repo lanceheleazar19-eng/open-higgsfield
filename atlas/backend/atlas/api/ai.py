@@ -231,6 +231,10 @@ def chat(body: ChatIn) -> StreamingResponse:
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
             d["goal_snapshot"] = goals_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
+            if re.search(r"correo|email|mail|bandeja|mensaje", mem.normalize(body.text)):
+                from atlas.integrations.email_sync import important_today
+                d["important_emails"] = [{"de": m.sender, "asunto": m.subject, "motivo": m.reason, "extracto": m.snippet[:200]}
+                                         for m in important_today(db, tz)] or "ninguno importante hoy (o Gmail no conectado)"
             if NUT_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
                 from atlas.nutrition import service as nut
                 today = date.fromisoformat(d["generated_at"][:10])

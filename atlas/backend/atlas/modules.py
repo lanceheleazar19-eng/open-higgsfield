@@ -38,7 +38,7 @@ MODULES: list[Module] = [
     Module("projects", "Proyectos", 7, "planned", "Proyectos y negocios con memoria propia.",
            ["Objetivos y tareas por proyecto", "Ideas y estudios de mercado",
             "Márgenes, ingresos y gastos", "Estrategias de marketing"]),
-    Module("calendar", "Calendario", 8, "planned", "Eventos, horarios y planificación semanal.",
+    Module("calendar", "Calendario", 8, "active", "Eventos, horarios y planificación semanal.",
            ["Crear y editar eventos", "Detección de conflictos", "Planificación semanal",
             "Integración con Google Calendar"]),
     Module("memory", "Memoria", 3, "active", "Memoria persistente consultable y editable.",

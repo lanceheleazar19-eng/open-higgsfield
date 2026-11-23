@@ -10,15 +10,37 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import ai, assistant, dashboard, goals, gym, memory, nutrition, profile, settings, system, tasks
+from atlas.api import ai, assistant, dashboard, goals, gym, integrations, memory, nutrition, profile, settings, system, tasks
 from atlas.config import get_settings
 from atlas.db import init_db
 
 
+async def _periodic_sync() -> None:
+    """Sincroniza Gmail e iCloud cada 30 min mientras ATLAS está abierto."""
+    import asyncio
+
+    from atlas.api.integrations import sync_all
+    from atlas.db import session_scope
+
+    def run() -> None:
+        with session_scope() as db:
+            sync_all(db)
+
+    while True:
+        await asyncio.sleep(get_settings().sync_interval_s)
+        try:
+            await asyncio.to_thread(run)
+        except Exception:  # noqa: BLE001 - la sincronización nunca debe tumbar el servidor
+            pass
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    import asyncio
     init_db()
+    task = asyncio.create_task(_periodic_sync())
     yield
+    task.cancel()
 
 
 def create_app() -> FastAPI:
@@ -30,7 +52,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["*"],
     )
-    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router):
+    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

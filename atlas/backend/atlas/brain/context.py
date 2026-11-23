@@ -52,6 +52,7 @@ def snapshot(d: dict) -> dict:
         "trading": "sin datos (módulo de paper trading en la Fase 6)",
         **({"gimnasio": d["gym"]} if d.get("gym") else {}),
         **({"nutricion": d["nutrition"]} if d.get("nutrition") else {}),
+        **({"correos_importantes_hoy": d["important_emails"]} if d.get("important_emails") else {}),
         "entrenamiento_ultimos_7_dias": {
             "sesiones": fit["sessions_7d"], "minutos": fit["minutes_7d"],
             "ultimo_entreno": (

@@ -16,6 +16,8 @@ DEFAULTS: dict[str, object] = {
     "personal_preferences": "",
     "profile_created_at": None,
     "nutrition_profile": None,
+    "gmail_last_sync": None,
+    "icloud_last_sync": None,
 }
 
 

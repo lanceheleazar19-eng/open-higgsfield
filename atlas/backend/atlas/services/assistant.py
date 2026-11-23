@@ -209,6 +209,10 @@ def welcome(d: dict) -> str:
     behind = [x for x in d.get("goals", {}).get("items", []) if x["pace"] == "behind"]
     if behind:
         parts.append(f"Atención: el objetivo {behind[0]['title']} va por detrás del ritmo.")
+    mails = d.get("important_emails") or []
+    if mails:
+        about = "; ".join(f"de {m['de']} sobre «{m['asunto']}»" for m in mails[:3])
+        parts.append(f"Tienes {_plural(len(mails), 'correo importante', 'correos importantes')}: {about}.")
     parts.append("¿En qué te ayudo?")
     return " ".join(parts)
 

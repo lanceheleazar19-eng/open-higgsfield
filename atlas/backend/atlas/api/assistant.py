@@ -32,4 +32,11 @@ def get_briefing(db: DB) -> dict:
 
 @router.get("/welcome")
 def get_welcome(db: DB) -> dict:
-    return {"reply": welcome(_data(db)), "intent": "welcome", "mode": "local"}
+    from email.utils import parseaddr
+
+    from atlas.integrations.email_sync import important_today
+    d = _data(db)
+    tz = str(get_prefs(db)["timezone"])
+    d["important_emails"] = [{"de": parseaddr(m.sender)[0] or parseaddr(m.sender)[1], "asunto": m.subject}
+                             for m in important_today(db, tz)]
+    return {"reply": welcome(d), "intent": "welcome", "mode": "local"}
