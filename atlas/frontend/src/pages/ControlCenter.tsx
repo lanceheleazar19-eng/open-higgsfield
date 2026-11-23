@@ -79,6 +79,18 @@ export function ControlCenter() {
     let completed = false;
     let mode: string | null = null;
     let cid = convRef.current;
+    let spoken = 0; // parte del texto ya enviada a la voz
+    const speakNew = (final: boolean) => {
+      if (!speakRef.current) return;
+      const pendingText = text.slice(spoken);
+      // habla hasta el último final de frase disponible (o todo, al terminar)
+      const m = final ? pendingText.length : Math.max(pendingText.lastIndexOf(". "), pendingText.lastIndexOf("? "),
+        pendingText.lastIndexOf("! "), pendingText.lastIndexOf(".\n")) + 1;
+      if (m > 0) {
+        voiceRef.current?.enqueue(pendingText.slice(0, m));
+        spoken += m;
+      }
+    };
     try {
       await api.chat(prompt, convRef.current, (ev) => {
         if (ev.type === "meta") {
@@ -90,9 +102,11 @@ export function ControlCenter() {
           if (firstDelta) { firstDelta = false; setStreaming(true); }
           text += ev.text;
           patch(id, { reply: text, phase: "streaming" });
+          speakNew(false);
         } else if (ev.type === "done") {
           completed = true;
           mode = ev.mode;
+          speakNew(true);
           patch(id, { phase: "done", mode: ev.mode, model: ev.model, note: ev.reason ?? null });
         } else if (ev.type === "error") {
           patch(id, { phase: "error", reply: text ? `${text}\n[${ev.message}]` : ev.message });
@@ -111,7 +125,6 @@ export function ControlCenter() {
       setStreaming(false);
       setAfterglow(true);
       setTimeout(() => setAfterglow(false), 1200);
-      if (speakRef.current && completed && text) voiceRef.current?.speak(text);
       void dash.reload();
       void reloadHealth();
       // La IA propone recuerdos del intercambio; nunca se guardan sin tu aprobación

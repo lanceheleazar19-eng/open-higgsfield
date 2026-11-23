@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Panel } from "../components/Panel";
+import { VoiceSettings } from "../components/VoiceSettings";
 
 const CURRENCIES = ["EUR", "USD", "MXN", "GBP", "COP", "ARS", "CLP"];
 
@@ -65,6 +66,7 @@ export function Settings() {
             </div>
           </form>
         </Panel>
+        <VoiceSettings />
         <Panel title="Estado del sistema">
           {health ? (
             <dl className="kv">

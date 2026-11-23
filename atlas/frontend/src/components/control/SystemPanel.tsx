@@ -61,6 +61,7 @@ export function SystemPanel({ health, offline, voice, speakReplies }: {
           <Row k="Síntesis" v={voice.canSpeak ? "Disponible" : "No disponible"} tone={voice.canSpeak ? undefined : "dim"} />
           <Row k="Respuesta hablada" v={speakReplies ? "Activada" : "Desactivada"} tone={speakReplies ? "ok" : "dim"} />
         </dl>
+        {voice.canSpeak && <p className="hud-note"><Link to="/settings">Cambiar voz y velocidad</Link></p>}
         {!voice.canListen && <p className="hud-note">Usa Chrome o Edge para hablar con ATLAS.</p>}
         {voice.error && <p className="hud-note t-warn">{voice.error}</p>}
       </section>

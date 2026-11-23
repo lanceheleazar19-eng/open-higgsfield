@@ -257,3 +257,31 @@ test("página Memoria: lista, añade y olvida recuerdos", async () => {
   expect(await screen.findByText("Recuerdo eliminado.")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Exportar" })).toHaveAttribute("href", "/api/memory/export");
 });
+
+test("con el altavoz activo lee la respuesta por frases, con la voz y velocidad elegidas", async () => {
+  const spoken: { text: string; rate: number; voice: string | undefined }[] = [];
+  class FakeUtterance { text: string; rate = 1; lang = ""; voice?: { name: string }; onend?: () => void; onerror?: () => void; onstart?: () => void;
+    constructor(t: string) { this.text = t; } }
+  const voices = [
+    { name: "Eddy (Spanish (Spain))", lang: "es-ES", voiceURI: "eddy", localService: true },
+    { name: "Mónica (Mejorada)", lang: "es-ES", voiceURI: "monica-enh", localService: true },
+  ];
+  vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+  vi.stubGlobal("speechSynthesis", {
+    getVoices: () => voices, cancel: vi.fn(), addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    speak: (u: FakeUtterance) => { spoken.push({ text: u.text, rate: u.rate, voice: u.voice?.name }); u.onend?.(); },
+  });
+  localStorage.setItem("atlas.speak", "1");
+  localStorage.setItem("atlas.rate", "1.2");
+  mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": chatReply("Buenos días, Lance. Hoy tienes dos tareas. ¿Empezamos por la más urgente?", "ai", "qwen2.5:7b"),
+  });
+  renderAt("/");
+  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "Buenos días" } });
+  fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+  await waitFor(() => expect(spoken.map((s) => s.text).join(" ")).toContain("¿Empezamos por la más urgente?"), { timeout: 5000 });
+  expect(spoken.map((s) => s.text).join(" ")).toBe("Buenos días, Lance. Hoy tienes dos tareas. ¿Empezamos por la más urgente?");
+  expect(spoken.length).toBeGreaterThan(1); // empezó a hablar antes de terminar la respuesta
+  expect(spoken.every((s) => s.rate === 1.2 && s.voice === "Mónica (Mejorada)")).toBe(true);
+});

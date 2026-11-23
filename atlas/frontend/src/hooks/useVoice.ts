@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { loadVoicePrefs, pickVoice, speechChunks } from "../lib/speech";
 
 /* Tipos mínimos de la Web Speech API (no están en lib.dom). */
 interface SpeechRecognitionLike {
@@ -29,6 +30,8 @@ export interface Voice {
   listen: () => void;
   stopListening: () => void;
   speak: (text: string) => void;
+  /** Añade texto a la cola sin interrumpir lo que se está diciendo (lectura mientras se genera). */
+  enqueue: (text: string) => void;
   stopSpeaking: () => void;
 }
 
@@ -44,8 +47,10 @@ export function useVoice(onFinal: (text: string) => void): Voice {
   const [interim, setInterim] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  const pending = useRef(0);
   const stopSpeaking = useCallback(() => {
-    if (canSpeak) window.speechSynthesis.cancel();
+    window.speechSynthesis?.cancel();
+    pending.current = 0;
     setSpeaking(false);
   }, [canSpeak]);
 
@@ -85,21 +90,72 @@ export function useVoice(onFinal: (text: string) => void): Voice {
 
   const speak = useCallback((text: string) => {
     if (!canSpeak) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[•«»]/g, ""));
-    u.lang = "es-ES";
-    const es = window.speechSynthesis.getVoices().find((v) => v.lang.startsWith("es"));
-    if (es) u.voice = es;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(u);
+    pending.current = 0;
+    speakText(text, () => setSpeaking(true), () => setSpeaking(false));
+  }, [canSpeak]);
+
+  const enqueue = useCallback((text: string) => {
+    if (!canSpeak || !text.trim()) return;
+    queueSpeech(text, () => { pending.current += 1; setSpeaking(true); }, () => {
+      pending.current = Math.max(0, pending.current - 1);
+      if (pending.current === 0) setSpeaking(false);
+    });
   }, [canSpeak]);
 
   useEffect(() => () => {
     recRef.current?.abort();
-    if (canSpeak) window.speechSynthesis.cancel();
+    window.speechSynthesis?.cancel();
   }, [canSpeak]);
 
-  return { canListen: !!Ctor, canSpeak, listening, speaking, interim, error, listen, stopListening, speak, stopSpeaking };
+  return { canListen: !!Ctor, canSpeak, listening, speaking, interim, error, listen, stopListening, speak, enqueue, stopSpeaking };
+}
+
+/** Lee un texto frase a frase con la voz y velocidad elegidas en Configuración (interrumpe lo anterior). */
+export function speakText(text: string, onStart?: () => void, onEnd?: () => void, override?: { voiceURI?: string | null; rate?: number }) {
+  window.speechSynthesis.cancel();
+  const synth = window.speechSynthesis;
+  const prefs = { ...loadVoicePrefs(), ...override };
+  const voice = pickVoice(synth.getVoices(), prefs.voiceURI ?? null);
+  const chunks = speechChunks(text);
+  if (!chunks.length) return;
+  chunks.forEach((chunk, i) => {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = voice?.lang ?? "es-ES";
+    if (voice) u.voice = voice;
+    u.rate = prefs.rate;
+    if (i === 0) u.onstart = () => onStart?.();
+    if (i === chunks.length - 1) { u.onend = () => onEnd?.(); }
+    u.onerror = () => onEnd?.();
+    synth.speak(u);
+  });
+}
+
+/** Lista de voces del sistema (se cargan de forma asíncrona en Chrome). */
+export function useSystemVoices(): SpeechSynthesisVoice[] {
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    const load = () => setVoices(window.speechSynthesis.getVoices());
+    load();
+    window.speechSynthesis.addEventListener?.("voiceschanged", load);
+    return () => window.speechSynthesis.removeEventListener?.("voiceschanged", load);
+  }, []);
+  return voices;
+}
+
+/** Encola cada trozo como locución independiente; onStart/onEnd se llaman por trozo. */
+function queueSpeech(text: string, onChunkStart: () => void, onChunkEnd: () => void) {
+  const synth = window.speechSynthesis;
+  const prefs = loadVoicePrefs();
+  const voice = pickVoice(synth.getVoices(), prefs.voiceURI);
+  for (const chunk of speechChunks(text)) {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = voice?.lang ?? "es-ES";
+    if (voice) u.voice = voice;
+    u.rate = prefs.rate;
+    onChunkStart();
+    u.onend = onChunkEnd;
+    u.onerror = onChunkEnd;
+    synth.speak(u);
+  }
 }
