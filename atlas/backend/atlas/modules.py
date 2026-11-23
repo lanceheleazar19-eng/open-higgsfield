@@ -40,7 +40,7 @@ MODULES: list[Module] = [
     Module("calendar", "Calendario", 8, "planned", "Eventos, horarios y planificación semanal.",
            ["Crear y editar eventos", "Detección de conflictos", "Planificación semanal",
             "Integración con Google Calendar"]),
-    Module("memory", "Memoria", 3, "planned", "Memoria persistente consultable y editable.",
+    Module("memory", "Memoria", 3, "active", "Memoria persistente consultable y editable.",
            ["Preferencias, objetivos y decisiones", "Temporal vs permanente",
             "Búsqueda en el historial", "Sin duplicados"]),
     Module("research", "Investigación", 2, "planned",

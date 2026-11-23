@@ -23,7 +23,8 @@ def test_without_ollama_falls_back_to_local(client):
     assert st["reachable"] is False and st["configured"] is False
     assert "Ollama no detectado" in st["note"]
     ev = _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente hoy?"}))
-    assert ev[0] == {"type": "delta", "text": "No tienes tareas pendientes registradas."}
+    assert ev[0]["type"] == "meta" and ev[0]["conversation_id"] > 0
+    assert ev[1] == {"type": "delta", "text": "No tienes tareas pendientes registradas."}
     assert ev[-1]["type"] == "done" and ev[-1]["mode"] == "local"
     assert client.get("/api/system/health").json()["ai"]["configured"] is False
 
@@ -48,7 +49,8 @@ def test_chat_streams_and_grounds_model_in_real_data(ollama, client, session):
     session.commit()
     history = [{"role": "user", "content": "hola"}, {"role": "assistant", "content": "Hola, Lance."}]
     ev = _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente?", "history": history}))
-    assert ev[0] == {"type": "status", "state": "thinking", "model": "qwen2.5:7b"}
+    assert ev[0]["type"] == "meta"
+    assert ev[1] == {"type": "status", "state": "thinking", "model": "qwen2.5:7b"}
     assert "".join(e["text"] for e in ev if e["type"] == "delta") == "Hola, tienes 2 tareas pendientes."
     assert ev[-1] == {"type": "done", "mode": "ai", "model": "qwen2.5:7b", "provider": "ollama"}
 
@@ -60,6 +62,7 @@ def test_chat_streams_and_grounds_model_in_real_data(ollama, client, session):
     assert "Eres ATLAS" in system and "Lance" in system
     assert "Pagar seguro" in system and "45,50 €" in system  # datos reales, importes ya formateados
     assert "Nunca inventes cifras" in system
+    assert "máximo potencial" in system
 
 
 def test_model_error_before_output_falls_back_to_local(ollama, client):

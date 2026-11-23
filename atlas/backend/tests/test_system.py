@@ -17,7 +17,7 @@ def test_modules_registry_has_all_sidebar_sections(client):
     assert ids == ["dashboard", "ai", "tasks", "gym", "finance", "trading",
                    "projects", "calendar", "memory", "research", "agents", "reports", "settings"]
     active = {m.id for m in MODULES if m.status == "active"}
-    assert active == {"dashboard", "ai", "settings"}
+    assert active == {"dashboard", "ai", "memory", "settings"}
 
 
 def test_root_without_frontend_build(client):

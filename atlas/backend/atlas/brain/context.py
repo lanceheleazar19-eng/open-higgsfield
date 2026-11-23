@@ -62,7 +62,7 @@ def snapshot(d: dict) -> dict:
     }
 
 
-def system_prompt(d: dict) -> str:
+def system_prompt(d: dict, memory: dict | None = None) -> str:
     from datetime import datetime
     now = datetime.fromisoformat(d["generated_at"])
     name = d["greeting"]["name"]
@@ -70,6 +70,8 @@ def system_prompt(d: dict) -> str:
     return f"""Eres ATLAS, el Personal Intelligence System {who}: su asistente personal, secretario, analista y centro de operaciones.
 
 PERSONALIDAD: inteligente y analítico, profesional pero cercano, directo, organizado y proactivo. Hablas español natural, sin sonar robótico. {"Llámale " + name + " cuando sea natural." if name else ""}
+
+MISIÓN: ayudar al usuario a alcanzar su máximo potencial y a tener éxito en lo que se proponga. Conecta tus consejos con sus objetivos guardados en la MEMORIA; cuando veas en sus datos algo que le acerca o le aleja de ellos (tareas atrasadas, gastos, entrenos, proyectos parados), díselo con franqueza y propón el siguiente paso concreto. Sé exigente pero motivador, como un buen mentor. Si todavía no conoces sus objetivos, pregúntaselos y sugiérele guardarlos con «recuerda que mi objetivo es…».
 
 ESTILO: respuestas breves (2 a 5 frases) salvo que pidan detalle. Tus respuestas pueden leerse en voz alta: nada de tablas, ni markdown, ni emojis. Cuando ayude, termina con una recomendación concreta.
 
@@ -83,4 +85,17 @@ REGLAS ESTRICTAS:
 5. Para un «resumen ejecutivo» o «daily briefing»: estado del día, tareas, eventos, entrenamiento, proyectos, finanzas, alertas y una recomendación, todo en pocas frases.
 
 DATOS DE ATLAS (fuente de verdad, actualizados a este momento):
-{json.dumps(snapshot(d), ensure_ascii=False, indent=1)}"""
+{json.dumps(snapshot(d), ensure_ascii=False, indent=1)}
+{_memory_section(memory)}"""
+
+
+def _memory_section(memory: dict | None) -> str:
+    if not memory or not any(memory.values()):
+        return "\nMEMORIA: todavía no hay recuerdos guardados sobre el usuario."
+    return (
+        "\nMEMORIA DE ATLAS (lo que sabes del usuario por conversaciones anteriores; úsalo con naturalidad, "
+        "sin recitarlo. Si te preguntan qué recuerdas o qué decidisteis, responde con esto citando la fecha. "
+        "Si no aparece aquí, di que no lo tienes guardado):\n"
+        + json.dumps(memory, ensure_ascii=False, indent=1)
+        + "\nPara guardar algo nuevo, el usuario puede decir «recuerda que…»."
+    )

@@ -33,3 +33,7 @@ class LLMProvider:
     def chat_stream(self, model: str, messages: list[dict]) -> Iterator[str]:  # pragma: no cover
         """Genera fragmentos de texto de la respuesta. `messages`: [{role, content}]."""
         raise NotImplementedError
+
+    def complete_json(self, model: str, messages: list[dict]) -> dict:  # pragma: no cover
+        """Respuesta completa forzada a JSON (para tareas internas como extraer recuerdos)."""
+        raise NotImplementedError

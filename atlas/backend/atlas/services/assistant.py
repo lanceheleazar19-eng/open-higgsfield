@@ -129,7 +129,7 @@ def briefing(d: dict) -> str:
 HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega en la Fase 2). "
         "Puedo responder con tus datos registrados: «¿qué tengo pendiente hoy?», «¿qué es prioritario?», "
         "«próximos eventos», «¿cuánto he gastado este mes?», «¿cómo voy en el gimnasio?», "
-        "«proyectos activos» o «resumen ejecutivo».")
+        "«proyectos activos» o «resumen ejecutivo». Y puedo recordar cosas: «recuerda que…».")
 
 INTENTS: list[tuple[str, re.Pattern, object]] = [
     ("briefing", re.compile(r"\b(resumen|briefing|informe|buenos dias|buenas tardes|buenas noches|hola)\b"), briefing),
@@ -143,8 +143,26 @@ INTENTS: list[tuple[str, re.Pattern, object]] = [
 ]
 
 
-def answer(text: str, d: dict) -> dict:
+_MEMORY_Q = re.compile(r"recuerdas|que (sabes|recuerdas) de mi|que decidimos|que hablamos|que te dije|memoria")
+
+
+def _memory_answer(memory: dict | None) -> str:
+    if not memory or not any(memory.values()):
+        return "No tengo nada guardado sobre eso. Puedes decirme «recuerda que…» y lo guardaré."
+    items = [f"{m['contenido']} ({m['guardado']})" for m in memory.get("relevante", []) + memory.get("perfil", [])][:5]
+    convs = [f"{c['fecha']} — {c['quien']}: {c['texto'][:120]}" for c in memory.get("conversaciones", [])][:3]
+    parts = []
+    if items:
+        parts.append("Esto es lo que tengo guardado: " + "; ".join(items) + ".")
+    if convs:
+        parts.append("De conversaciones anteriores: " + " | ".join(convs))
+    return " ".join(parts) or "No encuentro nada relacionado en mi memoria."
+
+
+def answer(text: str, d: dict, memory: dict | None = None) -> dict:
     q = _norm(text)
+    if _MEMORY_Q.search(q):
+        return {"intent": "memory", "reply": _memory_answer(memory), "mode": "local"}
     for name, pattern, fn in INTENTS:
         if pattern.search(q):
             return {"intent": name, "reply": fn(d), "mode": "local"}  # type: ignore[operator]

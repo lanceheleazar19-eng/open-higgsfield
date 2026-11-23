@@ -1,6 +1,7 @@
 """Orquestador del cerebro: elige proveedor y modelo, construye el contexto y
 transmite la respuesta. Si no hay IA disponible, responde el intérprete local."""
 
+import json
 from collections.abc import Iterator
 
 from atlas.brain.base import LLMProvider, ModelInfo, ProviderError, ProviderStatus
@@ -60,12 +61,12 @@ def brain_status(prefs: dict, provider: LLMProvider | None = None) -> dict:
 
 
 def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
-                provider: LLMProvider | None = None) -> Iterator[dict]:
+                provider: LLMProvider | None = None, memory: dict | None = None) -> Iterator[dict]:
     """Eventos: status → delta* → done (o error). `d` = datos del dashboard con alertas."""
     provider = provider or get_provider()
     status = brain_status(prefs, provider)
     if not status["configured"]:
-        r = local_answer(text, d)
+        r = local_answer(text, d, memory)
         yield {"type": "delta", "text": r["reply"]}
         yield {"type": "done", "mode": "local", "model": None, "reason": status["note"]}
         return
@@ -77,7 +78,7 @@ def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
         for m in history[-MAX_HISTORY:]
         if m.get("role") in ("user", "assistant") and m.get("content")
     ]
-    messages = [{"role": "system", "content": system_prompt(d)}, *clean_history, {"role": "user", "content": text}]
+    messages = [{"role": "system", "content": system_prompt(d, memory)}, *clean_history, {"role": "user", "content": text}]
     produced = False
     try:
         for chunk in provider.chat_stream(model, messages):
@@ -88,8 +89,47 @@ def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
             yield {"type": "error", "message": str(exc)}
             return
         # Sin respuesta del modelo: respondemos en modo local para no dejar al usuario sin nada
-        r = local_answer(text, d)
+        r = local_answer(text, d, memory)
         yield {"type": "delta", "text": r["reply"]}
         yield {"type": "done", "mode": "local", "model": None, "reason": str(exc)}
         return
     yield {"type": "done", "mode": "ai", "model": model, "provider": provider.name}
+
+
+SUGGEST_PROMPT = """Analiza el último mensaje del USUARIO y extrae solo información personal duradera y útil
+que un asistente personal debería recordar: preferencias, objetivos, decisiones tomadas o datos estables
+sobre su vida, trabajo, salud, proyectos o finanzas. NO extraigas preguntas, saludos, peticiones puntuales,
+opiniones de ATLAS ni datos que ya estén en la lista de recuerdos existentes.
+Responde SOLO con JSON: {"recuerdos": [{"contenido": "frase breve en tercera persona o neutra",
+"tipo": "preferencia|objetivo|decision|dato", "temporal": true|false}]}. Máximo 3. Si no hay nada, {"recuerdos": []}."""
+
+KIND_FROM_ES = {"preferencia": "preference", "objetivo": "goal", "decision": "decision", "decisión": "decision",
+                "dato": "fact", "nota": "note"}
+
+
+def suggest_memories(prefs: dict, user_text: str, assistant_text: str, existing: list[str],
+                     provider: LLMProvider | None = None) -> list[dict]:
+    """Pide al modelo candidatos a recordar. Nunca guarda: solo propone (el usuario decide)."""
+    provider = provider or get_provider()
+    status = brain_status(prefs, provider)
+    if not status["configured"]:
+        return []
+    messages = [
+        {"role": "system", "content": SUGGEST_PROMPT},
+        {"role": "user", "content": json.dumps({"mensaje_usuario": user_text, "respuesta_atlas": assistant_text[:1500],
+                                                "recuerdos_existentes": existing[:30]}, ensure_ascii=False)},
+    ]
+    try:
+        data = provider.complete_json(status["model"], messages)
+    except ProviderError:
+        return []
+    out = []
+    for item in (data.get("recuerdos") or [])[:3] if isinstance(data, dict) else []:
+        if not isinstance(item, dict):
+            continue
+        content = str(item.get("contenido") or "").strip()
+        if len(content) < 8 or len(content) > 300:
+            continue
+        out.append({"content": content, "kind": KIND_FROM_ES.get(str(item.get("tipo", "")).lower(), "fact"),
+                    "temporary": bool(item.get("temporal"))})
+    return out

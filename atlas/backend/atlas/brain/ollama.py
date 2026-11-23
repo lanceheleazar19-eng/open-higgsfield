@@ -59,3 +59,17 @@ class OllamaProvider(LLMProvider):
                         return
         except httpx.HTTPError as exc:
             raise ProviderError(f"No se pudo conectar con Ollama en {self.base_url}: {type(exc).__name__}") from exc
+
+    def complete_json(self, model: str, messages: list[dict]) -> dict:
+        payload = {"model": model, "messages": messages, "stream": False, "format": "json",
+                   "options": {"temperature": 0.1, "num_ctx": 4096}, "keep_alive": "15m"}
+        try:
+            r = httpx.post(f"{self.base_url}/api/chat", json=payload, timeout=httpx.Timeout(self.timeout, connect=3.0))
+        except httpx.HTTPError as exc:
+            raise ProviderError(f"No se pudo conectar con Ollama: {type(exc).__name__}") from exc
+        if r.status_code != 200:
+            raise ProviderError(f"Ollama devolvió {r.status_code}")
+        try:
+            return json.loads(r.json()["message"]["content"])
+        except (ValueError, KeyError, TypeError) as exc:
+            raise ProviderError("Respuesta JSON inválida del modelo") from exc

@@ -1,6 +1,7 @@
 """Motor de base de datos, sesiones y migraciones (Alembic)."""
 
 from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from alembic import command
@@ -53,6 +54,15 @@ def reset_engine() -> None:
 
 
 def get_session() -> Iterator[Session]:
+    get_engine()
+    assert _SessionLocal is not None
+    with _SessionLocal() as session:
+        yield session
+
+
+@contextmanager
+def session_scope() -> Iterator[Session]:
+    """Sesión propia (p. ej. dentro de respuestas en streaming, que viven más que la petición)."""
     get_engine()
     assert _SessionLocal is not None
     with _SessionLocal() as session:

@@ -14,6 +14,7 @@ class FakeOllama:
         ]
         self.reply_chunks = ["Hola", ", tienes ", "2 tareas", " pendientes."]
         self.mode = "ok"  # ok | http_error | midstream_error
+        self.json_reply: dict = {"recuerdos": []}
         self.requests: list[dict] = []
         fake = self
 
@@ -40,6 +41,9 @@ class FakeOllama:
                 fake.requests.append(req)
                 if fake.mode == "http_error":
                     return self._json(404, {"error": f"model '{req['model']}' not found"})
+                if req.get("format") == "json":
+                    return self._json(200, {"model": req["model"], "done": True,
+                                            "message": {"role": "assistant", "content": json.dumps(fake.json_reply)}})
                 self.send_response(200)
                 self.send_header("Content-Type", "application/x-ndjson")
                 self.end_headers()

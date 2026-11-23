@@ -47,7 +47,9 @@ def _storage(db, s) -> dict:  # noqa: ANN001
         db.scalar(select(func.count()).select_from(m)) or 0
         for m in (Task, CalendarEvent, Transaction, WorkoutSession, Project, ActivityLog)
     )
-    return {"db_bytes": db_bytes, "disk_free_bytes": usage.free, "disk_total_bytes": usage.total, "records": records}
+    from atlas.services.memory import counts
+    return {"db_bytes": db_bytes, "disk_free_bytes": usage.free, "disk_total_bytes": usage.total, "records": records,
+            **counts(db)}
 
 
 def _ai(db) -> dict:  # noqa: ANN001
