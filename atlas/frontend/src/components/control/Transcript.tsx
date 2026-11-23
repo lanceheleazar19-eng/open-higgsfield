@@ -7,7 +7,8 @@ export interface Exchange {
   question: string;
   reply: string;
   phase: "thinking" | "streaming" | "done" | "error" | "stopped";
-  mode?: "ai" | "local" | "memory" | "tasks";
+  mode?: "ai" | "local" | "memory" | "tasks" | "gym";
+  gym?: { sets: number; tonnage: number };
   model?: string | null;
   note?: string | null;
   memory?: { action: "saved" | "duplicate" | "forget_candidate"; item: MemoryItem; state: "shown" | "done" | "error"; error?: string };
@@ -21,6 +22,7 @@ function Source({ x }: { x: Exchange }) {
   if (x.mode === "ai") return <span className="src src-ai">IA · {x.model}</span>;
   if (x.mode === "memory") return <span className="src src-mem">Memoria</span>;
   if (x.mode === "tasks") return <span className="src src-task">Tareas</span>;
+  if (x.mode === "gym") return <span className="src src-gym">Gimnasio</span>;
   if (x.mode === "local") return <span className="src" title={x.note ?? undefined}>Modo local</span>;
   return null;
 }
@@ -95,6 +97,7 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask }: {
             </p>
             {x.memory && <MemoryNote x={x} onForget={onForget} />}
             {x.task && <TaskNote x={x} onTask={onTask} />}
+            {x.gym && <p className="mem-note">🏋️ Sesión de hoy: {x.gym.sets} series · <Link to="/gym">Ver entreno</Link></p>}
             {x.suggestions?.some((s) => s.state !== "dismissed") && (
               <div className="suggest" role="group" aria-label="ATLAS propone recordar">
                 <span className="suggest-title">ATLAS propone recordar</span>

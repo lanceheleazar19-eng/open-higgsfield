@@ -29,7 +29,7 @@ function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: nu
     calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: true },
     projects: { metric: n(d.projects.active, "activo", "activos"), planned: true },
     research: phase("research"),
-    gym: { metric: `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`, planned: true },
+    gym: { metric: d.fitness.today_routine ? `Hoy: ${d.fitness.today_routine}` : `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`, planned: false },
     finance: d.finance.has_data
       ? { metric: `${formatMoney(d.finance.net_cents, d.finance.currency)} mes`, planned: true, alert: d.finance.net_cents < 0 }
       : { metric: "Sin datos", planned: true },
@@ -96,6 +96,8 @@ export function ControlCenter() {
         if (ev.type === "meta") {
           cid = ev.conversation_id;
           setConversationId(ev.conversation_id);
+        } else if (ev.type === "gym") {
+          patch(id, { gym: { sets: ev.session.working_sets, tonnage: ev.session.tonnage } });
         } else if (ev.type === "task") {
           patch(id, { task: { action: ev.action, item: ev.task, state: "shown" } });
         } else if (ev.type === "memory") {

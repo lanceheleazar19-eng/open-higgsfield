@@ -605,6 +605,51 @@ input.full { width: 100%; margin-bottom: 12px; }
 }
 .toast-title { font: 600 10px var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
 
+/* ================= Gimnasio ================= */
+.src-gym { color: #34d399; border-color: rgba(52, 211, 153, .4); }
+.gym-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.gym-ex { display: grid; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.gym-ex:last-child { border-bottom: 0; }
+.gym-ex-head { display: grid; gap: 2px; }
+.gym-ex.is-done .task-title { color: var(--green); }
+.set-form { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-3); }
+.set-form input, .set-form select, .row-actions select, .check select {
+  font: 13.5px var(--font); color: var(--text); background: rgba(5, 11, 24, .7);
+  border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; width: 64px;
+}
+.check select { width: auto; margin-left: 8px; }
+.parse-list { margin: -4px 0 0; padding: 8px 10px 8px 26px; font-size: 13px; border-radius: 8px; background: rgba(34, 211, 238, .06); border: 1px solid rgba(34, 211, 238, .25); display: grid; gap: 3px; }
+.session-ex { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13.5px; }
+.session-ex li { display: grid; gap: 4px; }
+.set-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.set-chip { font: 500 12px var(--font-mono); padding: 3px 8px; border-radius: 7px; color: var(--text); background: rgba(47, 140, 255, .12); border: 1px solid var(--line-2); cursor: pointer; }
+.set-chip:hover { border-color: var(--red); color: var(--red); text-decoration: line-through; }
+.set-chip.static { cursor: default; }
+.set-chip.static:hover { border-color: var(--line-2); color: var(--text); text-decoration: none; }
+.routine-items { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.routine-items li { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.routine-edit { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.routine-edit li { display: grid; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; }
+.routine-edit input { width: 64px; }
+.line-chart-wrap { width: 100%; overflow: hidden; margin: 8px 0; }
+.line-chart { display: block; }
+.field { display: grid; gap: 6px; font-size: 13px; color: var(--text-2); }
+.field select { font: 14px var(--font); color: var(--text); background: rgba(5, 11, 24, .7); border: 1px solid var(--line-2); border-radius: 8px; padding: 8px 10px; }
+.lc-grid { stroke: rgba(96, 165, 250, .12); }
+.lc-axis { fill: var(--text-3); font: 10px var(--font-mono); }
+.lc-dot { stroke: var(--bg); stroke-width: 1.5; }
+.vol-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: 13px; }
+.vol-list li { display: grid; grid-template-columns: 130px 1fr 40px; gap: 10px; align-items: center; }
+.vol-track { position: relative; height: 8px; border-radius: 99px; background: rgba(96, 165, 250, .08); overflow: hidden; }
+.vol-track > span { position: relative; display: block; height: 100%; border-radius: inherit; background: var(--blue-2); }
+.vol-band { position: absolute; top: 0; bottom: 0; background: rgba(52, 211, 153, .14); }
+.vol-óptimo .vol-track > span { background: var(--green); }
+.vol-bajo .vol-track > span { background: var(--amber); }
+.vol-sin-trabajar span:first-child { color: var(--text-3); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+.data-table th { text-align: left; font: 600 10px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); padding: 6px 4px; border-bottom: 1px solid var(--line-2); }
+.data-table td { padding: 6px 4px; border-bottom: 1px solid var(--line); font-family: var(--font-mono); }
+
 /* ================= Responsive ================= */
 @media (max-width: 1180px) {
   .control { grid-template-columns: minmax(0, 1fr) minmax(250px, 290px); height: auto; min-height: 0; }
@@ -617,6 +662,8 @@ input.full { width: 100%; margin-bottom: 12px; }
   .week-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 }
 @media (max-width: 860px) {
+  .vol-list li { grid-template-columns: 100px 1fr 34px; }
+  .data-table { display: block; overflow-x: auto; }
   .grid-mem, .grid-tasks { grid-template-columns: 1fr; }
   .main { margin-left: 0; padding: 12px 14px 36px; }
   .topbar {

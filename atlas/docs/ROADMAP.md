@@ -7,7 +7,8 @@
 | 2 | Cerebro IA con Ollama: conversación en streaming anclada a tus datos | ✅ Completada |
 | 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ✅ Completada |
 | 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ✅ Completada |
-| 5 | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ⏳ Siguiente |
+| 5A | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ✅ Completada |
+| 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ⏳ Siguiente |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
 | 8 | Calendario + Google Calendar | — |
@@ -91,3 +92,18 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   fuera de plazo), cantidad necesaria por semana, ritmo real y fecha proyectada. Historial de registros.
 - Alertas de objetivos atrasados; objetivos (y plan semanal si se pide) en el contexto de la IA;
   modo local responde «¿cómo voy con mis objetivos?» y «organízame la semana».
+
+## Fase 5A — gimnasio
+- Biblioteca de ~50 ejercicios en español con alias («triceps v», «jalón», «bayesian»…) y peso por lado.
+- Plantilla con la rutina real del usuario (sáb. pecho/hombro/tríceps, dom. espalda/bíceps/trapecio,
+  mié. pecho/espalda, jue. brazos), importable en un clic; editor de rutinas.
+- Registro serie a serie (reps, kg, RIR) o pegando el texto tal como se apunta
+  («Inclinado 2 calentamiento 2x8 40kg», «Triceps v 40kg x 8-10 2 series»…), también desde el chat.
+  El calentamiento se anota sin inventar pesos.
+- Análisis: 1RM estimado (Epley), progresión con gráfico, volumen semanal por músculo (secundario = ½ serie,
+  referencia orientativa 10-20), frecuencia, estancamientos (3 sesiones sin superar el mejor 1RM previo),
+  comparación con la sesión anterior, entreno del día y siguiente.
+- Objetivos que se actualizan solos: peso máximo, 1RM o repeticiones de un ejercicio, o número de entrenos.
+- Medidas corporales (peso, grasa, cintura, pecho, brazo, muslo) con gráfico.
+- La IA recibe el resumen del gimnasio cuando la pregunta lo requiere; el modo local responde
+  «¿qué me toca hoy?», «¿cuánto he progresado en…?», «¿qué músculos trabajo menos?».

@@ -1,6 +1,7 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
+  BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
 
 export interface TaskInput {
@@ -10,6 +11,11 @@ export interface TaskInput {
 export interface GoalInput {
   title: string; description?: string | null; area?: string | null; kind: "numeric" | "milestones"; unit?: string | null;
   start_value?: number; target_value?: number | null; current_value?: number | null; deadline?: string | null;
+  auto_metric?: GoalItem["auto_metric"]; auto_exercise_id?: number | null;
+}
+export interface RoutineInput {
+  name: string; weekday: number | null; notes?: string | null;
+  exercises: { exercise_id: number; warmup_sets: number; sets: number; reps_min: number; reps_max: number | null; weight: number | null; notes: string | null }[];
 }
 
 export class ApiError extends Error {
@@ -107,6 +113,26 @@ export const api = {
   goalProgress: (id: number, p: { value?: number; delta?: number; note?: string }) =>
     request<GoalItem>(`/api/goals/${id}/progress`, { method: "POST", body: JSON.stringify(p) }),
   deleteGoal: (id: number) => requestEmpty(`/api/goals/${id}`, { method: "DELETE" }),
+  gymExercises: () => request<{ items: GymExercise[]; muscles: { id: string; label: string }[] }>("/api/gym/exercises"),
+  gymRoutines: () => request<{ items: RoutineData[]; templates: RoutineTemplate[] }>("/api/gym/routines"),
+  importRoutineTemplate: (id: string) => request<{ items: RoutineData[] }>(`/api/gym/routines/import/${encodeURIComponent(id)}`, { method: "POST" }),
+  saveRoutine: (r: RoutineInput, id?: number) =>
+    request<RoutineData>(id ? `/api/gym/routines/${id}` : "/api/gym/routines", { method: id ? "PUT" : "POST", body: JSON.stringify(r) }),
+  deleteRoutine: (id: number) => requestEmpty(`/api/gym/routines/${id}`, { method: "DELETE" }),
+  gymToday: () => request<GymToday>("/api/gym/today"),
+  addSet: (s: { exercise_id: number; reps: number; weight: number; rir?: number | null; routine_id?: number | null }) =>
+    request<{ id: number; session_id: number; e1rm: number }>("/api/gym/sets", { method: "POST", body: JSON.stringify(s) }),
+  deleteSet: (id: number) => requestEmpty(`/api/gym/sets/${id}`, { method: "DELETE" }),
+  logWorkoutText: (text: string, preview: boolean, routine_id?: number | null) =>
+    request<{ parsed: ParsedLog[]; session: GymSession | null }>("/api/gym/log-text", { method: "POST", body: JSON.stringify({ text, preview, routine_id }) }),
+  gymSessions: () => request<{ items: GymSession[] }>("/api/gym/sessions"),
+  deleteGymSession: (id: number) => requestEmpty(`/api/gym/sessions/${id}`, { method: "DELETE" }),
+  gymProgress: (exerciseId: number, weeks = 26) => request<GymProgress>(`/api/gym/progress/${exerciseId}?weeks=${weeks}`),
+  gymVolume: (days = 7) => request<GymVolume>(`/api/gym/volume?days=${days}`),
+  gymInsights: () => request<GymInsights>("/api/gym/insights"),
+  bodyMetrics: () => request<{ items: BodyEntry[] }>("/api/gym/body"),
+  addBodyMetric: (b: Partial<BodyEntry>) => request<BodyEntry>("/api/gym/body", { method: "POST", body: JSON.stringify(b) }),
+  deleteBodyMetric: (id: number) => requestEmpty(`/api/gym/body/${id}`, { method: "DELETE" }),
   timezones: () => request<string[]>("/api/settings/timezones"),
 };
 

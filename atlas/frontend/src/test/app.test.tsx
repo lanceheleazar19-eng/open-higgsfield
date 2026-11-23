@@ -60,10 +60,10 @@ test("backend caído muestra estado sin conexión con reintento", async () => {
 
 test("sidebar marca módulos planificados con su fase y abre su página", async () => {
   mockFetch({ ...base, "/api/dashboard": emptyDashboard });
-  renderAt("/gym");
-  expect(await screen.findByText("F5")).toBeInTheDocument();
-  expect(await screen.findByText("Fase 5 · en desarrollo")).toBeInTheDocument();
-  expect(screen.getByText("Series y RIR")).toBeInTheDocument();
+  renderAt("/trading");
+  expect(await screen.findByText("F6")).toBeInTheDocument();
+  expect(await screen.findByText("Fase 6 · en desarrollo")).toBeInTheDocument();
+  expect(screen.getByText("Win rate y P&L")).toBeInTheDocument();
 });
 
 test("configuración guarda el nombre vía PUT", async () => {
@@ -374,4 +374,51 @@ test("recordatorio vencido aparece como aviso con acción «Hecha»", async () =
   fireEvent.click(within(screen.getByRole("region", { name: "Recordatorios" })).getByRole("button", { name: "Hecha" }));
   await waitFor(() => expect(screen.queryByText("Sacar al perro")).not.toBeInTheDocument());
   expect(calls.some((c) => c.url === "/api/tasks/1/complete")).toBe(true);
+});
+
+const routine = {
+  id: 1, name: "Pecho + hombro + tríceps", weekday: 5, weekday_name: "sábado", notes: null, active: true,
+  exercises: [{ id: 10, exercise_id: 1, name: "Press inclinado", muscle: "pecho", per_side: false, position: 0, warmup_sets: 2,
+    sets: 2, reps_min: 8, reps_max: null, weight: 40, notes: "Objetivo: 46 kg antes de 2027", done: false,
+    last: { date: "2026-11-21", sets: [{ reps: 8, weight: 40, rir: 2 }], top: { reps: 8, weight: 40 } } }],
+};
+
+test("gimnasio: importa la rutina en un clic", async () => {
+  const calls = mockFetch({
+    ...base,
+    "/api/gym/today": { date: "2026-11-23", weekday_name: "lunes", rest_day: true, routine: null, session_id: null, next: null },
+    "/api/gym/routines": { items: [], templates: [{ id: "rutina_4_dias", name: "Rutina 4 días (Sáb · Dom · Mié · Jue)", description: null,
+      days: [{ name: "Pecho + hombro + tríceps", weekday: 5 }] }] },
+    "/api/gym/exercises": { items: [], muscles: [] },
+    "POST /api/gym/routines/import/rutina_4_dias": { items: [routine] },
+  });
+  renderAt("/gym");
+  fireEvent.click(await screen.findByRole("tab", { name: "Rutinas" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Importar esta rutina" }));
+  expect(await screen.findByText(/Rutina importada/)).toBeInTheDocument();
+  expect(calls.some((c) => c.url === "/api/gym/routines/import/rutina_4_dias")).toBe(true);
+});
+
+test("gimnasio hoy: ver objetivo, última vez y registrar una serie", async () => {
+  const calls = mockFetch({
+    ...base,
+    "/api/gym/today": { date: "2026-11-28", weekday_name: "sábado", rest_day: false, routine, session_id: null, next: null },
+    "/api/gym/routines": { items: [routine], templates: [] },
+    "POST /api/gym/sets": { id: 5, session_id: 3, e1rm: 53.3 },
+    "POST /api/gym/log-text": { parsed: [{ exercise_id: 1, name: "Press inclinado", reps: [8, 8], weight: 42.5, rir: 2, warmup_sets: 0, per_side: false, notes: [] }], session: null },
+  });
+  renderAt("/gym");
+  expect(await screen.findByText("Hoy: Pecho + hombro + tríceps")).toBeInTheDocument();
+  expect(screen.getByText(/Objetivo: 2 calent\. \+ 2×8 · 40 kg/)).toBeInTheDocument();
+  expect(screen.getByText(/Última vez/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Peso de Press inclinado"), { target: { value: "42,5" } });
+  fireEvent.change(screen.getByLabelText("RIR de Press inclinado"), { target: { value: "2" } });
+  fireEvent.click(screen.getByRole("button", { name: "+ Serie" }));
+  const st = await screen.findByText(/^Registrado:/);
+  expect(st).toHaveTextContent("Registrado: Press inclinado: 8 reps × 42,5 kg · RIR 2");
+  expect(JSON.parse(calls.find((c) => c.url === "/api/gym/sets")!.init!.body as string))
+    .toEqual({ exercise_id: 1, reps: 8, weight: 42.5, rir: 2, routine_id: null });
+  // registro por texto con vista previa
+  fireEvent.change(screen.getByLabelText("Entreno en texto"), { target: { value: "inclinado 2x8 42,5kg rir 2" } });
+  expect(await screen.findByText(/2×\(8\/8\)/, {}, { timeout: 3000 })).toBeInTheDocument();
 });

@@ -6,6 +6,7 @@ export const QUICK_COMMANDS = [
   "¿Qué tengo pendiente hoy?",
   "Organízame la semana",
   "¿Cómo voy con mis objetivos?",
+  "¿Qué me toca hoy en el gimnasio?",
   "¿Qué tareas son prioritarias?",
   "Próximos eventos",
   "¿Cuánto he gastado este mes?",

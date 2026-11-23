@@ -430,7 +430,8 @@ function GoalCard({ g, onChange }: { g: GoalItem; onChange: (msg: string, tone?:
         </ul>
       )}
       <div className="goal-actions">
-        {g.status === "active" && g.kind === "numeric" && (
+        {g.status === "active" && g.auto_metric && <span className="muted small">⚡ Se actualiza solo con tus entrenos</span>}
+        {g.status === "active" && g.kind === "numeric" && !g.auto_metric && (
           <form onSubmit={record} className="progress-form">
             <select value={mode} onChange={(e) => setMode(e.target.value as "add" | "set")} aria-label="Tipo de registro">
               <option value="add">Sumar</option>
@@ -461,6 +462,10 @@ function GoalForm({ onSaved }: { onSaved: (g: GoalItem) => void }) {
   const [target, setTarget] = useState("");
   const [deadline, setDeadline] = useState("");
   const [area, setArea] = useState("");
+  const [auto, setAuto] = useState<"" | "exercise_weight" | "exercise_e1rm" | "exercise_reps" | "workout_count">("");
+  const [exId, setExId] = useState("");
+  const exercises = useAsync(() => (auto && auto !== "workout_count" ? api.gymExercises() : Promise.resolve(null)));
+  useEffect(() => { void exercises.reload(); }, [auto]); // eslint-disable-line react-hooks/exhaustive-deps
   const [error, setError] = useState<string | null>(null);
 
   async function submit(e: FormEvent) {
@@ -471,6 +476,7 @@ function GoalForm({ onSaved }: { onSaved: (g: GoalItem) => void }) {
       const g = await api.createGoal({
         title: title.trim(), kind, area: area || null, deadline: deadline || null,
         ...(kind === "numeric" ? { unit: unit.trim() || null, start_value: num(start || "0"), target_value: num(target) } : {}),
+        ...(kind === "numeric" && auto ? { auto_metric: auto, auto_exercise_id: auto === "workout_count" ? null : Number(exId) } : {}),
       });
       onSaved(g);
       setTitle(""); setTarget(""); setDeadline(""); setUnit(""); setStart("0");
@@ -506,9 +512,30 @@ function GoalForm({ onSaved }: { onSaved: (g: GoalItem) => void }) {
           </select>
         </label>
       </div>
+      {kind === "numeric" && (
+        <div className="form-row">
+          <label><span>Actualizar solo con el gimnasio</span>
+            <select value={auto} onChange={(e) => setAuto(e.target.value as typeof auto)}>
+              <option value="">No (lo registro yo)</option>
+              <option value="exercise_weight">Peso máximo en un ejercicio</option>
+              <option value="exercise_e1rm">1RM estimado de un ejercicio</option>
+              <option value="exercise_reps">Repeticiones máximas en una serie</option>
+              <option value="workout_count">Número de entrenos</option>
+            </select>
+          </label>
+          {auto && auto !== "workout_count" && (
+            <label><span>Ejercicio</span>
+              <select value={exId} onChange={(e) => setExId(e.target.value)} required>
+                <option value="">Elige…</option>
+                {(exercises.data?.items ?? []).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
+              </select>
+            </label>
+          )}
+        </div>
+      )}
       <p className="muted small">Para bajar (p. ej. peso de 86 a 78 kg) pon el valor actual mayor que la meta.</p>
       <div className="form-actions">
-        <button className="btn" type="submit" disabled={title.trim().length < 2 || (kind === "numeric" && !target.trim())}>Crear objetivo</button>
+        <button className="btn" type="submit" disabled={title.trim().length < 2 || (kind === "numeric" && !target.trim()) || (!!auto && auto !== "workout_count" && !exId)}>Crear objetivo</button>
         {error && <span className="neg small">{error}</span>}
       </div>
     </form>

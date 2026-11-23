@@ -171,12 +171,23 @@ class SetIn(BaseModel):
     rir: int | None = Field(default=None, ge=0, le=10)
     warmup: bool = False
     day: date | None = None
+    routine_id: int | None = None  # entrenar otra rutina en un día distinto al suyo
+
+
+def _routine(db, routine_id: int | None) -> Routine | None:  # noqa: ANN001
+    if routine_id is None:
+        return None
+    r = db.get(Routine, routine_id)
+    if not r:
+        raise HTTPException(404, "Rutina no encontrada")
+    return r
 
 
 @router.post("/sets", status_code=201)
 def add_set(body: SetIn, db: DB) -> dict:
     _exercise(db, body.exercise_id)
-    ws = gym.add_set(db, body.day or _today(db), body.exercise_id, body.reps, body.weight, body.rir, body.warmup)
+    ws = gym.add_set(db, body.day or _today(db), body.exercise_id, body.reps, body.weight, body.rir, body.warmup,
+                     _routine(db, body.routine_id))
     db.commit()
     return {"id": ws.id, "session_id": ws.session_id, "e1rm": gym.e1rm(ws.weight, ws.reps)}
 
@@ -196,6 +207,7 @@ class LogTextIn(BaseModel):
     text: str = Field(min_length=3, max_length=4000)
     day: date | None = None
     preview: bool = False
+    routine_id: int | None = None
 
 
 @router.post("/log-text")
@@ -206,7 +218,7 @@ def log_text(body: LogTextIn, db: DB) -> dict:
               "warmup_sets": p.warmup_sets, "per_side": p.per_side, "notes": p.notes} for p in parsed]
     if body.preview or not parsed:
         return {"parsed": items, "session": None}
-    s, _ = gym.log_parsed(db, parsed, body.day or _today(db))
+    s, _ = gym.log_parsed(db, parsed, body.day or _today(db), _routine(db, body.routine_id))
     db.commit()
     return {"parsed": items, "session": gym.session_dict(db, s)}
 

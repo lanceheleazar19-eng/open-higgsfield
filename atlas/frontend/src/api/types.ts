@@ -95,9 +95,10 @@ export type ChatEvent =
   | { type: "meta"; conversation_id: number }
   | { type: "memory"; action: "saved" | "duplicate" | "forget_candidate"; memory: MemoryItem }
   | { type: "task"; action: "created" | "complete_candidate" | "not_found"; task: TaskItem | null }
+  | { type: "gym"; action: "logged"; session: GymSession }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym"; model: string | null; reason?: string | null }
   | { type: "error"; message: string };
 
 export interface ChatMessage {
@@ -135,6 +136,7 @@ export interface Dashboard {
     top_expense_categories: { category: string; amount_cents: number }[];
   };
   fitness: {
+    today_routine?: string | null;
     sessions_7d: number;
     minutes_7d: number;
     days: { date: string; sessions: number }[];
@@ -189,6 +191,7 @@ export interface GoalItem {
   unit: string | null; start_value: number; target_value: number | null; current_value: number;
   start_date: string; deadline: string | null; status: "active" | "achieved" | "paused" | "abandoned";
   tasks_total: number; tasks_done: number; achieved_at: string | null; metrics: GoalMetrics;
+  auto_metric?: "exercise_weight" | "exercise_e1rm" | "exercise_reps" | "workout_count" | null; auto_exercise_id?: number | null;
   history?: { id: number; value: number; note: string | null; recorded_at: string }[];
 }
 
@@ -201,3 +204,42 @@ export interface TaskSummary {
   period: "day" | "week"; from: string; to: string; completed: number; completed_titles: string[];
   created: number; due: number; due_open: number; overdue: number; completion_rate: number | null;
 }
+
+export interface GymExercise {
+  id: number; name: string; muscle: string; muscle_label: string; secondary: string[]; equipment: string | null;
+  per_side: boolean; aliases: string[]; custom: boolean;
+}
+export interface RoutineItem {
+  id: number; exercise_id: number; name: string; muscle: string; per_side: boolean; position: number; warmup_sets: number;
+  sets: number; reps_min: number; reps_max: number | null; weight: number | null; notes: string | null;
+  done?: boolean; last?: { date: string; sets: { reps: number; weight: number; rir: number | null }[]; top: { reps: number; weight: number } } | null;
+}
+export interface RoutineData { id: number; name: string; weekday: number | null; weekday_name: string | null; notes: string | null; active: boolean; exercises: RoutineItem[] }
+export interface RoutineTemplate { id: string; name: string; description: string | null; days: { name: string; weekday: number | null }[] }
+export interface GymSet { id: number; set_number: number; reps: number; weight: number; rir: number | null; warmup: boolean; e1rm: number | null }
+export interface GymSession {
+  id: number; date: string; routine_name: string | null; routine_id: number | null; duration_min: number | null; notes: string | null;
+  exercises: { exercise_id: number; name: string; muscle: string; per_side: boolean; sets: GymSet[] }[];
+  working_sets: number; tonnage: number;
+}
+export interface GymToday {
+  date: string; weekday_name: string; rest_day: boolean; routine: RoutineData | null; session_id: number | null;
+  session?: GymSession; next: { name: string; date: string; weekday_name: string } | null;
+}
+export interface ProgressPoint { date: string; e1rm: number; top_weight: number; top_reps: number; sets: number; volume: number }
+export interface GymProgress {
+  exercise: { id: number; name: string; per_side: boolean }; points: ProgressPoint[]; sessions: number;
+  change_e1rm?: number; change_pct?: number | null; change_top_weight?: number; since?: string; best: ProgressPoint | null; stagnant: boolean;
+}
+export interface MuscleVolume { muscle: string; label: string; sets: number; frequency: number; status: "sin trabajar" | "bajo" | "óptimo" | "alto" }
+export interface GymVolume { from: string; to: string; muscles: MuscleVolume[]; reference: { min: number; max: number } }
+export interface GymInsights {
+  stagnations: { exercise_id: number; name: string; sessions: number; best_e1rm: number | null }[];
+  undertrained: MuscleVolume[];
+  compare: { current: string; previous: string; tonnage_delta: number; exercises: { name: string; now: GymSet; before: GymSet; delta_e1rm: number }[] } | null;
+}
+export interface BodyEntry {
+  id: number; measured_on: string; weight_kg: number | null; body_fat_pct: number | null; waist_cm: number | null;
+  chest_cm: number | null; arm_cm: number | null; thigh_cm: number | null; notes: string | null;
+}
+export interface ParsedLog { exercise_id: number; name: string; reps: number[]; weight: number | null; rir: number | null; warmup_sets: number; per_side: boolean; notes: string[] }

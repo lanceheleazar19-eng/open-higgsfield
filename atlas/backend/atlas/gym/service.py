@@ -122,8 +122,9 @@ def get_or_create_session(db: Session, day: date, routine: Routine | None = None
     return s
 
 
-def log_parsed(db: Session, parsed: list[ParsedExercise], day: date) -> tuple[WorkoutSession, list[WorkoutSet]]:
-    s = get_or_create_session(db, day)
+def log_parsed(db: Session, parsed: list[ParsedExercise], day: date,
+               routine: Routine | None = None) -> tuple[WorkoutSession, list[WorkoutSet]]:
+    s = get_or_create_session(db, day, routine)
     created: list[WorkoutSet] = []
     for p in parsed:
         n = db.scalar(select(func.coalesce(func.max(WorkoutSet.set_number), 0))
@@ -143,8 +144,9 @@ def log_parsed(db: Session, parsed: list[ParsedExercise], day: date) -> tuple[Wo
     return s, created
 
 
-def add_set(db: Session, day: date, exercise_id: int, reps: int, weight: float, rir: int | None, warmup: bool) -> WorkoutSet:
-    s = get_or_create_session(db, day)
+def add_set(db: Session, day: date, exercise_id: int, reps: int, weight: float, rir: int | None, warmup: bool,
+            routine: Routine | None = None) -> WorkoutSet:
+    s = get_or_create_session(db, day, routine)
     n = db.scalar(select(func.coalesce(func.max(WorkoutSet.set_number), 0))
                   .where(WorkoutSet.session_id == s.id, WorkoutSet.exercise_id == exercise_id)) or 0
     ws = WorkoutSet(session_id=s.id, exercise_id=exercise_id, set_number=n + 1, reps=reps, weight=weight, rir=rir, warmup=warmup)

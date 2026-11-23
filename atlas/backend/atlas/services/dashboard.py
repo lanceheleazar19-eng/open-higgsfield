@@ -154,7 +154,10 @@ def _fitness(db: Session, today: date) -> dict:
     last = db.scalars(
         select(WorkoutSession).order_by(WorkoutSession.performed_on.desc(), WorkoutSession.id.desc()).limit(1)
     ).first()
+    from atlas.gym.service import routine_for_day
+    r = routine_for_day(db, today)
     return {
+        "today_routine": r.name if r else None,
         "sessions_7d": len(rows),
         "minutes_7d": sum(r.duration_min or 0 for r in rows),
         "days": days,
