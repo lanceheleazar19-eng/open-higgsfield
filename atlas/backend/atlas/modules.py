@@ -22,7 +22,7 @@ MODULES: list[Module] = [
            "Cerebro conversacional multi-modelo (Ollama local + APIs externas).",
            ["Conversación natural", "Proveedor intercambiable (Ollama, Anthropic, OpenAI…)",
             "Lectura de PDF, Excel e imágenes", "Investigación web", "Herramientas sobre tus datos"]),
-    Module("tasks", "Tareas", 4, "planned", "Gestión de tareas, prioridades y objetivos.",
+    Module("tasks", "Tareas", 4, "active", "Tareas, prioridades, plan semanal y objetivos medibles.",
            ["Crear por texto o voz", "Prioridades y fechas límite", "Detección de atrasos",
             "Recordatorios", "Resúmenes diarios y semanales"]),
     Module("gym", "Gimnasio", 5, "planned", "Entrenamiento, progresión y medidas físicas.",

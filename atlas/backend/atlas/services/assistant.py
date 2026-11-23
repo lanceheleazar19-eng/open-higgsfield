@@ -126,6 +126,39 @@ def briefing(d: dict) -> str:
     return "\n".join(lines)
 
 
+def _goals(d: dict) -> str:
+    gs = d.get("goal_snapshot") or []
+    if not gs:
+        return "No tienes objetivos medibles registrados. Créalos en Tareas > Objetivos y calcularé tu ritmo."
+    parts = []
+    for g in gs:
+        txt = f"{g['objetivo']}: {g['progreso']} ({g['ritmo']})"
+        if g.get("necesario_por_semana"):
+            txt += f", necesitas {g['necesario_por_semana']} por semana"
+        if g.get("fecha_proyectada_al_ritmo_actual"):
+            txt += f", al ritmo actual lo lograrás el {g['fecha_proyectada_al_ritmo_actual']}"
+        parts.append(txt)
+    return "Tus objetivos: " + "; ".join(parts) + "."
+
+
+DAYS_ES = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+
+
+def _plan(d: dict) -> str:
+    plan = d.get("week_plan")
+    if not plan:
+        return "No puedo organizar la semana ahora mismo."
+    from datetime import date as _date
+    lines = []
+    for x in plan["days"]:
+        if x["tasks"]:
+            wd = DAYS_ES[_date.fromisoformat(x["date"]).weekday()]
+            lines.append(f"{wd} {x['date'][8:10]}: " + ", ".join(t["title"] for t in x["tasks"]))
+    if not lines:
+        return "No tienes tareas abiertas para organizar esta semana."
+    return "Así te organizo la semana: " + "; ".join(lines) + ". Puedes aplicarlo en Tareas > Semana."
+
+
 HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega en la Fase 2). "
         "Puedo responder con tus datos registrados: «¿qué tengo pendiente hoy?», «¿qué es prioritario?», "
         "«próximos eventos», «¿cuánto he gastado este mes?», «¿cómo voy en el gimnasio?», "
@@ -133,6 +166,8 @@ HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega e
 
 INTENTS: list[tuple[str, re.Pattern, object]] = [
     ("briefing", re.compile(r"\b(resumen|briefing|informe|buenos dias|buenas tardes|buenas noches|hola)\b"), briefing),
+    ("plan", re.compile(r"organiza|planifica|plan de la semana"), _plan),
+    ("goals", re.compile(r"objetivo|meta|potencial|progreso"), _goals),
     ("priorities", re.compile(r"prioritari|urgent|importante"), _priorities),
     ("tasks", re.compile(r"pendient|tarea|que tengo|hacer hoy"), _pending),
     ("events", re.compile(r"evento|agenda|calendario|reunion|cita"), _events),

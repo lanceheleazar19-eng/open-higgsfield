@@ -11,14 +11,17 @@ para evitar errores de coma flotante.
 from datetime import date, datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
+from sqlalchemy import false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from atlas.models.base import Base, utcnow
@@ -59,7 +62,14 @@ class Task(Base):
     project_id: Mapped[int | None] = mapped_column(
         ForeignKey("projects.id", ondelete="SET NULL"), index=True
     )
+    goal_id: Mapped[int | None] = mapped_column(ForeignKey("goals.id", ondelete="SET NULL"), index=True)
+    # Fecha sin hora: due_at = final del día local (no cuenta como atrasada hasta que acaba el día)
+    all_day: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    # Recordatorio: momento en que avisar; reminded_at marca que ya se avisó
+    reminder_at: Mapped[datetime | None] = mapped_column(DateTime, index=True)
+    reminded_at: Mapped[datetime | None] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
 
 
@@ -107,3 +117,45 @@ class WorkoutSession(Base):
     duration_min: Mapped[int | None] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+GOAL_STATUSES = ("active", "achieved", "paused", "abandoned")
+
+
+class Goal(Base):
+    """Objetivo medible. Numérico (de start_value a target_value, p. ej. ahorrar o bajar de peso)
+    o por hitos (progreso = tareas vinculadas completadas)."""
+
+    __tablename__ = "goals"
+    __table_args__ = (
+        CheckConstraint(f"status IN {GOAL_STATUSES}", name="status"),
+        CheckConstraint("kind IN ('numeric', 'milestones')", name="kind"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str | None] = mapped_column(Text)
+    area: Mapped[str | None] = mapped_column(String(32))  # finanzas, salud, negocio, aprendizaje…
+    kind: Mapped[str] = mapped_column(String(12), default="numeric")
+    unit: Mapped[str | None] = mapped_column(String(16))
+    start_value: Mapped[float] = mapped_column(Float, default=0)
+    target_value: Mapped[float | None] = mapped_column(Float)
+    current_value: Mapped[float] = mapped_column(Float, default=0)
+    start_date: Mapped[date] = mapped_column(Date)
+    deadline: Mapped[date | None] = mapped_column(Date)
+    status: Mapped[str] = mapped_column(String(12), default="active", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
+    achieved_at: Mapped[datetime | None] = mapped_column(DateTime)
+
+
+class GoalProgress(Base):
+    """Historial de valores de un objetivo (permite calcular el ritmo real)."""
+
+    __tablename__ = "goal_progress"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    goal_id: Mapped[int] = mapped_column(ForeignKey("goals.id", ondelete="CASCADE"), index=True)
+    value: Mapped[float] = mapped_column(Float)
+    note: Mapped[str | None] = mapped_column(String(300))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)

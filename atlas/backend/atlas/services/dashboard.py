@@ -65,6 +65,7 @@ def _tasks(db: Session, tz: str, now_utc: datetime, today_end_utc: datetime) -> 
                 "priority": t.priority,
                 "status": t.status,
                 "due_at": _iso_local(t.due_at, tz),
+                "all_day": t.all_day,
                 "overdue": bool(t.due_at and t.due_at < now_utc),
             }
             for t in top
@@ -232,4 +233,17 @@ def build_dashboard(db: Session, prefs: dict, now: datetime | None = None) -> di
         "fitness": fitness,
         "projects": projects,
         "activity": _activity(db, tz),
+        "goals": _goals(db, today),
     }
+
+
+def _goals(db: Session, today: date) -> dict:
+    from atlas.services.goals import active_goals, metrics
+    items = []
+    for g in active_goals(db)[:6]:
+        m = metrics(db, g, today)
+        items.append({"id": g.id, "title": g.title, "unit": g.unit, "kind": g.kind, "progress": m.get("progress"),
+                      "pace": m.get("pace"), "deadline": g.deadline.isoformat() if g.deadline else None,
+                      "current": m.get("current"), "target": m.get("target"),
+                      "required_per_week": m.get("required_per_week")})
+    return {"items": items}

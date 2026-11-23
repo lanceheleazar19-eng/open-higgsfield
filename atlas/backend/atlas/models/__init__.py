@@ -5,6 +5,8 @@ from atlas.models.core import ActivityLog, Setting
 from atlas.models.memory import Conversation, ConversationMessage, Memory
 from atlas.models.domain import (
     CalendarEvent,
+    Goal,
+    GoalProgress,
     Project,
     Task,
     Transaction,
@@ -21,6 +23,8 @@ __all__ = [
     "WorkoutSession",
     "Project",
     "Memory",
+    "Goal",
+    "GoalProgress",
     "Conversation",
     "ConversationMessage",
 ]

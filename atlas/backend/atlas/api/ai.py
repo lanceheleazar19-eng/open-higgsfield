@@ -1,4 +1,7 @@
 import json
+import re
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -8,7 +11,11 @@ from atlas.api.deps import DB
 from atlas.brain.orchestrator import brain_status, chat_events
 from atlas.db import session_scope
 from atlas.services import conversations as convs
+from atlas.services import goals as goals_svc
 from atlas.services import memory as mem
+from atlas.services import tasks as tasks_svc
+from atlas.services.clock import local_to_utc_naive
+from atlas.services.nlp import parse_complete_command, parse_task_command
 from atlas.services.alerts import build_alerts
 from atlas.services.dashboard import build_dashboard
 from atlas.services.preferences import get_prefs
@@ -33,6 +40,47 @@ def ai_status(db: DB) -> dict:
     return brain_status(get_prefs(db))
 
 
+PLAN_Q = re.compile(r"organiza|planifica|plan de la semana|mi semana|esta semana|que hago (esta|la) semana")
+DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
+PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "crítica"}
+
+
+def _when(dt: datetime, all_day: bool) -> str:
+    s = f"el {DAYS[dt.weekday()]} {dt.day}/{dt.month}"
+    return s if all_day else f"{s} a las {dt:%H:%M}"
+
+
+def _task_command(db, text: str, tz: str):  # noqa: ANN001
+    """Crea una tarea o propone completarla. Devuelve (evento, respuesta) o None."""
+    now_local = datetime.now(ZoneInfo(tz)).replace(tzinfo=None)
+    p = parse_task_command(text, now_local)
+    if p:
+        due = local_to_utc_naive(p.due.replace(tzinfo=ZoneInfo(tz))) if p.due else None
+        reminder = due if (p.reminder and due) else None
+        if p.reminder and p.all_day and due:  # recordatorio de día completo → a las 9:00 de ese día
+            reminder = local_to_utc_naive(p.due.replace(hour=9, minute=0, second=0, tzinfo=ZoneInfo(tz)))
+        t = tasks_svc.create_task(db, title=p.title, priority=p.priority, category=p.category,
+                                  due_at=due, all_day=p.all_day, reminder_at=reminder)
+        db.commit()
+        reply = f"Apuntado: «{t.title}»"
+        if p.due:
+            reply += " para " + _when(p.due, p.all_day)
+        if p.priority != "medium":
+            reply += f", prioridad {PRIO_ES[p.priority]}"
+        reply += "."
+        if reminder:
+            reply += " Te avisaré a su hora mientras ATLAS esté abierto."
+        return {"type": "task", "action": "created", "task": tasks_svc.to_dict(t, tz)}, reply
+    target = parse_complete_command(text)
+    if target:
+        t = tasks_svc.find_open_task(db, target)
+        if not t:
+            return {"type": "task", "action": "not_found", "task": None}, "No encuentro ninguna tarea abierta parecida."
+        return ({"type": "task", "action": "complete_candidate", "task": tasks_svc.to_dict(t, tz)},
+                f"¿Marco como hecha «{t.title}»? Confírmalo con el botón.")
+    return None
+
+
 def _line(ev: dict) -> str:
     return json.dumps(ev, ensure_ascii=False) + "\n"
 
@@ -50,6 +98,17 @@ def chat(body: ChatIn) -> StreamingResponse:
             convs.add_message(db, conv, "user", body.text)
             db.commit()
             yield _line({"type": "meta", "conversation_id": conv.id})
+
+            # Órdenes de tareas: «apúntame…», «recuérdame…», «he terminado…»
+            task_ev = _task_command(db, body.text, tz)
+            if task_ev:
+                ev, reply = task_ev
+                yield _line(ev)
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "tasks", "model": None})
+                convs.add_message(db, conv, "assistant", reply, mode="local")
+                db.commit()
+                return
 
             # Órdenes explícitas de memoria: «recuerda que…» / «olvida que…»
             cmd = mem.parse_command(body.text)
@@ -81,6 +140,9 @@ def chat(body: ChatIn) -> StreamingResponse:
 
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
+            d["goal_snapshot"] = goals_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
+            if PLAN_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
+                d["week_plan"] = tasks_svc.plan_week(db, tz)
             memory_ctx = mem.memory_context(db, body.text, tz, conversation_id=conv.id)
             db.commit()
             text, final = "", None

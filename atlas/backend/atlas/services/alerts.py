@@ -36,4 +36,11 @@ def build_alerts(d: dict) -> list[dict]:
     if fit["last_session"] and fit["sessions_7d"] == 0:
         alerts.append({"level": "info", "module": "gym",
                        "text": f"Sin entrenos en 7 días (último: {fit['last_session']['date']})."})
+    for g in d.get("goals", {}).get("items", []):
+        if g["pace"] == "behind":
+            need = g.get("required_per_week")
+            extra = f" Necesitas {abs(need):g}{(' ' + g['unit']) if g.get('unit') else ''} por semana para llegar." if need else ""
+            alerts.append({"level": "warning", "module": "goals", "text": f"Objetivo «{g['title']}» va por detrás del ritmo.{extra}"})
+        elif g["pace"] == "overdue":
+            alerts.append({"level": "critical", "module": "goals", "text": f"Objetivo «{g['title']}» ha superado su fecha límite."})
     return alerts

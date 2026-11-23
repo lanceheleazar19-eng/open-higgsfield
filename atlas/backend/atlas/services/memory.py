@@ -200,7 +200,7 @@ def purge_expired(db: Session) -> int:
 
 _REMEMBER = re.compile(
     r"^(?:oye\s+)?(?:atlas[,:\s]+)?(?:por favor\s+)?"
-    r"(?:recuerda(?:\s+siempre)?|no olvides|memoriza|apunta|anota|guarda en (?:la |tu )?memoria)"
+    r"(?:recuerda(?:\s+siempre)?|no olvides|memoriza|apunta que|anota que|guarda en (?:la |tu )?memoria)"
     r"(?:\s+que|\s+esto|:)?[\s:,]+(?P<body>.{3,})$",
     re.IGNORECASE | re.DOTALL,
 )
