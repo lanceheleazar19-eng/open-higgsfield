@@ -5,8 +5,8 @@
 | 1 | Arquitectura, estructura, dashboard, configuración | ✅ Completada |
 | 1.5 | ATLAS 2.0: centro de control holográfico | ✅ Completada |
 | 2 | Cerebro IA con Ollama: conversación en streaming anclada a tus datos | ✅ Completada |
-| 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ⏳ Siguiente |
-| 4 | Gestor de tareas (prioridades, fechas, atrasos, objetivos, resúmenes) | — |
+| 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ✅ Completada |
+| 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ⏳ Siguiente |
 | 5 | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | — |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
@@ -63,3 +63,16 @@ dashboard en cuanto su fase los permita registrar.
 
 Pendiente para fases posteriores: uso de herramientas (crear tareas, etc.) con confirmación,
 memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
+
+## Fase 3 — memoria persistente
+- Tablas `memories`, `conversations`, `conversation_messages` + índices FTS5 (sin tildes, por prefijos).
+- Recuerdos: preferencia, objetivo, decisión, dato, nota; permanentes o temporales (caducan solos:
+  «esta semana», «hoy», «este mes»…). Duplicados detectados por huella normalizada y similitud.
+- En la conversación: «recuerda que…» guarda (lo pide el usuario); «olvida que…» propone y pide
+  confirmación; la IA **propone** recuerdos tras cada respuesta y solo se guardan si el usuario acepta.
+- Cada consulta recibe: perfil (preferencias y objetivos), recuerdos temporales vigentes, recuerdos
+  relevantes y fragmentos de conversaciones anteriores (con filtro «ayer», «la semana pasada», «el mes pasado»).
+- Conversaciones guardadas; ATLAS retoma la última al volver a abrirse; «Nueva conversación».
+- Página Memoria: buscar, filtrar, añadir, editar, hacer permanente, olvidar, limpiar caducados,
+  exportar JSON; pestaña de conversaciones con búsqueda y borrado.
+- Misión de ATLAS en su identidad: ayudar al usuario a alcanzar su potencial, conectando consejos con sus objetivos.

@@ -6,7 +6,10 @@ export interface Health {
   database: { ok: boolean; engine: string };
   ai: { configured: boolean; provider: string | null; model: string | null; models_installed: number; note: string };
   python: string;
-  storage: { db_bytes: number; disk_free_bytes: number; disk_total_bytes: number; records: number } | null;
+  storage: {
+    db_bytes: number; disk_free_bytes: number; disk_total_bytes: number; records: number;
+    memories: number; conversations: number;
+  } | null;
 }
 
 export interface Alert {
@@ -49,10 +52,51 @@ export interface AiStatus {
   note: string | null;
 }
 
+export type MemoryKind = "preference" | "goal" | "decision" | "fact" | "note";
+
+export interface MemoryItem {
+  id: number;
+  content: string;
+  kind: MemoryKind;
+  permanent: boolean;
+  expires_at: string | null;
+  expired: boolean;
+  project_id: number | null;
+  source: "manual" | "chat" | "suggested";
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MemorySuggestion {
+  content: string;
+  kind: MemoryKind;
+  temporary: boolean;
+}
+
+export interface ConversationSummary {
+  id: number;
+  title: string;
+  messages: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StoredMessage {
+  id: number;
+  conversation_id: number;
+  role: "user" | "assistant";
+  content: string;
+  mode: "ai" | "local" | null;
+  model: string | null;
+  created_at: string;
+}
+
 export type ChatEvent =
+  | { type: "meta"; conversation_id: number }
+  | { type: "memory"; action: "saved" | "duplicate" | "forget_candidate"; memory: MemoryItem }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory"; model: string | null; reason?: string | null }
   | { type: "error"; message: string };
 
 export interface ChatMessage {

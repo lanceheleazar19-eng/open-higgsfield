@@ -9,6 +9,7 @@ interface AtlasCtx {
   modules: ModuleInfo[];
   prefs: Prefs | null;
   reloadPrefs: () => Promise<void>;
+  reloadHealth: () => Promise<void>;
 }
 
 const Ctx = createContext<AtlasCtx | null>(null);
@@ -25,6 +26,7 @@ export function AtlasProvider({ children }: { children: ReactNode }) {
         modules: modules.data ?? [],
         prefs: prefs.data,
         reloadPrefs: prefs.reload,
+        reloadHealth: health.reload,
       }}
     >
       {children}

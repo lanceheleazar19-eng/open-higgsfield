@@ -4,7 +4,7 @@ export const health: Health = {
   status: "online", version: "0.1.0", python: "3.13",
   database: { ok: true, engine: "sqlite" },
   ai: { configured: false, provider: null, model: null, models_installed: 0, note: "Ollama no detectado." },
-  storage: { db_bytes: 81920, disk_free_bytes: 50e9, disk_total_bytes: 100e9, records: 12 },
+  storage: { db_bytes: 81920, disk_free_bytes: 50e9, disk_total_bytes: 100e9, records: 12, memories: 3, conversations: 2 },
 };
 
 export const modules: ModuleInfo[] = [
@@ -35,7 +35,7 @@ export function mockFetch(routes: Record<string, unknown>) {
   const fn = vi.fn(async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     const key = `${init?.method ?? "GET"} ${url}`;
-    const body = key in routes ? routes[key] : routes[url];
+    const body = key in routes ? routes[key] : url in routes ? routes[url] : routes[url.split("?")[0] + "?"];
     if (body === undefined) return new Response("{}", { status: 404 });
     if (body && typeof body === "object" && "ndjson" in body) {
       const lines = (body as { ndjson: unknown[] }).ndjson.map((e) => JSON.stringify(e) + "\n").join("");
@@ -48,10 +48,13 @@ export function mockFetch(routes: Record<string, unknown>) {
 }
 
 /** Respuesta en streaming del cerebro, troceada como la envía el backend. */
-export function chatReply(text: string, mode: "ai" | "local" = "local", model: string | null = null) {
+export function chatReply(text: string, mode: "ai" | "local" | "memory" = "local", model: string | null = null,
+  extra: unknown[] = [], conversationId = 7) {
   const chunks = mode === "ai" ? text.match(/.{1,8}/g) ?? [] : [text];
   return {
     ndjson: [
+      { type: "meta", conversation_id: conversationId },
+      ...extra,
       ...(mode === "ai" ? [{ type: "status", state: "thinking", model }] : []),
       ...chunks.map((t) => ({ type: "delta", text: t })),
       { type: "done", mode, model },

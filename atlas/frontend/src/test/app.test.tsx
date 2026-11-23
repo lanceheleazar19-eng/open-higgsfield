@@ -14,7 +14,7 @@ const base = {
   "/api/settings/timezones": ["Europe/Madrid", "America/Mexico_City"],
 };
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); localStorage.clear(); });
 
 test("dashboard vacío muestra estados vacíos honestos y no cifras inventadas", async () => {
   mockFetch({ ...base, "/api/dashboard": emptyDashboard });
@@ -82,7 +82,7 @@ test("los nodos del núcleo muestran datos reales y abren su módulo", async () 
   mockFetch({ ...base, "/api/dashboard": { ...emptyDashboard, tasks: { ...emptyDashboard.tasks, pending: 3 } } });
   renderAt("/");
   const node = await screen.findByRole("button", { name: "Abrir Tasks: 3 pendientes" });
-  expect(screen.getByRole("button", { name: "Abrir Memory: 12 registros" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Abrir Memory: 3 recuerdos" })).toBeInTheDocument();
   fireEvent.click(node);
   expect(await screen.findByText("Fase 4 · en desarrollo")).toBeInTheDocument();
 });
@@ -96,7 +96,7 @@ test("comando rápido consulta al asistente y muestra la respuesta", async () =>
   fireEvent.click(await screen.findByRole("button", { name: "¿Qué tengo pendiente hoy?" }));
   expect(await screen.findByText("No tienes tareas pendientes registradas.", {}, { timeout: 5000 })).toBeInTheDocument();
   const post = calls.find((c) => c.init?.method === "POST");
-  expect(JSON.parse(post!.init!.body as string)).toEqual({ text: "¿Qué tengo pendiente hoy?", history: [] });
+  expect(JSON.parse(post!.init!.body as string)).toEqual({ text: "¿Qué tengo pendiente hoy?" });
   expect(within(screen.getByRole("region", { name: "Conversación con ATLAS" })).getByText("Modo local")).toBeInTheDocument();
 });
 
@@ -115,14 +115,11 @@ test("barra de conversación: texto libre y resumen ejecutivo", async () => {
   expect(screen.getByText("IA · qwen2.5:7b")).toBeInTheDocument();
   await waitFor(() => expect(screen.getByRole("button", { name: "Resumen" })).toBeEnabled());
   fireEvent.click(screen.getByRole("button", { name: "Resumen" }));
-  // la segunda petición lleva el hilo de la conversación
-  await waitFor(() => expect(calls.filter((c) => c.init?.method === "POST").length).toBe(2));
-  const body = JSON.parse(calls.filter((c) => c.init?.method === "POST")[1].init!.body as string);
-  expect(body.text).toMatch(/resumen ejecutivo/);
-  expect(body.history).toEqual([
-    { role: "user", content: "Hola ATLAS" },
-    { role: "assistant", content: "Hola, Lance. Todo en orden." },
-  ]);
+  // la segunda petición continúa la misma conversación (el historial lo guarda el backend)
+  await waitFor(() => expect(calls.filter((c) => c.url === "/api/assistant/chat").length).toBe(2));
+  const body = JSON.parse(calls.filter((c) => c.url === "/api/assistant/chat")[1].init!.body as string);
+  expect(body).toEqual({ text: expect.stringMatching(/resumen ejecutivo/), conversation_id: 7 });
+  expect(localStorage.getItem("atlas.conversation")).toBe("7");
 });
 
 test("micrófono deshabilitado y explicado si el navegador no soporta voz", async () => {
@@ -164,4 +161,99 @@ test("página de IA sin Ollama explica cómo activarlo", async () => {
   renderAt("/ai");
   expect(await screen.findByText("No detectado")).toBeInTheDocument();
   expect(screen.getByText("ollama pull qwen2.5:7b")).toBeInTheDocument();
+});
+
+const mem = (over: Record<string, unknown> = {}) => ({
+  id: 1, content: "Prefiero entrenar por la mañana", kind: "preference", permanent: true, expires_at: null, expired: false,
+  project_id: null, source: "chat", created_at: "2026-11-23T10:00:00+01:00", updated_at: "2026-11-23T10:00:00+01:00", ...over,
+});
+
+test("«recuerda que…» muestra que se ha guardado en memoria", async () => {
+  mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": chatReply("Hecho. Lo recordaré.", "memory", null, [{ type: "memory", action: "saved", memory: mem() }]),
+  });
+  renderAt("/");
+  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "recuerda que prefiero entrenar por la mañana" } });
+  fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+  expect(await screen.findByText(/Guardado en memoria/, {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "Conversación con ATLAS" })).getByText("Memoria")).toBeInTheDocument();
+});
+
+test("olvidar requiere confirmación con botón", async () => {
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": chatReply("¿Quieres que olvide esto?", "memory", null, [{ type: "memory", action: "forget_candidate", memory: mem() }]),
+    "DELETE /api/memory/1": {},
+  });
+  renderAt("/");
+  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "olvida que entreno por la mañana" } });
+  fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+  const btn = await screen.findByRole("button", { name: "Olvidar «Prefiero entrenar por la mañana»" }, { timeout: 5000 });
+  expect(calls.some((c) => c.init?.method === "DELETE")).toBe(false);
+  fireEvent.click(btn);
+  expect(await screen.findByText(/Olvidado:/)).toBeInTheDocument();
+  expect(calls.some((c) => c.url === "/api/memory/1" && c.init?.method === "DELETE")).toBe(true);
+});
+
+test("la IA propone recuerdos y solo se guardan si lo apruebas", async () => {
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": chatReply("¡Gran objetivo!", "ai", "qwen2.5:7b"),
+    "POST /api/memory/suggest": { suggestions: [
+      { content: "Quiere correr una media maratón", kind: "goal", temporary: false },
+      { content: "Entrena tres días por semana", kind: "fact", temporary: false },
+    ] },
+    "POST /api/memory": { memory: mem({ id: 9, content: "Quiere correr una media maratón", kind: "goal" }), created: true },
+  });
+  renderAt("/");
+  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "Quiero correr una media maratón en primavera" } });
+  fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
+  expect(await screen.findByText("ATLAS propone recordar", {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(calls.some((c) => c.url === "/api/memory" && c.init?.method === "POST")).toBe(false);
+  const [save] = screen.getAllByRole("button", { name: "Guardar" });
+  fireEvent.click(save);
+  expect(await screen.findByText("Guardado")).toBeInTheDocument();
+  const post = calls.find((c) => c.url === "/api/memory" && c.init?.method === "POST");
+  expect(JSON.parse(post!.init!.body as string)).toEqual({ content: "Quiere correr una media maratón", kind: "goal", source: "suggested" });
+  fireEvent.click(screen.getByRole("button", { name: "Descartar" }));
+  await waitFor(() => expect(screen.queryByText("Entrena tres días por semana")).not.toBeInTheDocument());
+});
+
+test("al volver a abrir ATLAS retoma la última conversación", async () => {
+  localStorage.setItem("atlas.conversation", "7");
+  mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "/api/conversations/7": { id: 7, title: "Hola", created_at: "", messages: [
+      { id: 1, conversation_id: 7, role: "user", content: "¿Cómo voy con mis objetivos?", mode: null, model: null, created_at: "2026-11-22T10:00:00+01:00" },
+      { id: 2, conversation_id: 7, role: "assistant", content: "Vas bien, sigue así.", mode: "ai", model: "qwen2.5:7b", created_at: "2026-11-22T10:00:05+01:00" },
+    ] },
+  });
+  renderAt("/");
+  expect(await screen.findByText("Vas bien, sigue así.")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Nueva conversación" }));
+  expect(screen.queryByText("Vas bien, sigue así.")).not.toBeInTheDocument();
+  await waitFor(() => expect(localStorage.getItem("atlas.conversation")).toBeNull());
+});
+
+test("página Memoria: lista, añade y olvida recuerdos", async () => {
+  const calls = mockFetch({
+    ...base,
+    "/api/memory?": { items: [mem(), mem({ id: 2, content: "Viaje a Lisboa", kind: "fact", permanent: false, expires_at: "2026-11-29T23:59:00+01:00" })], memories: 2, conversations: 1 },
+    "POST /api/memory": { memory: mem({ id: 3, content: "Mi objetivo es ahorrar", kind: "goal" }), created: true },
+    "DELETE /api/memory/1": {},
+  });
+  vi.spyOn(window, "confirm").mockReturnValue(true);
+  renderAt("/memory");
+  expect(await screen.findByText("Prefiero entrenar por la mañana")).toBeInTheDocument();
+  expect(screen.getByText(/Temporal · hasta/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("¿Qué debe recordar ATLAS?"), { target: { value: "Mi objetivo es ahorrar" } });
+  fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "goal" } });
+  fireEvent.click(screen.getByRole("button", { name: "Guardar recuerdo" }));
+  expect(await screen.findByText("Guardado.")).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.init?.method === "POST")!.init!.body as string))
+    .toEqual({ content: "Mi objetivo es ahorrar", kind: "goal", expires_at: null });
+  fireEvent.click(screen.getByRole("button", { name: "Olvidar: Prefiero entrenar por la mañana" }));
+  expect(await screen.findByText("Recuerdo eliminado.")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Exportar" })).toHaveAttribute("href", "/api/memory/export");
 });

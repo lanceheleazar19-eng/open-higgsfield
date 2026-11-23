@@ -35,6 +35,8 @@ export function SystemPanel({ health, offline, voice, speakReplies }: {
       <section>
         <h3>Memoria</h3>
         <dl>
+          <Row k="Recuerdos" v={st ? String(st.memories) : "—"} />
+          <Row k="Conversaciones" v={st ? String(st.conversations) : "—"} />
           <Row k="Registros" v={st ? st.records.toLocaleString("es-ES") : "—"} />
           <Row k="Tamaño" v={st ? formatBytes(st.db_bytes) : "—"} />
           <Row k="Disco libre" v={st ? formatBytes(st.disk_free_bytes) : "—"} />
