@@ -96,6 +96,8 @@ export function ControlCenter() {
         if (ev.type === "meta") {
           cid = ev.conversation_id;
           setConversationId(ev.conversation_id);
+        } else if (ev.type === "meal") {
+          patch(id, { meal: { count: ev.entries.length } });
         } else if (ev.type === "gym") {
           patch(id, { gym: { sets: ev.session.working_sets, tonnage: ev.session.tonnage } });
         } else if (ev.type === "task") {

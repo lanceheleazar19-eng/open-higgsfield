@@ -1,7 +1,7 @@
 import type {
   AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
-  Profile, SystemMetrics, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
+  Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
 
 export interface TaskInput {
@@ -108,6 +108,24 @@ export const api = {
   deleteAvatar: () => requestEmpty("/api/profile/avatar", { method: "DELETE" }),
   avatarUrl: (version: number | null) => `/api/profile/avatar?v=${version ?? 0}`,
   metrics: () => request<SystemMetrics>("/api/system/metrics"),
+  nutritionProfile: () => request<{ profile: NutritionProfile | null; targets: NutritionTargets | null; latest_weight: number | null }>("/api/nutrition/profile"),
+  saveNutritionProfile: (p: NutritionProfile) => request<{ profile: NutritionProfile; targets: NutritionTargets | null }>("/api/nutrition/profile", { method: "PUT", body: JSON.stringify(p) }),
+  nutritionDay: () => request<NutritionDay>("/api/nutrition/day"),
+  nutritionWeek: () => request<{ days: ({ date: string } & Macros)[] }>("/api/nutrition/week"),
+  foods: (q = "") => request<{ items: FoodItem[] }>(`/api/nutrition/foods?q=${encodeURIComponent(q)}`),
+  addFood: (f: Omit<FoodItem, "id" | "custom">) => request<FoodItem>("/api/nutrition/foods", { method: "POST", body: JSON.stringify(f) }),
+  parseMeal: (text: string) => request<{ items: MealProposal[] }>("/api/nutrition/parse", { method: "POST", body: JSON.stringify({ text }) }),
+  addMeal: (meal: string, items: { food_id: number; grams: number }[], source: "manual" | "text" | "photo") =>
+    request<{ items: MealEntryItem[] }>("/api/nutrition/entries", { method: "POST", body: JSON.stringify({ meal, items, source }) }),
+  deleteMealEntry: (id: number) => requestEmpty(`/api/nutrition/entries/${id}`, { method: "DELETE" }),
+  analyzePhoto: async (file: File): Promise<{ model: string; items: MealProposal[]; note: string }> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    let res: Response;
+    try { res = await fetch("/api/nutrition/photo", { method: "POST", body: fd }); } catch { throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS"); }
+    if (!res.ok) { let d = res.statusText; try { d = (await res.json()).detail; } catch { /* */ } throw new ApiError(res.status, d); }
+    return res.json();
+  },
   tasks: (p: { status?: "open" | "done" | "all"; q?: string; goal_id?: number; category?: string } = {}) => {
     const qs = new URLSearchParams();
     Object.entries(p).forEach(([k, v]) => { if (v !== undefined && v !== "") qs.set(k, String(v)); });

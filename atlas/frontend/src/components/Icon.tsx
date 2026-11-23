@@ -19,6 +19,8 @@ const PATHS: Record<string, string> = {
   mute: "M4 9h4l5-4v14l-5-4H4zM17 9l5 6M22 9l-5 6",
   spark: "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z",
   stop: "M7 7h10v10H7z",
+  nutrition: "M7 3v8a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3M9 3v18M17 3c-1.7 0-3 2-3 5s1.3 5 3 5v8",
+  camera: "M4 8h3l2-3h6l2 3h3v11H4zM12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
   refresh: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
   menu: "M4 7h16M4 12h16M4 17h16",
   close: "M6 6l12 12M18 6L6 18",

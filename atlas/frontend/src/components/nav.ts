@@ -10,6 +10,7 @@ export const NAV: NavItem[] = [
   { id: "ai", path: "/ai", label: "Inteligencia artificial" },
   { id: "tasks", path: "/tasks", label: "Tareas" },
   { id: "gym", path: "/gym", label: "Gimnasio" },
+  { id: "nutrition", path: "/nutrition", label: "Nutrición" },
   { id: "finance", path: "/finance", label: "Finanzas" },
   { id: "trading", path: "/trading", label: "Trading" },
   { id: "projects", path: "/projects", label: "Proyectos" },

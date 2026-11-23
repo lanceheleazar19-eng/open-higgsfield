@@ -491,3 +491,38 @@ test("la bienvenida espera a que el navegador cargue las voces y usa la elegida"
   listeners.forEach((fn) => fn());
   await waitFor(() => expect(spoken).toEqual([{ text: "Bienvenido de nuevo.", voice: "Mónica (Mejorada)" }]));
 });
+
+const food = (id: number, name: string, kcal: number, protein: number, unit_grams = 100) =>
+  ({ id, name, kcal, protein, carbs: 10, fat: 5, unit_name: "unidad", unit_grams, custom: false });
+const nday = { date: "2026-11-24", entries: [], totals: { kcal: 0, protein: 0, carbs: 0, fat: 0 },
+  targets: { kcal: 2950, protein: 136, carbs: 430, fat: 68, bmr: 1725, tdee: 2674, weight_used: 75.5 }, tips: ["Te faltan 136 g de proteína."], suggested_meal: "desayuno" };
+
+test("nutrición: escribe una comida, revisa la interpretación y guarda", async () => {
+  const calls = mockFetch({
+    ...base, "/api/nutrition/day": nday, "/api/nutrition/foods?q=": { items: [food(1, "Huevo", 143, 12.6, 60), food(2, "Tostada", 300, 10, 30)] },
+    "POST /api/nutrition/parse": { items: [{ food: food(1, "Huevo", 143, 12.6, 60), grams: 120, text: "Huevo", kcal: 171.6, protein: 15.1, carbs: 1, fat: 11 }] },
+    "POST /api/nutrition/entries": { items: [] },
+  });
+  renderAt("/nutrition");
+  expect(await screen.findByText("Te faltan 136 g de proteína.")).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Comida en texto"), { target: { value: "2 huevos" } });
+  expect(await screen.findByLabelText("Gramos de Huevo", {}, { timeout: 3000 })).toHaveValue("120");
+  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  expect(await screen.findByText("Guardado en desayuno.")).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.url === "/api/nutrition/entries")!.init!.body as string))
+    .toEqual({ meal: "desayuno", items: [{ food_id: 1, grams: 120 }], source: "text" });
+});
+
+test("nutrición: la foto propone alimentos y no guarda hasta confirmar", async () => {
+  const calls = mockFetch({
+    ...base, "/api/nutrition/day": nday, "/api/nutrition/foods?q=": { items: [food(3, "Arroz blanco cocido", 130, 2.7)] },
+    "POST /api/nutrition/photo": { model: "qwen2.5vl:7b", note: "Estimación por foto: revisa los gramos antes de guardar.",
+      items: [{ food: food(3, "Arroz blanco cocido", 130, 2.7), grams: 180, text: "arroz blanco" }, { food: null, grams: 20, text: "salsa rara" }] },
+  });
+  renderAt("/nutrition");
+  fireEvent.change(await screen.findByLabelText("Foto del plato"), { target: { files: [new File(["x"], "plato.jpg", { type: "image/jpeg" })] } });
+  expect(await screen.findByText(/revisa los gramos/)).toBeInTheDocument();
+  expect(screen.getByLabelText("Gramos de Arroz blanco cocido")).toHaveValue("180");
+  expect(screen.getByLabelText("Alimento para «salsa rara»")).toHaveValue("");
+  expect(calls.some((c) => c.url === "/api/nutrition/entries")).toBe(false);
+});

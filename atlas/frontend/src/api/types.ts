@@ -96,9 +96,10 @@ export type ChatEvent =
   | { type: "memory"; action: "saved" | "duplicate" | "forget_candidate"; memory: MemoryItem }
   | { type: "task"; action: "created" | "complete_candidate" | "not_found"; task: TaskItem | null }
   | { type: "gym"; action: "logged"; session: GymSession }
+  | { type: "meal"; action: "logged" | "not_found"; entries: MealEntryItem[]; missing: string[] }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition"; model: string | null; reason?: string | null }
   | { type: "error"; message: string };
 
 export interface ChatMessage {
@@ -250,3 +251,14 @@ export interface Profile {
   has_avatar: boolean; avatar_version: number | null;
 }
 export interface SystemMetrics { cpu_percent: number; ram_percent: number; ram_used_bytes: number; ram_total_bytes: number }
+
+export interface Macros { kcal: number; protein: number; carbs: number; fat: number }
+export interface NutritionProfile {
+  sex: "male" | "female"; age: number; height_cm: number; weight_kg: number | null; activity: number;
+  goal: "bulk" | "cut" | "maintain"; target_weight_kg: number | null; protein_per_kg: number;
+}
+export interface NutritionTargets extends Macros { bmr: number; tdee: number; weight_used: number }
+export interface FoodItem { id: number; name: string; kcal: number; protein: number; carbs: number; fat: number; unit_name: string; unit_grams: number; custom: boolean }
+export interface MealProposal { food: FoodItem | null; grams: number | null; text: string; kcal?: number; protein?: number; carbs?: number; fat?: number }
+export interface MealEntryItem extends Macros { id: number; date: string; meal: string; food_id: number | null; name: string; grams: number; source: string }
+export interface NutritionDay { date: string; entries: MealEntryItem[]; totals: Macros; targets: NutritionTargets | null; tips: string[]; suggested_meal: string }

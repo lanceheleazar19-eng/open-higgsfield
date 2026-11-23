@@ -8,7 +8,7 @@
 | 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ✅ Completada |
 | 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ✅ Completada |
 | 5A | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ✅ Completada |
-| 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ⏳ Siguiente |
+| 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ✅ Completada |
 | 6 | Finanzas (dinero real) y Trading (paper trading, separado) | — |
 | 7 | Proyectos y negocios (espacio y memoria propios) | — |
 | 8 | Calendario + Google Calendar | — |
@@ -124,3 +124,15 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Configuración › Perfil personal: nombre visible (es el del saludo), usuario, preferencias, fecha de
   creación y foto con recortador circular (arrastrar + zoom). La foto se valida por su contenido,
   se re-codifica sin metadatos (EXIF/GPS), se guarda solo en `data/avatar.webp` y nunca se envía a la IA.
+
+## Fase 5B — nutrición
+- Base local de 103 alimentos comunes en España (valores medios por 100 g) + alimentos propios.
+- Registro escribiendo («200 g de arroz, pechuga de pollo y una manzana») o desde el chat
+  («he desayunado 2 huevos y una tostada»), con unidades, gramos y cantidades en palabras.
+- Foto del plato: el modelo de visión LOCAL de Ollama (p. ej. qwen2.5vl:7b) identifica alimentos y
+  estima gramos; ATLAS propone y el usuario revisa antes de guardar. La foto no se almacena.
+  Las macros siempre se calculan en el servidor con la base de alimentos.
+- Perfil nutricional y objetivos (Mifflin-St Jeor × actividad, ±kcal según objetivo, proteína por kg;
+  usa el último peso de Gimnasio › Cuerpo). Totales del día, semana con línea de objetivo,
+  recomendaciones (proteína restante con alimentos concretos, hidratos antes de entrenar, etc.).
+- La IA recibe la nutrición de hoy y de la semana cuando la pregunta lo requiere.

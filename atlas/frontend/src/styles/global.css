@@ -932,3 +932,17 @@ body::before { background-image: linear-gradient(rgba(255, 64, 78, .028) 1px, tr
   .node-label { font-size: 11.5px; }
   .profile-grid { grid-template-columns: 1fr; }
 }
+
+/* --- Nutrición --- */
+.macro { display: grid; gap: 5px; margin-bottom: 12px; }
+.macro-head { display: flex; justify-content: space-between; font-size: 13px; }
+.proposal { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.proposal li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.proposal select, .proposal input { font: 13.5px var(--font); color: var(--text); background: rgba(12, 4, 6, .7); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; }
+.proposal select { flex: 1; min-width: 160px; }
+.proposal input { width: 70px; }
+.kcal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; height: 200px; margin: 10px 0; }
+.kcal-col { display: grid; grid-template-rows: 1fr auto auto; gap: 4px; text-align: center; }
+.kcal-bar { position: relative; display: flex; align-items: flex-end; background: rgba(255, 64, 78, .06); border-radius: 6px; }
+.kcal-bar span { width: 100%; background: linear-gradient(0deg, var(--blue), var(--cyan)); border-radius: 6px; box-shadow: 0 0 12px var(--glow); }
+.kcal-bar i { position: absolute; left: -3px; right: -3px; height: 2px; background: #fff; opacity: .7; }
