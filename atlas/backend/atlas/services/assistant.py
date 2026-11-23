@@ -159,6 +159,33 @@ def _plan(d: dict) -> str:
     return "Así te organizo la semana: " + "; ".join(lines) + ". Puedes aplicarlo en Tareas > Semana."
 
 
+def _gym(d: dict, q: str) -> str:
+    g = d.get("gym")
+    if not g:
+        return "No tengo datos del gimnasio todavía. Importa tu rutina en Gimnasio > Rutinas y registra tus series."
+    if re.search(r"toca hoy|que entreno|que me toca", q):
+        nxt = g.get("proximo_entreno")
+        extra = f" El próximo: {nxt['name']} el {nxt['weekday_name']}." if nxt and g["hoy"].startswith("descanso") else ""
+        return f"Hoy toca: {g['hoy']}.{extra}"
+    if re.search(r"menos|olvid|descuid", q):
+        low = g.get("musculos_por_debajo_de_10_series") or []
+        return ("Esta semana van por debajo de 10 series: " + ", ".join(low) + ".") if low else "Todos tus músculos principales están en 10 series o más esta semana."
+    for p in g.get("progresion_por_ejercicio", []):
+        name = _norm(p["ejercicio"])
+        if any(w in q for w in name.split() if len(w) > 4):
+            txt = f"{p['ejercicio']}: última sesión {p['ultima_sesion']}, mejor serie {p['mejor_serie']}, 1RM estimado {p['1rm_estimado']} kg"
+            if p.get("cambio_1rm_desde"):
+                txt += f" ({p['cambio_1rm_desde']})"
+            if p.get("estancado"):
+                txt += ". Parece estancado: prueba a variar repeticiones o descanso"
+            return txt + "."
+    vol = g.get("volumen_semanal_series_por_musculo", {})
+    for label, n in vol.items():
+        if _norm(label) in q:
+            return f"Esta semana llevas {n:g} series efectivas de {label}."
+    return "Gimnasio: hoy " + g["hoy"] + ". " + ", ".join(f"{k}: {v:g} series" for k, v in vol.items() if v) + "."
+
+
 HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega en la Fase 2). "
         "Puedo responder con tus datos registrados: «¿qué tengo pendiente hoy?», «¿qué es prioritario?», "
         "«próximos eventos», «¿cuánto he gastado este mes?», «¿cómo voy en el gimnasio?», "
@@ -196,6 +223,8 @@ def _memory_answer(memory: dict | None) -> str:
 
 def answer(text: str, d: dict, memory: dict | None = None) -> dict:
     q = _norm(text)
+    if d.get("gym") and re.search(r"toca hoy|que entreno|progresad|mejorando|volumen|series de|musculos?|estanc", q):
+        return {"intent": "gym", "reply": _gym(d, q), "mode": "local"}
     if _MEMORY_Q.search(q):
         return {"intent": "memory", "reply": _memory_answer(memory), "mode": "local"}
     for name, pattern, fn in INTENTS:

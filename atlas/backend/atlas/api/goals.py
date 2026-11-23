@@ -29,9 +29,13 @@ class GoalIn(BaseModel):
     current_value: float | None = None
     start_date: date | None = None
     deadline: date | None = None
+    auto_metric: str | None = Field(default=None, pattern="^(exercise_weight|exercise_e1rm|exercise_reps|workout_count)$")
+    auto_exercise_id: int | None = None
 
     @model_validator(mode="after")
     def check(self):
+        if self.auto_metric and self.auto_metric != "workout_count" and not self.auto_exercise_id:
+            raise ValueError("Elige el ejercicio que mide este objetivo")
         if self.kind == "numeric":
             if self.target_value is None:
                 raise ValueError("Un objetivo numérico necesita un valor meta")
@@ -88,7 +92,14 @@ def create(body: GoalIn, db: DB) -> dict:
     data["start_date"] = data["start_date"] or today
     if data["current_value"] is None:
         data["current_value"] = data["start_value"]
+    if data["auto_exercise_id"] is not None:
+        from atlas.models import Exercise
+        if not db.get(Exercise, data["auto_exercise_id"]):
+            raise HTTPException(422, "Ejercicio inexistente")
     g = svc.create_goal(db, **data)
+    if g.auto_metric:
+        from atlas.gym.service import sync_goals
+        sync_goals(db)
     db.commit()
     return svc.to_dict(db, g, today, tz)
 

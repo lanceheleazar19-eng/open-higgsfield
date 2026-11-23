@@ -1,5 +1,7 @@
 import json
 import re
+
+from sqlalchemy import select
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
@@ -11,11 +13,14 @@ from atlas.api.deps import DB
 from atlas.brain.orchestrator import brain_status, chat_events
 from atlas.db import session_scope
 from atlas.services import conversations as convs
+from atlas.gym import service as gym_svc
+from atlas.gym.parse import looks_like_log, parse_workout
+from atlas.models import Exercise, Goal
 from atlas.services import goals as goals_svc
 from atlas.services import memory as mem
 from atlas.services import tasks as tasks_svc
 from atlas.services.clock import local_to_utc_naive
-from atlas.services.nlp import parse_complete_command, parse_task_command
+from atlas.services.nlp import TASK_TRIGGER, parse_complete_command, parse_task_command
 from atlas.services.alerts import build_alerts
 from atlas.services.dashboard import build_dashboard
 from atlas.services.preferences import get_prefs
@@ -40,6 +45,8 @@ def ai_status(db: DB) -> dict:
     return brain_status(get_prefs(db))
 
 
+GYM_Q = re.compile(r"entren|gimnasio|gym|rutina|toca hoy|musculo|volumen|series|progres|mejorando|fuerza|press|curl|"
+                   r"dominad|jalon|remo|triceps|biceps|pecho|espalda|hombro|pierna|1rm|estanc|peso|kilos|kg")
 PLAN_Q = re.compile(r"organiza|planifica|plan de la semana|mi semana|esta semana|que hago (esta|la) semana")
 DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "crítica"}
@@ -48,6 +55,37 @@ PRIO_ES = {"low": "baja", "medium": "media", "high": "alta", "critical": "críti
 def _when(dt: datetime, all_day: bool) -> str:
     s = f"el {DAYS[dt.weekday()]} {dt.day}/{dt.month}"
     return s if all_day else f"{s} a las {dt:%H:%M}"
+
+
+def _es(v: float) -> str:
+    return f"{v:g}".replace(".", ",")
+
+
+def _gym_log(db, text: str, tz: str):  # noqa: ANN001
+    """Registra series si el mensaje es un entrenamiento. Devuelve (evento, respuesta) o None."""
+    if not looks_like_log(text) or TASK_TRIGGER.match(text.strip()) or mem.parse_command(text):
+        return None  # «apúntame…» es una tarea y «recuerda que…» es memoria, aunque mencionen series
+    parsed = parse_workout(text, list(db.scalars(select(Exercise))))
+    if not parsed:
+        return None
+    today = datetime.now(ZoneInfo(tz)).date()
+    before = {g.id: g.current_value for g in goals_svc.active_goals(db)}
+    s, _ = gym_svc.log_parsed(db, parsed, today)
+    db.commit()
+    lines = []
+    for p in parsed:
+        reps = "/".join(str(r) for r in p.reps)
+        w = f" con {_es(p.weight)} kg{' por lado' if p.per_side else ''}" if p.weight else ""
+        rir = f", RIR {p.rir}" if p.rir is not None else ""
+        lines.append(f"{p.exercise_name}: {len(p.reps)}×({reps}){w}{rir}")
+    reply = "Registrado en tu sesión de hoy: " + "; ".join(lines) + "."
+    for g in goals_svc.active_goals(db):
+        if g.auto_metric and before.get(g.id) != g.current_value:
+            reply += f" Objetivo «{g.title}» actualizado: {_es(g.current_value)}{(' ' + g.unit) if g.unit else ''}."
+    achieved = [g for g in db.scalars(select(Goal).where(Goal.status == "achieved", Goal.id.in_(list(before))))]
+    for g in achieved:
+        reply += f" 🎯 ¡Has conseguido «{g.title}»!"
+    return {"type": "gym", "action": "logged", "session": gym_svc.session_dict(db, s)}, reply
 
 
 def _task_command(db, text: str, tz: str):  # noqa: ANN001
@@ -99,6 +137,17 @@ def chat(body: ChatIn) -> StreamingResponse:
             db.commit()
             yield _line({"type": "meta", "conversation_id": conv.id})
 
+            # Registro de entrenamiento: «press inclinado 3x8 40kg rir 2»
+            gym_ev = _gym_log(db, body.text, tz)
+            if gym_ev:
+                ev, reply = gym_ev
+                yield _line(ev)
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "gym", "model": None})
+                convs.add_message(db, conv, "assistant", reply, mode="local")
+                db.commit()
+                return
+
             # Órdenes de tareas: «apúntame…», «recuérdame…», «he terminado…»
             task_ev = _task_command(db, body.text, tz)
             if task_ev:
@@ -141,6 +190,8 @@ def chat(body: ChatIn) -> StreamingResponse:
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
             d["goal_snapshot"] = goals_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
+            if GYM_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
+                d["gym"] = gym_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
             if PLAN_Q.search(mem.normalize(body.text)) or not brain_status(prefs)["configured"]:
                 d["week_plan"] = tasks_svc.plan_week(db, tz)
             memory_ctx = mem.memory_context(db, body.text, tz, conversation_id=conv.id)

@@ -50,6 +50,7 @@ def snapshot(d: dict) -> dict:
             if f["has_data"] else "sin movimientos registrados"
         ),
         "trading": "sin datos (módulo de paper trading en la Fase 6)",
+        **({"gimnasio": d["gym"]} if d.get("gym") else {}),
         "entrenamiento_ultimos_7_dias": {
             "sesiones": fit["sessions_7d"], "minutos": fit["minutes_7d"],
             "ultimo_entreno": (
@@ -97,7 +98,8 @@ REGLAS ESTRICTAS:
 2. El dinero real y el capital de trading son cosas distintas. Nunca los mezcles.
 3. Tú no ejecutas acciones directamente. Para crear una tarea, el usuario escribe «apúntame…» o «recuérdame…» (p. ej. «apúntame llamar al gestor el viernes a las 10») y ATLAS la crea; para completarla, «he terminado…». Aún no hay eventos de calendario, movimientos de dinero, operaciones de mercado, archivos ni Internet: si te lo piden, explícalo.
 4. Para conocimiento general puedes responder con lo que sabes; avisa si puede estar desactualizado.
-5. Para un «resumen ejecutivo» o «daily briefing»: estado del día, tareas, eventos, entrenamiento, proyectos, finanzas, alertas y una recomendación, todo en pocas frases.
+5. Gimnasio: responde con los datos de «gimnasio» (progresión, 1RM estimado, volumen semanal por músculo, estancamientos). Como referencia general de hipertrofia se suelen recomendar 10-20 series efectivas por músculo y semana; dilo como orientación, no como regla. Para registrar series el usuario escribe p. ej. «press inclinado 2x8 40kg rir 2».
+6. Para un «resumen ejecutivo» o «daily briefing»: estado del día, tareas, eventos, entrenamiento, proyectos, finanzas, alertas y una recomendación, todo en pocas frases.
 
 DATOS DE ATLAS (fuente de verdad, actualizados a este momento):
 {json.dumps(snapshot(d), ensure_ascii=False, indent=1)}

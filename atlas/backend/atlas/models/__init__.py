@@ -2,6 +2,7 @@
 
 from atlas.models.base import Base
 from atlas.models.core import ActivityLog, Setting
+from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, WorkoutSet
 from atlas.models.memory import Conversation, ConversationMessage, Memory
 from atlas.models.domain import (
     CalendarEvent,
@@ -24,6 +25,11 @@ __all__ = [
     "Project",
     "Memory",
     "Goal",
+    "Exercise",
+    "Routine",
+    "RoutineExercise",
+    "WorkoutSet",
+    "BodyMetric",
     "GoalProgress",
     "Conversation",
     "ConversationMessage",

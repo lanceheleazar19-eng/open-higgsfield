@@ -87,6 +87,7 @@ def to_dict(db: Session, g: Goal, today: date, tz: str) -> dict:
         "start_date": g.start_date.isoformat(), "deadline": g.deadline.isoformat() if g.deadline else None,
         "status": g.status, "tasks_total": tasks_total, "tasks_done": tasks_done,
         "achieved_at": utc_naive_to_local(g.achieved_at, tz).isoformat() if g.achieved_at else None,
+        "auto_metric": g.auto_metric, "auto_exercise_id": g.auto_exercise_id,
         "metrics": metrics(db, g, today),
     }
 

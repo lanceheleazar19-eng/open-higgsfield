@@ -114,6 +114,7 @@ class WorkoutSession(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     performed_on: Mapped[date] = mapped_column(Date, index=True)
     routine_name: Mapped[str | None] = mapped_column(String(120))
+    routine_id: Mapped[int | None] = mapped_column(ForeignKey("routines.id", ondelete="SET NULL"), index=True)
     duration_min: Mapped[int | None] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
@@ -147,6 +148,10 @@ class Goal(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, onupdate=utcnow)
     achieved_at: Mapped[datetime | None] = mapped_column(DateTime)
+    # Seguimiento automático: exercise_weight (peso máx. en serie efectiva), exercise_e1rm,
+    # exercise_reps (reps máx. en una serie) o workout_count (sesiones desde el inicio)
+    auto_metric: Mapped[str | None] = mapped_column(String(24))
+    auto_exercise_id: Mapped[int | None] = mapped_column(ForeignKey("exercises.id", ondelete="SET NULL"))
 
 
 class GoalProgress(Base):

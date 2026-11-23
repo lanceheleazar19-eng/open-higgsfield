@@ -1,0 +1,44 @@
+{
+  "name": "Rutina 4 días (Sáb · Dom · Mié · Jue)",
+  "description": "Pecho/hombro/tríceps, espalda/bíceps/trapecio, pecho/espalda y brazos. Pesos «por lado» en máquinas, poleas y mancuernas.",
+  "routines": [
+    {"name": "Pecho + hombro + tríceps", "weekday": 5, "exercises": [
+      {"exercise": "Press inclinado", "warmup_sets": 2, "sets": 2, "reps_min": 8, "weight": 40, "notes": "Objetivo: 46 kg antes de 2027"},
+      {"exercise": "Aperturas en polea hacia el medio", "sets": 3, "reps_min": 10, "weight": 15},
+      {"exercise": "Tríceps en V (polea)", "sets": 2, "reps_min": 8, "reps_max": 10, "weight": 40},
+      {"exercise": "Extensión de tríceps por encima de la cabeza", "sets": 2, "reps_min": 10, "weight": 20},
+      {"exercise": "Tríceps unilateral en polea", "sets": 1, "reps_min": 8, "weight": 11},
+      {"exercise": "Elevaciones laterales en polea", "sets": 3, "reps_min": 10, "weight": 6},
+      {"exercise": "Press militar en máquina", "sets": 2, "reps_min": 10, "weight": 25, "notes": "Si no estoy fatigado"}
+    ]},
+    {"name": "Espalda + bíceps + trapecio", "weekday": 6, "exercises": [
+      {"exercise": "Jalón al pecho en máquina", "sets": 3, "reps_min": 8, "weight": 95},
+      {"exercise": "Remo de densidad", "sets": 2, "reps_min": 10, "weight": 55},
+      {"exercise": "Pullover unilateral", "sets": 2, "reps_min": 10, "weight": 11},
+      {"exercise": "Deltoides posterior", "sets": 2, "reps_min": 10, "weight": 6},
+      {"exercise": "Encogimientos (shrug)", "sets": 1, "reps_min": 20, "weight": 26},
+      {"exercise": "Curl de bíceps", "sets": 2, "reps_min": 8, "weight": 22},
+      {"exercise": "Curl martillo", "sets": 2, "reps_min": 8, "weight": 18},
+      {"exercise": "Curl bayesiano", "sets": 2, "reps_min": 8, "weight": 15}
+    ]},
+    {"name": "Pecho + espalda", "weekday": 2, "exercises": [
+      {"exercise": "Press inclinado", "warmup_sets": 2, "sets": 2, "reps_min": 8, "weight": 40, "notes": "Objetivo: 46 kg antes de 2027"},
+      {"exercise": "Aperturas en polea hacia el medio", "sets": 2, "reps_min": 10, "weight": 15},
+      {"exercise": "Aperturas en polea hacia arriba", "sets": 2, "reps_min": 10, "weight": 11},
+      {"exercise": "Chest press", "sets": 2, "reps_min": 8, "weight": 40, "notes": "40 o 45 según la fatiga"},
+      {"exercise": "Jalón al pecho en máquina", "sets": 2, "reps_min": 8, "weight": 95},
+      {"exercise": "Remo de densidad", "sets": 2, "reps_min": 10, "weight": 55},
+      {"exercise": "Deltoides posterior", "sets": 2, "reps_min": 10, "weight": 6},
+      {"exercise": "Encogimientos (shrug)", "sets": 1, "reps_min": 20, "weight": 26}
+    ]},
+    {"name": "Bíceps + tríceps + antebrazo", "weekday": 3, "exercises": [
+      {"exercise": "Tríceps en V (polea)", "sets": 3, "reps_min": 8, "reps_max": 10, "weight": 40},
+      {"exercise": "Extensión de tríceps por encima de la cabeza", "sets": 2, "reps_min": 10, "weight": 20},
+      {"exercise": "Tríceps unilateral en polea", "sets": 1, "reps_min": 8, "weight": 11},
+      {"exercise": "Elevaciones laterales en polea", "sets": 3, "reps_min": 10, "weight": 6},
+      {"exercise": "Press militar en máquina", "sets": 2, "reps_min": 10, "weight": 25, "notes": "Si no estoy fatigado"},
+      {"exercise": "Curl de bíceps", "sets": 2, "reps_min": 8, "weight": 22},
+      {"exercise": "Curl martillo", "sets": 2, "reps_min": 8, "weight": 18}
+    ]}
+  ]
+}

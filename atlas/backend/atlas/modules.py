@@ -25,7 +25,7 @@ MODULES: list[Module] = [
     Module("tasks", "Tareas", 4, "active", "Tareas, prioridades, plan semanal y objetivos medibles.",
            ["Crear por texto o voz", "Prioridades y fechas límite", "Detección de atrasos",
             "Recordatorios", "Resúmenes diarios y semanales"]),
-    Module("gym", "Gimnasio", 5, "planned", "Entrenamiento, progresión y medidas físicas.",
+    Module("gym", "Gimnasio", 5, "active", "Entrenamiento, progresión y medidas físicas.",
            ["Rutinas y ejercicios", "Series, repeticiones, peso y RIR", "Volumen semanal",
             "Progresión de fuerza", "Detección de estancamientos"]),
     Module("finance", "Finanzas", 6, "planned", "Dinero real: ingresos, gastos y presupuestos.",

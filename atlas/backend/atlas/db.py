@@ -77,6 +77,9 @@ def alembic_config(url: str | None = None) -> Config:
 
 
 def init_db() -> None:
-    """Aplica migraciones pendientes. Nunca borra datos."""
+    """Aplica migraciones pendientes y sincroniza datos de referencia. Nunca borra datos."""
     get_engine()
     command.upgrade(alembic_config(), "head")
+    from atlas.gym.library import ensure_library
+    with session_scope() as db:
+        ensure_library(db)
