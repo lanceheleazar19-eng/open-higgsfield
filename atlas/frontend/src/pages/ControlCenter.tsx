@@ -5,12 +5,12 @@ import type { NutritionDay, Dashboard, StoredMessage } from "../api/types";
 import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { CommandBar } from "../components/control/CommandBar";
-import { IntelPanel } from "../components/control/IntelPanel";
 import { Transcript, type Exchange } from "../components/control/Transcript";
 import { AtlasCore, type NodeInfo } from "../components/core/AtlasCore";
 import type { CoreState } from "../components/core/scene";
 import { BootScreen, alreadyBooted, welcomeEnabled } from "../components/BootScreen";
-import { Telemetry } from "../components/Telemetry";
+import { HudGoals, HudLeft, HudProjects, HudRight, HudToday } from "../components/hud/Panels";
+import { useTelemetry } from "../components/hud/Hud";
 import { useVoice } from "../hooks/useVoice";
 import { formatMoney, greetingFor } from "../lib/format";
 import { v4, type CommandCenter as CommandCenterData } from "../api/v4";
@@ -65,6 +65,7 @@ export function ControlCenter() {
   const dash = useAsync(api.dashboard, 60_000);
   const cc = useAsync(v4.commandCenter, 20_000);
   const nday = useAsync(api.nutritionDay, 120_000);
+  const tele = useTelemetry(4000);
   const [planet, setPlanet] = useState<string | null>(null);
   const [phase, setPhase] = useState<"executing" | "researching" | null>(null);
   const [errorFlash, setErrorFlash] = useState(false);
@@ -349,10 +350,13 @@ export function ControlCenter() {
   const d = dash.data;
 
   return (
-    <div className="control-page">
+    <div className="control-page hud-page">
       {booting && <BootScreen health={health} onStart={(v) => void startAtlas(v)} />}
-      <div className={`control ${offline ? "is-offline" : ""}`}>
-        <div className="stage">
+      <div className={`hud ${offline ? "is-offline" : ""}`}>
+        <HudLeft t={tele.data} hist={tele.hist} error={tele.error || offline} state={offline ? "error" : coreState} />
+
+        <div className="stage hud-center">
+          <div className="hud-frame" aria-hidden="true"><i /><i /><i /><i /></div>
           <header className="stage-head">
             {d && (
               <h1 className="greet">
@@ -373,8 +377,16 @@ export function ControlCenter() {
               <button className="btn" onClick={() => void dash.reload()}>Reintentar</button>
             </div>
           )}
+        </div>
 
-          <div className={`dock ${consoleMin ? "is-min" : ""}`}>
+        <HudRight d={d} t={tele.data} cc={cc.data} module={planet ? { id: planet, info: info[planet] } : null}
+          onOpen={navigate} onClose={() => setPlanet(null)} onChanged={() => void dash.reload()} />
+
+        <div className="hud-strip">
+          <HudGoals d={d} />
+          <HudProjects />
+          <HudToday t={tele.data} />
+          <div className={`dock strip-console ${consoleMin ? "is-min" : ""}`}>
             <button type="button" className="console-toggle" aria-expanded={!consoleMin} onClick={() => toggleConsole()}>
               {consoleMin ? `Mostrar conversación${log.length ? ` (${log.length})` : ""}` : "Minimizar consola"}
             </button>
@@ -392,20 +404,7 @@ export function ControlCenter() {
             />
           </div>
         </div>
-
-        <IntelPanel data={d} onChanged={() => void dash.reload()} module={planet ? { id: planet, info: info[planet] } : null}
-          onOpen={navigate} onClose={() => setPlanet(null)} />
       </div>
-
-      {d && (
-        <section className="telemetry" id="telemetria" aria-labelledby="telemetry-title">
-          <header className="section-head">
-            <p className="eyebrow">Datos registrados</p>
-            <h2 id="telemetry-title">Telemetría detallada</h2>
-          </header>
-          <Telemetry data={d} />
-        </section>
-      )}
     </div>
   );
 }

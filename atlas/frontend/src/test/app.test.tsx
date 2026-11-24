@@ -46,7 +46,7 @@ test("dashboard con datos muestra nombre, tareas atrasadas y finanzas", async ()
   });
   renderAt("/");
   expect(await screen.findByText("Lance")).toBeInTheDocument();
-  expect(screen.getAllByText("Pagar seguro").length).toBe(2); // columna derecha + telemetría
+  expect(screen.getAllByText("Pagar seguro").length).toBeGreaterThan(0); // panel Intelligence data
   expect(screen.getAllByText(/Atrasada ·/).length).toBeGreaterThan(0);
   expect(screen.getByText("Vivienda")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "1 tarea atrasada." })).toHaveAttribute("href", "/tasks");
@@ -715,4 +715,28 @@ test("físico: si el análisis iría a la nube, pide consentimiento antes de env
   expect(calls).toBe(1); // sin permiso no se reintenta con allow_cloud
   expect(window.confirm).toHaveBeenCalled();
   void fetchCalls;
+});
+
+test("HUD: telemetría real, N/D cuando falta un dato y widgets ocultables", async () => {
+  const tel = { generated_at: "2026-11-24T10:00:00", core: { online: true, ai_configured: false, model: null, provider: null, privacy: "local_first" },
+    system: { cpu_percent: 37.5, ram_percent: 41, ram_used: 6e9, ram_total: 16e9, swap_percent: 0, process_rss: 1.3e8, process_threads: 12, uptime_s: 3720, db_bytes: 4096, disk_free: 5e10, load: null },
+    ollama: { reachable: false, ping_ms: null, installed: null, loaded: null },
+    latency: { last_ms: null, last_model: null, last_at: null, avg_24h: null, max_24h: null, calls_24h: 0, errors_24h: 0, tokens_out_24h: 0, series: [] },
+    memory: { memories: 3, documents: 1, chunks: 4, entities: 0, relations: 0, recalled_24h: 2, recalled: [] },
+    agents: { runs_24h: 0, active: [], last: null }, processes: [],
+    connections: [{ name: "Ollama (IA local)", state: "off", detail: "no responde" }, { name: "Base de datos", state: "ok", detail: "SQLite" }],
+    events: [{ ts: "2026-11-24T09:59:58", module: "tasks", action: "create", text: "Tarea creada: Llamar al gestor" }],
+    today: { by_module: { tasks: 1 }, events: 1, tasks_done: 0, messages: 0, model_calls: 0, notifications: 0 } };
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard, "/api/telemetry": tel });
+  renderAt("/");
+  const left = await screen.findByRole("region", { name: "System telemetry" });
+  expect(await within(left).findByText("38%")).toBeInTheDocument(); // CPU real
+  expect(within(left).getByText("1h 2m")).toBeInTheDocument(); // uptime real
+  expect(within(left).getAllByText("N/D").length).toBeGreaterThan(2); // latencia y ping: sin datos → N/D
+  expect(within(left).getByText("Tarea creada: Llamar al gestor")).toBeInTheDocument(); // evento real
+  expect(within(left).getByText("no responde")).toBeInTheDocument();
+  fireEvent.click(within(left).getByRole("button", { name: "⚙" }));
+  fireEvent.click(within(left).getByRole("button", { name: "Ocultar Latencia IA" }));
+  expect(within(left).queryByRole("article", { name: "Latencia IA" })).not.toBeInTheDocument();
+  expect(JSON.parse(localStorage.getItem("vistan.hud.left")!).hidden).toEqual(["latency"]);
 });

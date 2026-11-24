@@ -318,3 +318,15 @@ def test_projects_workspace_and_center(client):
     s = client.get("/api/search", params={"q": "intro"}).json()
     assert s["tasks"][0]["title"] == "Grabar intro"
     assert client.delete(f"/api/projects/{p['id']}").status_code == 204
+
+
+def test_telemetry_is_real_and_marks_unavailable(client):
+    client.post("/api/projects", json={"name": "Prueba telemetría"})
+    t = client.get("/api/telemetry").json()
+    s = t["system"]
+    assert 0 <= s["cpu_percent"] <= 100 and 0 < s["ram_percent"] < 100 and s["process_rss"] > 0 and s["uptime_s"] >= 0
+    assert t["ollama"]["reachable"] is False and t["ollama"]["ping_ms"] is None  # sin Ollama → N/D, nunca inventado
+    assert t["latency"]["last_ms"] is None and t["latency"]["calls_24h"] == 0
+    assert {c["name"] for c in t["connections"]} >= {"Ollama (IA local)", "Gmail", "Anthropic"}
+    assert any("Prueba telemetría" in e["text"] for e in t["events"])  # eventos reales del registro
+    assert t["today"]["by_module"].get("projects") == 1

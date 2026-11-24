@@ -229,3 +229,15 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - **Privacidad de imágenes**: análisis local por defecto (Ollama). Solo si eliges un proveedor en la nube para
   «Imágenes» se envían fotos, y cada vez se pide consentimiento indicando proveedor y modelo.
 - **VISTAN CORE**: el Fitness Agent consulta Progress, los análisis de físico y las comidas fotografiadas.
+
+## VISTAN · centro de control a pantalla completa (HUD)
+- La pantalla principal ocupa todo el monitor: **System telemetry** (izquierda), **VISTAN CORE** con el sistema
+  solar y marco de visor (centro), **Intelligence data** (derecha) y una **franja inferior** con objetivos,
+  proyectos, actividad del día y la consola de conversación. En el HUD el menú se convierte en un carril de iconos.
+- Telemetría real desde `GET /api/telemetry`: CPU/RAM/swap/carga, proceso de VISTAN (RSS, hilos, uptime), base de
+  datos y disco, modelo activo y privacidad, ping de Ollama y modelos cargados en memoria, latencia de cada llamada
+  a modelos (última, media, máxima, errores, serie), actividad de memoria (incluidos los recuerdos que la IA ha
+  usado), agentes y procesos en ejecución, estado de conexiones y un registro de eventos real con hora.
+  Lo que no se puede medir se muestra como **N/D**; las gráficas solo usan muestras tomadas (nada interpolado).
+- Widgets que se pueden ocultar, mostrar y reordenar (⚙ en cada panel; se guarda en el navegador).
+- En pantallas pequeñas se reorganiza en columna: núcleo, consola, franja, inteligencia y telemetría.
