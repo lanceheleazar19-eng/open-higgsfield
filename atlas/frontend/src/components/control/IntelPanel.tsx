@@ -28,9 +28,9 @@ function FinanceChart({ series }: { series: { date: string; net_cents: number }[
   const line = series.map((p, i) => `${x(i)},${y(p.net_cents)}`).join(" ");
   return (
     <svg className="fin-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label="Evolución del neto del mes">
-      <defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff2e42" stopOpacity=".45" /><stop offset="1" stopColor="#ff2e42" stopOpacity="0" /></linearGradient></defs>
+      <defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#e11d35" stopOpacity=".45" /><stop offset="1" stopColor="#e11d35" stopOpacity="0" /></linearGradient></defs>
       <polygon points={`0,${H} ${line} ${W},${H}`} fill="url(#fg)" />
-      <polyline points={line} fill="none" stroke="#ff3b4f" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+      <polyline points={line} fill="none" stroke="#e11d35" strokeWidth="2" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }

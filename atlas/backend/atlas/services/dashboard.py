@@ -243,6 +243,7 @@ def build_dashboard(db: Session, prefs: dict, now: datetime | None = None) -> di
         "generated_at": local_now.isoformat(),
         "greeting": {
             "name": prefs.get("user_name") or "",
+            "custom": prefs.get("greeting") or "",
             "part_of_day": part_of_day(local_now.hour),
             "timezone": tz,
         },

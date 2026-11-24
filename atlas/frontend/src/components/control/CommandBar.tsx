@@ -106,7 +106,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           <button type="button" className={`chip ${voice.handsFree.wake ? "on" : ""}`} aria-pressed={voice.handsFree.wake} disabled={offline}
             title="Escucha la palabra «ATLAS» mientras esta pestaña está abierta"
             onClick={() => voice.setHandsFree({ wake: !voice.handsFree.wake })}>
-            <Icon name="mic" size={14} /> Oye ATLAS: {voice.handsFree.wake ? "activo" : "apagado"}
+            <Icon name="mic" size={14} /> Hola ATLAS: {voice.handsFree.wake ? "activo" : "apagado"}
           </button>
         )}
         <div className="quick" role="group" aria-label="Comandos rápidos">

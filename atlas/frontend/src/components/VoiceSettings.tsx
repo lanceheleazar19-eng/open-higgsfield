@@ -66,11 +66,15 @@ export function VoiceSettings() {
             {!canListen && <p className="callout">Este navegador no puede escuchar. Usa Chrome, Edge o Safari.</p>}
             <label className="check">
               <input type="checkbox" disabled={!canListen} checked={hf.wake} onChange={(e) => setHf(saveHandsFree({ wake: e.target.checked }))} />
-              «Oye ATLAS»: escuchar la palabra de activación mientras ATLAS está abierto
+              «Hola ATLAS»: escuchar la palabra de activación mientras ATLAS está abierto
             </label>
             <label className="check">
               <input type="checkbox" disabled={!canListen} checked={hf.continuous} onChange={(e) => setHf(saveHandsFree({ continuous: e.target.checked }))} />
               Conversación continua: tras responderte, sigo escuchando sin pulsar nada (si te callas, lo dejo)
+            </label>
+            <label className="check">
+              <input type="checkbox" disabled={!canListen} checked={hf.clap} onChange={(e) => setHf(saveHandsFree({ clap: e.target.checked }))} />
+              Dos palmadas: ATLAS empieza a escucharte (experimental; se detecta en tu ordenador, sin grabar audio)
             </label>
             <p className={hf.wake ? "callout" : "muted small"}>
               <strong>Privacidad:</strong> el reconocimiento de voz lo hace el navegador, no ATLAS.
@@ -82,7 +86,7 @@ export function VoiceSettings() {
             <details className="help">
               <summary>Órdenes de voz</summary>
               <ul className="steps">
-                <li><strong>«ATLAS, …»</strong> o <strong>«Oye ATLAS, …»</strong> seguido de tu pregunta. Si solo dices «ATLAS», suena un pitido y te escucho.</li>
+                <li><strong>«Hola ATLAS, …»</strong>, <strong>«Oye ATLAS, …»</strong> o <strong>«ATLAS, …»</strong> seguido de tu pregunta. Si solo dices «ATLAS», suena un pitido y te escucho.</li>
                 <li><strong>«Para» / «Calla»</strong> o <strong>«ATLAS, …»</strong> mientras hablo: me interrumpes.</li>
                 <li><strong>«Repite»</strong>, <strong>«Más despacio»</strong>, <strong>«Más rápido»</strong>.</li>
                 <li><strong>«Eso es todo»</strong> o <strong>«Gracias»</strong>: termino la conversación y vuelvo a esperar.</li>

@@ -13,22 +13,23 @@ import { BootScreen, alreadyBooted, welcomeEnabled } from "../components/BootScr
 import { Telemetry } from "../components/Telemetry";
 import { useVoice } from "../hooks/useVoice";
 import { formatMoney, greetingFor } from "../lib/format";
+import { v4, type CommandCenter as CommandCenterData } from "../api/v4";
 
 const MIN_THINK_MS = 450; // deja ver la transición de estado del núcleo
 
 /** Métricas reales de cada nodo; los módulos no construidos muestran su fase. */
-function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: number | undefined, aiModel: string | null): Record<string, NodeInfo> {
+function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: number | undefined, aiModel: string | null, c?: CommandCenterData | null): Record<string, NodeInfo> {
   const phase = (id: string) => ({ metric: `Fase ${phases.get(id) ?? "—"}`, planned: true });
   const n = (v: number, one: string, many: string) => `${v} ${v === 1 ? one : many}`;
   if (!d) return {};
   return {
     ai: aiModel ? { metric: aiModel, planned: false } : { metric: "Modo local", planned: false, alert: false },
     memory: memories !== undefined ? { metric: n(memories, "recuerdo", "recuerdos"), planned: false } : phase("memory"),
-    agents: { metric: "0 activos", planned: true },
+    agents: c ? { metric: `${c.agent_runs_24h} ejec. · 24 h`, planned: false, alert: c.approvals_pending > 0 } : phase("agents"),
     tasks: { metric: n(d.tasks.pending, "pendiente", "pendientes"), planned: false, alert: d.tasks.overdue > 0 },
-    calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: true },
-    projects: { metric: n(d.projects.active, "activo", "activos"), planned: true },
-    research: phase("research"),
+    calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: false },
+    projects: { metric: n(d.projects.active, "activo", "activos"), planned: false },
+    research: c ? { metric: c.research_running ? `${c.research_running} en curso` : n(c.research_total, "informe", "informes"), planned: false } : phase("research"),
     gym: { metric: d.fitness.today_routine ? `Hoy: ${d.fitness.today_routine}` : `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`, planned: false },
     finance: d.finance.has_data
       ? { metric: `${formatMoney(d.finance.net_cents, d.finance.currency)} mes`, planned: false, alert: d.finance.net_cents < 0 || d.finance.budgets?.some((b) => b.status === "over") }
@@ -41,6 +42,13 @@ function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: nu
 
 export function ControlCenter() {
   const dash = useAsync(api.dashboard, 60_000);
+  const cc = useAsync(v4.commandCenter, 20_000);
+  const [phase, setPhase] = useState<"executing" | "researching" | null>(null);
+  const [errorFlash, setErrorFlash] = useState(false);
+  const [consoleMin, setConsoleMin] = useState(() => { try { return localStorage.getItem("atlas.console.min") === "1"; } catch { return false; } });
+  const toggleConsole = () => setConsoleMin((m) => { try { localStorage.setItem("atlas.console.min", m ? "0" : "1"); } catch { /* */ } return !m; });
+  const flashError = () => { setErrorFlash(true); setTimeout(() => setErrorFlash(false), 3500); };
+  useEffect(() => { if (phase === "researching" && cc.data && cc.data.research_running === 0) { const t = setTimeout(() => setPhase(null), 8000); return () => clearTimeout(t); } }, [phase, cc.data]);
   const { health, healthError, modules, reloadHealth } = useAtlas();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -102,6 +110,15 @@ export function ControlCenter() {
           setConversationId(ev.conversation_id);
         } else if (ev.type === "meal") {
           patch(id, { meal: { count: ev.entries.length } });
+        } else if (ev.type === "agents") {
+          patch(id, { agents: ev.run });
+          if (ev.run.agents.length) setPhase("executing");
+        } else if (ev.type === "sources") {
+          patch(id, { sources: ev.items });
+        } else if (ev.type === "research") {
+          patch(id, { research: ev.research });
+          setPhase("researching");
+          void cc.reload();
         } else if (ev.type === "finance") {
           patch(id, { money: { item: ev.transaction, state: "shown" } });
         } else if (ev.type === "gym") {
@@ -111,7 +128,7 @@ export function ControlCenter() {
         } else if (ev.type === "memory") {
           patch(id, { memory: { action: ev.action, item: ev.memory, state: "shown" } });
         } else if (ev.type === "delta") {
-          if (firstDelta) { firstDelta = false; setStreaming(true); }
+          if (firstDelta) { firstDelta = false; setStreaming(true); setPhase(null); }
           text += ev.text;
           patch(id, { reply: text, phase: "streaming" });
           speakNew(false);
@@ -121,18 +138,20 @@ export function ControlCenter() {
           speakNew(true);
           patch(id, { phase: "done", mode: ev.mode, model: ev.model, note: ev.reason ?? null });
         } else if (ev.type === "error") {
+          flashError();
           patch(id, { phase: "error", reply: text ? `${text}\n[${ev.message}]` : ev.message });
         }
       }, ctrl.signal);
       if (!text) patch(id, { phase: "error", reply: "No se recibió respuesta." });
     } catch (e) {
       if ((e as Error).name === "AbortError") patch(id, { phase: "stopped", reply: text });
-      else patch(id, { phase: "error", reply: (e as Error).message });
+      else { flashError(); patch(id, { phase: "error", reply: (e as Error).message }); }
     } finally {
       // Deja ver la transición del núcleo aunque la respuesta sea instantánea
       const wait = MIN_THINK_MS - (performance.now() - t0);
       if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       abortRef.current = null;
+      setPhase((p) => (p === "researching" ? p : null));
       setBusy(false);
       setStreaming(false);
       setAfterglow(true);
@@ -290,14 +309,20 @@ export function ControlCenter() {
 
   const briefing = () => converse("Resumen ejecutivo", "Prepárame el resumen ejecutivo del día (daily briefing) con mis datos.");
 
-  const coreState: CoreState = voice.listening ? "listening"
-    : busy && !streaming ? "thinking"
-      : streaming || afterglow || voice.speaking ? "responding" : "idle";
+  // Estado del núcleo = eventos reales: escucha, razonamiento, herramientas de agentes, investigación, voz o error
+  const researching = (cc.data?.research_running ?? 0) > 0 || phase === "researching";
+  const coreState: CoreState = errorFlash ? "error"
+    : voice.listening ? "listening"
+      : busy && phase === "executing" && !streaming ? "executing"
+        : busy && !streaming ? "thinking"
+          : voice.speaking ? "speaking"
+            : streaming || afterglow ? "responding"
+              : researching ? "researching" : "idle";
   const offline = !!healthError || (!!dash.error && !dash.data);
   const phases = useMemo(() => new Map(modules.map((m) => [m.id, m.phase])), [modules]);
   const info = useMemo(
-    () => nodeInfo(dash.data, phases, health?.storage?.memories, health?.ai.configured ? health.ai.model : null),
-    [dash.data, phases, health],
+    () => nodeInfo(dash.data, phases, health?.storage?.memories, health?.ai.configured ? health.ai.model : null, cc.data),
+    [dash.data, phases, health, cc.data],
   );
   const d = dash.data;
 
@@ -309,7 +334,9 @@ export function ControlCenter() {
           <header className="stage-head">
             {d && (
               <h1 className="greet">
-                {greetingFor(d.greeting.part_of_day)}{d.greeting.name ? <>, <span className="accent">{d.greeting.name}</span></> : null}
+                {d.greeting.custom
+                  ? d.greeting.custom.split("{nombre}").map((part, i, arr) => <span key={i}>{part}{i < arr.length - 1 && <span className="accent">{d.greeting.name}</span>}</span>)
+                  : <>{greetingFor(d.greeting.part_of_day)}{d.greeting.name ? <>, <span className="accent">{d.greeting.name}</span></> : null}</>}
               </h1>
             )}
             {d && !d.greeting.name && <p className="hint"><Link to="/settings">Dime cómo te llamas</Link> para personalizar el saludo.</p>}
@@ -325,8 +352,11 @@ export function ControlCenter() {
             </div>
           )}
 
-          <div className="dock">
-            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} onMoneyUndo={moneyUndo} onPhotoSave={photoSave} />
+          <div className={`dock ${consoleMin ? "is-min" : ""}`}>
+            <button type="button" className="console-toggle" aria-expanded={!consoleMin} onClick={() => toggleConsole()}>
+              {consoleMin ? `Mostrar conversación${log.length ? ` (${log.length})` : ""}` : "Minimizar consola"}
+            </button>
+            {!consoleMin && <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} onMoneyUndo={moneyUndo} onPhotoSave={photoSave} />}
             <CommandBar
               busy={busy}
               offline={offline}

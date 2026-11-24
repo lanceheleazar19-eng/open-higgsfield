@@ -187,7 +187,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
       setInterim("");
       recRef.current = null;
       // «ATLAS, …» al principio de lo dictado: se quita la palabra de activación
-      const lead = /^\W*(?:(?:oye|hey|ey|eh|ok|okay|vale)\W+)?h?[aá]t\s?l[aá]s(?![a-zñ])/i.test(finalText);
+      const lead = /^\W*(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\W+)?h?[aá]t\s?l[aá]s(?![a-zñ])/i.test(finalText);
       const said = (lead ? afterWake(finalText) ?? "" : finalText).trim();
       if (said) handleUtterance(said);
       else if (followUp) setConv(false); // silencio tras la respuesta → vuelve a esperar «ATLAS»
@@ -270,6 +270,19 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     bgRef.current = rec;
     try { rec.start(); setWakeActive(handsFree.wake); } catch { bgRef.current = null; }
   }, [bgWanted, bgTick, handsFree.wake, make, stopBg, stopSpeaking, handleUtterance, listen]);
+
+  // Dos palmadas → ATLAS escucha (opcional, detección local de volumen; no se graba nada)
+  const listenRef = useRef(listen);
+  listenRef.current = listen;
+  useEffect(() => {
+    if (!handsFree.clap || !Ctor || listening || speaking || typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+    let det: { stop: () => void } | null = null;
+    let cancelled = false;
+    void import("../lib/clap").then(({ startClapDetector }) => startClapDetector(() => { beep(); setConv(true); listenRef.current(); }))
+      .then((d) => { if (cancelled) d.stop(); else det = d; })
+      .catch(() => setError("No se pudo usar el micrófono para detectar palmadas"));
+    return () => { cancelled = true; det?.stop(); };
+  }, [handsFree.clap, Ctor, listening, speaking]);
 
   // Al volver a la pestaña, reanuda la escucha
   useEffect(() => {

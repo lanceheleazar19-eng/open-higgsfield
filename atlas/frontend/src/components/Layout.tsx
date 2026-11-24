@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Header } from "./Header";
 import { Reminders } from "./Reminders";
+import { CommandPalette } from "./CommandPalette";
 import { Sidebar } from "./Sidebar";
 
 export function Layout() {
@@ -15,6 +16,7 @@ export function Layout() {
         <Outlet />
       </main>
       <Reminders />
+      <CommandPalette />
     </div>
   );
 }

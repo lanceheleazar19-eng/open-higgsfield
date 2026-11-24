@@ -24,6 +24,14 @@ const PATHS: Record<string, string> = {
   refresh: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
   menu: "M4 7h16M4 12h16M4 17h16",
   close: "M6 6l12 12M18 6L6 18",
+  knowledge: "M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM18 17H8a3 3 0 0 0-3 3M9 8h5M9 11h4",
+  workflows: "M5 5h5v5H5zM14 14h5v5h-5zM7.5 10v4a2 2 0 0 0 2 2H14M16.5 14V9.5a2 2 0 0 0-2-2H10",
+  command: "M4 5h16v12H4zM8 21h8M12 17v4M7 9l3 2-3 2M12 13h4",
+  bell: "M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9zM10 20a2 2 0 0 0 4 0",
+  graph: "M6 6a2 2 0 1 0 0 .1M18 8a2 2 0 1 0 0 .1M8 18a2 2 0 1 0 0 .1M7.8 6.8l8.4 1.4M7 16.2l-.8-8.4M9.8 17.2l6.8-7.6",
+  shield: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
+  upload: "M12 16V4M7 9l5-5 5 5M4 20h16",
+  plus: "M12 5v14M5 12h14",
   alert: "M12 9v4M12 17h.01M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",
 };
 

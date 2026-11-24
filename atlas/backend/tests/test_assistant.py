@@ -23,7 +23,7 @@ def test_empty_answers_are_honest(client):
     r = client.post("/api/assistant/query", json={"text": "¿Cuánto he gastado este mes?"}).json()
     assert "no puedo darte cifras" in r["reply"]
     r = client.post("/api/assistant/query", json={"text": "¿Quién ganó el mundial de 1998?"}).json()
-    assert r["intent"] == "unknown" and "Fase 2" in r["reply"]
+    assert r["intent"] == "unknown" and "sin un modelo de IA" in r["reply"]
 
 
 def test_query_validation(client):

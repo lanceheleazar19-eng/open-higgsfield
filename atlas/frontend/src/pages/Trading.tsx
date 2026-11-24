@@ -47,7 +47,7 @@ export function Trading() {
                 </dl>
                 {s.curve.length > 1 && (
                   <LineChart ariaLabel="Curva de capital simulado" labels={s.curve.map((c) => formatDayLabel(c.date))} height={180}
-                    series={[{ label: "Capital", color: "#ff2e42", values: s.curve.map((c) => c.equity) }]} />
+                    series={[{ label: "Capital", color: "#e11d35", values: s.curve.map((c) => c.equity) }]} />
                 )}
               </>
             )}

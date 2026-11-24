@@ -4,6 +4,7 @@ import { useAtlas } from "./AtlasContext";
 import { Avatar } from "./Avatar";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
+import { NotificationsBell } from "./NotificationsBell";
 
 function HeaderClock({ timeZone }: { timeZone?: string }) {
   const [now, setNow] = useState(() => new Date());
@@ -38,6 +39,10 @@ export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => 
         <i aria-hidden="true" />{online ? "Sistema activo" : health ? "Sistema degradado" : "Sin conexión"}
       </div>
       <div className="hdr-right">
+        <button type="button" className="hdr-k" onClick={() => window.dispatchEvent(new Event("atlas-palette"))} aria-label="Abrir paleta de comandos">
+          <Icon name="research" size={15} /><span>Buscar o ejecutar</span><kbd>⌘K</kbd>
+        </button>
+        <NotificationsBell />
         <HeaderClock timeZone={prefs?.timezone} />
         <Link to="/settings#perfil" className="hdr-avatar" aria-label="Mi perfil y configuración" title={profile?.display_name || "Mi perfil"}>
           <Avatar profile={profile} size={46} />

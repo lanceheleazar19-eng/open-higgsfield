@@ -24,7 +24,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, {
@@ -47,7 +47,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-async function requestEmpty(path: string, init?: RequestInit): Promise<void> {
+export async function requestEmpty(path: string, init?: RequestInit): Promise<void> {
   let res: Response;
   try {
     res = await fetch(path, init);
@@ -113,7 +113,7 @@ export const api = {
   deleteConversation: (id: number) => requestEmpty(`/api/conversations/${id}`, { method: "DELETE" }),
   exportUrl: "/api/memory/export",
   profile: () => request<Profile>("/api/profile"),
-  updateProfile: (p: { display_name?: string; username?: string; preferences?: string }) =>
+  updateProfile: (p: { display_name?: string; username?: string; preferences?: string; greeting?: string }) =>
     request<Profile>("/api/profile", { method: "PUT", body: JSON.stringify(p) }),
   uploadAvatar: async (blob: Blob): Promise<Profile> => {
     const fd = new FormData();

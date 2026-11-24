@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import { ORBITS, orbitPoint, type Vec3 } from "./orbits";
 
-export type CoreState = "idle" | "listening" | "thinking" | "responding";
+export type CoreState = "idle" | "listening" | "thinking" | "researching" | "executing" | "speaking" | "responding" | "error";
 
 interface StateLook {
   color: THREE.Color;
@@ -19,10 +19,14 @@ interface StateLook {
 }
 
 const LOOKS: Record<CoreState, StateLook> = {
-  idle: { color: new THREE.Color("#e3192d"), accent: new THREE.Color("#ff5a66"), spin: 1, sparks: 22, pulseSpeed: 0.18, pulseDir: 1, glow: 1 },
-  listening: { color: new THREE.Color("#ff3346"), accent: new THREE.Color("#ffb0b8"), spin: 1.4, sparks: 45, pulseSpeed: 0.35, pulseDir: 1, glow: 1.25 },
-  thinking: { color: new THREE.Color("#ff1a2e"), accent: new THREE.Color("#ffffff"), spin: 4, sparks: 170, pulseSpeed: 0.9, pulseDir: 1, glow: 1.55 },
-  responding: { color: new THREE.Color("#ff4a5c"), accent: new THREE.Color("#ffd0d5"), spin: 2, sparks: 75, pulseSpeed: 0.7, pulseDir: -1, glow: 1.35 },
+  idle: { color: new THREE.Color("#b51224"), accent: new THREE.Color("#e11d35"), spin: 1, sparks: 18, pulseSpeed: 0.16, pulseDir: 1, glow: 0.95 },
+  listening: { color: new THREE.Color("#e11d35"), accent: new THREE.Color("#ffc2c9"), spin: 1.4, sparks: 45, pulseSpeed: 0.35, pulseDir: 1, glow: 1.25 },
+  thinking: { color: new THREE.Color("#e11d35"), accent: new THREE.Color("#ffffff"), spin: 4, sparks: 170, pulseSpeed: 0.9, pulseDir: 1, glow: 1.55 },
+  researching: { color: new THREE.Color("#b51224"), accent: new THREE.Color("#ff8f9b"), spin: 2.6, sparks: 120, pulseSpeed: 1.1, pulseDir: -1, glow: 1.4 },
+  executing: { color: new THREE.Color("#e11d35"), accent: new THREE.Color("#ffffff"), spin: 3.2, sparks: 140, pulseSpeed: 1.3, pulseDir: -1, glow: 1.6 },
+  speaking: { color: new THREE.Color("#e11d35"), accent: new THREE.Color("#ffd0d5"), spin: 1.8, sparks: 70, pulseSpeed: 0.7, pulseDir: -1, glow: 1.35 },
+  responding: { color: new THREE.Color("#e11d35"), accent: new THREE.Color("#ffd0d5"), spin: 2, sparks: 75, pulseSpeed: 0.7, pulseDir: -1, glow: 1.35 },
+  error: { color: new THREE.Color("#650b19"), accent: new THREE.Color("#e11d35"), spin: 0.35, sparks: 6, pulseSpeed: 0.08, pulseDir: 1, glow: 0.7 },
 };
 
 export interface FrameInput {

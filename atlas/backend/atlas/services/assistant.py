@@ -217,7 +217,7 @@ def welcome(d: dict) -> str:
     return " ".join(parts)
 
 
-HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (el cerebro llega en la Fase 2). "
+HELP = ("Ahora mismo trabajo en modo local, sin modelo de IA (abre Ollama o configura un proveedor en Configuración › Modelos). "
         "Puedo responder con tus datos registrados: «¿qué tengo pendiente hoy?», «¿qué es prioritario?», "
         "«próximos eventos», «¿cuánto he gastado este mes?», «¿cómo voy en el gimnasio?», "
         "«proyectos activos» o «resumen ejecutivo». Y puedo recordar cosas: «recuerda que…».")
@@ -261,8 +261,58 @@ def answer(text: str, d: dict, memory: dict | None = None) -> dict:
     for name, pattern, fn in INTENTS:
         if pattern.search(q):
             return {"intent": name, "reply": fn(d), "mode": "local"}  # type: ignore[operator]
+    found = agents_summary(d.get("agentes"))
+    if found:
+        return {"intent": "agents", "mode": "local",
+                "reply": "Sin modelo de IA no puedo razonar la respuesta, pero los agentes han reunido estos datos reales: "
+                         + found + " Con Ollama abierto te daría una respuesta completa."}
     return {
         "intent": "unknown",
         "mode": "local",
-        "reply": "No puedo responder a eso todavía: no hay ningún modelo de IA conectado (Fase 2). " + HELP,
+        "reply": "No puedo responder a eso sin un modelo de IA conectado. " + HELP,
     }
+
+
+def _eur_c(c: int | None) -> str:
+    return _money(int(c or 0), "EUR")
+
+
+def agents_summary(agentes: dict | None) -> str:
+    """Resumen legible (sin IA) de lo que han recopilado los agentes. Solo datos reales; nada se interpreta."""
+    if not agentes:
+        return ""
+    data: dict = {}
+    for a in agentes.values():
+        data.update(a.get("datos") or {})
+    out = []
+    f = data.get("finance.summary")
+    if f:
+        txt = f"Este mes llevas {_eur_c(f['income_cents'])} de ingresos y {_eur_c(f['expense_cents'])} de gastos (dinero real)"
+        if f.get("savings_rate") is not None:
+            txt += f", un {f['savings_rate']} % de ahorro"
+        out.append(txt + ".")
+        for b in f.get("budgets") or []:
+            if b["status"] != "ok":
+                out.append(f"Presupuesto de {b['category']}: {b['pct']} % usado.")
+    n = data.get("nutrition.today")
+    if n and n.get("hoy"):
+        t = n.get("objetivos") or {}
+        out.append(f"Hoy has comido {round(n['hoy'].get('kcal', 0))} kcal y {round(n['hoy'].get('protein', 0))} g de proteína"
+                   + (f" (objetivo {t.get('kcal')} kcal y {t.get('protein')} g)." if t else "."))
+    tr = data.get("trading.stats")
+    if tr and tr.get("overall", {}).get("trades"):
+        o = tr["overall"]
+        out.append(f"Trading SIMULADO: {o['trades']} operaciones cerradas, P&L {o['pnl']}, win rate {o['win_rate']} %.")
+    mem = data.get("memory.search")
+    if mem:
+        out.append("En tu memoria: " + "; ".join(m["contenido"] for m in mem[:3]) + ".")
+    docs = data.get("docs.search")
+    if docs:
+        out.append("En tus documentos: " + "; ".join(f"«{x['title']}»" for x in docs[:3]) + ".")
+    pr = data.get("projects.list")
+    if pr:
+        out.append("Proyectos activos: " + ", ".join(f"{p['nombre']} ({p['tareas_abiertas']} tareas abiertas)" for p in pr[:4]) + ".")
+    ins = data.get("insights.detect")
+    if ins:
+        out.append("A tener en cuenta: " + "; ".join(i["title"] for i in ins[:3]) + ".")
+    return " ".join(out)

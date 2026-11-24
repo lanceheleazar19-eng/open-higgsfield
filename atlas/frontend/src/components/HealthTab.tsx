@@ -46,7 +46,7 @@ export function HealthTab() {
       <div className="stack">
         <Panel title="Pasos (30 días)">
           {steps.length ? <LineChart ariaLabel="Pasos por día" labels={steps.map((x) => formatDayLabel(x.day))} height={170}
-            series={[{ label: "Pasos", color: "#ff2e42", values: steps.map((x) => x.steps) }]} /> : <Empty>Aún no ha llegado ningún dato del Atajo.</Empty>}
+            series={[{ label: "Pasos", color: "#e11d35", values: steps.map((x) => x.steps) }]} /> : <Empty>Aún no ha llegado ningún dato del Atajo.</Empty>}
         </Panel>
         <Panel title="Sueño (horas)">
           {sleep.length ? <LineChart ariaLabel="Horas de sueño" unit=" h" labels={sleep.map((x) => formatDayLabel(x.day))} height={170}

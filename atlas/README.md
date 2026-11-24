@@ -91,6 +91,15 @@ ATLAS vive en tu ordenador; el móvil se conecta a él. La forma segura y recome
 4. En el móvil (con Tailscale conectado) abre esa dirección en Safari → botón Compartir →
    **Añadir a pantalla de inicio**. ATLAS aparecerá como una app.
 
+### Novedades de ATLAS 4.0
+
+- **⌘K / Ctrl+K**: paleta de comandos (abrir módulos, crear tareas, investigar, buscar en todo).
+- **Conocimiento**: importa PDF, Word, Excel, CSV, Markdown, webs e imágenes; ATLAS los cita como [1], [2]…
+  Para búsqueda semántica (opcional): `ollama pull nomic-embed-text`. Para leer imágenes: `ollama pull qwen2.5vl:7b`.
+- **Investigación**: escribe «investiga …» en el chat o usa la página Investigación (necesita internet).
+- **Modelos en la nube (opcional)**: Configuración › Modelos de IA → pega tu API key de OpenAI, Anthropic o Gemini
+  (se guarda en el Llavero), pulsa «Probar» y elige qué tareas usan cada modelo. Por defecto todo es local.
+
 ### Que ATLAS arranque solo (Mac, sin Terminal abierta)
 
 ```bash

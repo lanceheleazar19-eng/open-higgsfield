@@ -10,7 +10,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import ai, assistant, dashboard, finance, goals, gym, health, integrations, memory, nutrition, profile, settings, system, tasks, trading
+from atlas.api import (agents, ai, assistant, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
+                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, workflows)
 from atlas.config import get_settings
 from atlas.db import init_db
 
@@ -34,13 +35,35 @@ async def _periodic_sync() -> None:
             pass
 
 
+async def _workflows_loop() -> None:
+    """Workflows programados (Daily Briefing, Weekly Review…) y copia de seguridad diaria."""
+    import asyncio
+
+    from atlas.workflows import engine as wf
+    while True:
+        await asyncio.sleep(60)
+        try:
+            await asyncio.to_thread(wf.tick)
+            await asyncio.to_thread(wf.maintenance)
+        except Exception:  # noqa: BLE001 - el programador nunca debe tumbar el servidor
+            pass
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     import asyncio
     init_db()
+    from atlas.db import session_scope
+    from atlas.research.engine import mark_interrupted
+    from atlas.workflows.engine import ensure_builtins
+    with session_scope() as db:
+        ensure_builtins(db)
+    mark_interrupted()
     task = asyncio.create_task(_periodic_sync())
+    wtask = asyncio.create_task(_workflows_loop())
     yield
     task.cancel()
+    wtask.cancel()
 
 
 def create_app() -> FastAPI:
@@ -52,7 +75,9 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["*"],
     )
-    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router):
+    for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
+              knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
+              projects.router, center.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

@@ -76,9 +76,20 @@ def alembic_config(url: str | None = None) -> Config:
     return cfg
 
 
+def _pending_migrations() -> bool:
+    from alembic.runtime.migration import MigrationContext
+    from alembic.script import ScriptDirectory
+    head = ScriptDirectory.from_config(alembic_config()).get_current_head()
+    with get_engine().connect() as conn:
+        return MigrationContext.configure(conn).get_current_revision() != head
+
+
 def init_db() -> None:
     """Aplica migraciones pendientes y sincroniza datos de referencia. Nunca borra datos."""
     get_engine()
+    if _pending_migrations():
+        from atlas.services.backup import backup_db
+        backup_db("antes-de-migrar")  # copia de seguridad antes de cualquier cambio de estructura
     command.upgrade(alembic_config(), "head")
     from atlas.gym.library import ensure_library
     from atlas.nutrition.service import ensure_foods

@@ -18,7 +18,12 @@ DEFAULTS: dict[str, object] = {
     "nutrition_profile": None,
     "gmail_last_sync": None,
     "icloud_last_sync": None,
-    "paper_capital": None,  # capital VIRTUAL inicial del paper trading (no es dinero real)
+    "paper_capital": None,
+    "model_router": None,  # configuración del Model Router (ver atlas/brain/router.py)
+    "security_policy": None,  # niveles WRITE/EXECUTE/ADMIN: auto | confirm
+    "proactive": None,  # reglas de inteligencia proactiva activadas
+    "insights_dismissed": None,
+    "greeting": "",  # saludo personalizado  # capital VIRTUAL inicial del paper trading (no es dinero real)
 }
 
 

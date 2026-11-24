@@ -265,8 +265,45 @@ def chat(body: ChatIn) -> StreamingResponse:
                 db.commit()
                 return
 
+            # Investigación en internet: «investiga …»
+            from atlas.agents import core as agent_core
+            rq = agent_core.research_command(body.text)
+            if rq:
+                from atlas.models import Research
+                from atlas.research import engine as research_engine
+                r = Research(question=rq, status="queued", state={})
+                db.add(r)
+                db.commit()
+                research_engine.start(r.id)
+                reply = (f"Empiezo a investigar «{rq}». Buscaré y leeré varias fuentes, compararé lo que dicen y te avisaré "
+                         "al terminar con el informe, las fuentes y el nivel de confianza. Puedes seguirlo en Investigación.")
+                yield _line({"type": "research", "research": research_engine.to_dict(r)})
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "research", "model": None})
+                convs.add_message(db, conv, "assistant", reply, mode="local")
+                db.commit()
+                return
+
+            import time as _time
+            t_start = _time.perf_counter()
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
+            # ATLAS CORE: elige agentes y ejecuta sus herramientas sobre los datos reales
+            run_, actx = agent_core.run(db, body.text, prefs, tz)
+            if run_.agents:
+                d["agentes"] = actx
+                yield _line({"type": "agents", "run": agent_core.run_dict(run_)})
+            # RAG: fragmentos relevantes de tus documentos, con su fuente
+            from atlas.knowledge.service import search as doc_search
+            from atlas.models import Document
+            if db.scalar(select(Document.id).limit(1)):
+                docs = doc_search(db, body.text, k=5)
+                if docs:
+                    d["documentos"] = docs
+                    yield _line({"type": "sources", "items": [{"n": i + 1, "document_id": x["document_id"], "title": x["title"],
+                                                               "chunk": x["chunk"], "url": x["url"], "kind": x["kind"]}
+                                                              for i, x in enumerate(docs)]})
+            db.commit()
             d["goal_snapshot"] = goals_svc.snapshot(db, date.fromisoformat(d["generated_at"][:10]))
             if re.search(r"correo|email|mail|bandeja|mensaje", mem.normalize(body.text)):
                 from atlas.integrations.email_sync import important_today
@@ -309,6 +346,7 @@ def chat(body: ChatIn) -> StreamingResponse:
             if text:
                 mode = final.get("mode") if final and final["type"] == "done" else None
                 convs.add_message(db, conv, "assistant", text, mode=mode, model=(final or {}).get("model"))
-                db.commit()
+            agent_core.finish(db, run_, text, (final or {}).get("model"), t_start, ok=bool(text))
+            db.commit()
 
     return StreamingResponse(gen(), media_type="application/x-ndjson", headers={"Cache-Control": "no-store"})

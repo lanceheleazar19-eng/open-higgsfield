@@ -77,12 +77,13 @@ export function ProfileSettings() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [prefsText, setPrefsText] = useState("");
+  const [greeting, setGreeting] = useState("");
   const [pick, setPick] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ tone: "pos" | "neg"; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (profile) { setName(profile.display_name); setUsername(profile.username); setPrefsText(profile.preferences); }
+    if (profile) { setName(profile.display_name); setUsername(profile.username); setPrefsText(profile.preferences); setGreeting(profile.greeting ?? ""); }
   }, [profile]);
   useEffect(() => () => { if (pick) URL.revokeObjectURL(pick); }, [pick]);
   useEffect(() => {
@@ -116,7 +117,7 @@ export function ProfileSettings() {
   async function save(e: FormEvent) {
     e.preventDefault();
     try {
-      await api.updateProfile({ display_name: name, username, preferences: prefsText });
+      await api.updateProfile({ display_name: name, username, preferences: prefsText, greeting });
       await reloadProfile();
       setMsg({ tone: "pos", text: "Perfil guardado." });
     } catch (err) { setMsg({ tone: "neg", text: (err as Error).message }); }
@@ -145,6 +146,8 @@ export function ProfileSettings() {
             <input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} placeholder="Tu nombre" /></label>
           <label><span>Nombre de usuario</span>
             <input value={username} onChange={(e) => setUsername(e.target.value)} maxLength={30} placeholder="p. ej. lance" pattern="[a-zA-Z0-9._\\-]{3,30}" /></label>
+          <label><span>Saludo personalizado (usa {"{nombre}"}; vacío = «Buenos días/tardes/noches»)</span>
+            <input value={greeting} onChange={(e) => setGreeting(e.target.value)} maxLength={120} placeholder="Ej.: A tus órdenes, {nombre}" /></label>
           <label><span>Preferencias personales</span>
             <textarea rows={3} value={prefsText} onChange={(e) => setPrefsText(e.target.value)} maxLength={2000}
               placeholder="Ej.: prefiero respuestas directas y con un plan concreto" /></label>

@@ -65,7 +65,7 @@ export function Finance() {
             {s && s.months.some((m) => m.income_cents || m.expense_cents) ? (
               <LineChart ariaLabel="Ingresos y gastos por mes" labels={s.months.map((m) => monthLabel(m.month))} height={190}
                 series={[{ label: "Ingresos", color: "#34d399", values: s.months.map((m) => m.income_cents / 100) },
-                         { label: "Gastos", color: "#ff2e42", values: s.months.map((m) => m.expense_cents / 100) }]} />
+                         { label: "Gastos", color: "#e11d35", values: s.months.map((m) => m.expense_cents / 100) }]} />
             ) : <Empty>Aún no hay movimientos registrados.</Empty>}
           </Panel>
           <Panel title="Movimientos">
@@ -163,7 +163,7 @@ function Budgets({ budgets, categories, money, onChange }: { budgets: BudgetItem
             </span>
           </div>
           <div className="goal-bar" role="progressbar" aria-label={`Presupuesto ${b.category}`} aria-valuenow={Math.min(100, b.pct)} aria-valuemin={0} aria-valuemax={100}>
-            <span style={{ width: `${Math.min(100, b.pct)}%`, background: b.status === "over" ? "#ff2e42" : b.status === "warning" ? "#fbbf24" : undefined }} />
+            <span style={{ width: `${Math.min(100, b.pct)}%`, background: b.status === "over" ? "#e11d35" : b.status === "warning" ? "#fbbf24" : undefined }} />
           </div>
         </div>
       ))}

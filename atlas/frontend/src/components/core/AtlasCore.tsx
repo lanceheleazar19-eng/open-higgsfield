@@ -13,8 +13,12 @@ export interface NodeInfo {
 const STATE_LABEL: Record<CoreState, string> = {
   idle: "En espera",
   listening: "Escuchando",
-  thinking: "Procesando",
+  thinking: "Razonando",
+  researching: "Investigando",
+  executing: "Ejecutando",
+  speaking: "Hablando",
   responding: "Respondiendo",
+  error: "Error",
 };
 
 function webglAvailable(): boolean {

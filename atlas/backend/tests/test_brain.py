@@ -24,6 +24,9 @@ def test_without_ollama_falls_back_to_local(client):
     assert "Ollama no detectado" in st["note"]
     ev = _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente hoy?"}))
     assert ev[0]["type"] == "meta" and ev[0]["conversation_id"] > 0
+    agents = next(e for e in ev if e["type"] == "agents")["run"]  # ATLAS CORE eligió el agente de planificación
+    assert agents["agents"] == ["planning"] and all(s["level"] == "READ" for s in agents["steps"])
+    ev = [e for e in ev if e["type"] not in ("agents", "sources")]
     assert ev[1] == {"type": "delta", "text": "No tienes tareas pendientes registradas."}
     assert ev[-1]["type"] == "done" and ev[-1]["mode"] == "local"
     assert client.get("/api/system/health").json()["ai"]["configured"] is False
@@ -48,7 +51,8 @@ def test_chat_streams_and_grounds_model_in_real_data(ollama, client, session):
     ])
     session.commit()
     history = [{"role": "user", "content": "hola"}, {"role": "assistant", "content": "Hola, Lance."}]
-    ev = _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente?", "history": history}))
+    ev = [e for e in _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente?", "history": history}))
+          if e["type"] not in ("agents", "sources")]
     assert ev[0]["type"] == "meta"
     assert ev[1] == {"type": "status", "state": "thinking", "model": "qwen2.5:7b"}
     assert "".join(e["text"] for e in ev if e["type"] == "delta") == "Hola, tienes 2 tareas pendientes."

@@ -10,11 +10,12 @@
 | 5A | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ✅ Completada |
 | 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ✅ Completada |
 | 6 | Finanzas (dinero real), Trading (paper trading, separado) y Apple Salud | ✅ Completada |
-| 7 | Proyectos y negocios (espacio y memoria propios) | — |
+| 7 | Proyectos y negocios (espacio y memoria propios) | ✅ Completada (ATLAS 4.0) |
 | 8 | Calendario (iCloud) + Gmail importante | ✅ Completada |
 | 9 | Voz manos libres (palabra de activación, interrupción, conversación continua) | ✅ Completada |
-| 10 | Automatizaciones, notificaciones, Daily Briefing | — |
-| 11 | Seguridad, copias de seguridad, exportación, optimización | — |
+| 10 | Automatizaciones, notificaciones, Daily Briefing | ✅ Completada (ATLAS 4.0) |
+| 11 | Seguridad, copias de seguridad, exportación, optimización | ✅ Completada (ATLAS 4.0) |
+| 4.0 | Multiagente, Second Brain + grafo, RAG, Research Engine, multi-modelo, Command Center | ✅ Completada |
 
 ## Fase 1 — entregado
 - Backend FastAPI con configuración por entorno, SQLite + migraciones Alembic.
@@ -173,3 +174,31 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - **Órdenes locales** (sin IA): «repite», «más despacio», «más rápido», «eso es todo».
 - Privacidad explicada en la interfaz: el reconocimiento lo hace el navegador (Chrome → Google,
   Safari → Apple). Reconocimiento 100 % local (Whisper) queda como mejora futura.
+
+## ATLAS 4.0 — sistema operativo personal
+- **ATLAS CORE + 9 agentes** (Research, Finance, Fitness, Trading, Business, Coding, Memory, Planning, Security):
+  cada mensaje pasa por CORE, que elige hasta 3 agentes (colaboran compartiendo herramientas), ejecuta sus
+  herramientas reales sobre tus datos (registradas con nivel READ/WRITE/EXECUTE/ADMIN) y entrega el contexto
+  al modelo. Traza visible en el chat y en Agentes › Ejecuciones. Sin modelo de IA, resume los datos reunidos.
+- **Second Brain**: documentos PDF/DOCX/TXT/MD/CSV/XLSX/imágenes (visión local)/webs/notas → texto → fragmentos →
+  índice FTS5 + embeddings de Ollama si hay modelo de embeddings → recuperación híbrida con fuentes [n] en el chat.
+  Grafo de conocimiento real (proyectos, recuerdos, decisiones, ideas, objetivos, tareas, documentos, investigaciones,
+  conversaciones y entidades; aristas de pertenencia, relaciones manuales y menciones), con zoom, filtros, búsqueda,
+  vista por proyecto y edición de relaciones. Importación/exportación Markdown estilo Obsidian ([[enlaces]]).
+- **Research Engine**: subpreguntas → DuckDuckGo + Wikipedia → lectura de páginas → afirmaciones por fuente →
+  informe con conclusiones citadas, contradicciones, «sin confirmar», fiabilidad por dominio y confianza global.
+  Reanudable por pasos; «investiga …» desde el chat. Sin IA: informe extractivo honesto.
+- **Multi-modelo**: Ollama + OpenAI + Anthropic + Gemini (streaming real). Model Router por tarea (chat, agentes,
+  investigación, JSON) con privacidad (solo local / local primero / mejor calidad), límite mensual, precios para
+  calcular coste y registro de cada llamada (latencia, errores, tokens). Keys en el Llavero; «Probar» lista los
+  modelos reales del proveedor.
+- **Workflows**: Daily Briefing (08:00), Weekly Review (domingo 20:00), Project Analysis, Research Workflow y editor
+  de workflows propios por pasos; programación, reanudación y aprobación para los pasos EXECUTE.
+- **Seguridad**: política por niveles, aprobaciones, registro de actividad, filtro de instrucciones maliciosas en
+  documentos/webs, copia automática diaria y antes de cada migración, exportación JSON completa.
+- **Proactividad** configurable (atrasos, fechas, proyectos estancados, objetivos sin progreso, gastos inusuales,
+  pausa en el entreno) con qué/por qué/datos/recomendación. **Command Center**, **Analytics**, **paleta ⌘K**,
+  notificaciones, núcleo 3D con estados reales (escuchando, razonando, ejecutando, investigando, hablando, error),
+  consola minimizable, «Hola ATLAS» y activación por dos palmadas (local, experimental).
+- Pendiente / no posible aún: app nativa de macOS con atajos globales (hoy: arranque automático en segundo plano con
+  LaunchAgent + PWA); reconocimiento de voz 100 % local (Whisper); datos de mercado en vivo para el Trading Agent.

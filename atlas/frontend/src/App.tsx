@@ -11,10 +11,17 @@ import { Nutrition } from "./pages/Nutrition";
 import { Calendar } from "./pages/Calendar";
 import { Finance } from "./pages/Finance";
 import { Trading } from "./pages/Trading";
+import { Agents } from "./pages/Agents";
+import { Analytics } from "./pages/Analytics";
+import { CommandCenter } from "./pages/CommandCenter";
+import { Knowledge } from "./pages/Knowledge";
+import { Projects } from "./pages/Projects";
+import { Research } from "./pages/Research";
+import { Workflows } from "./pages/Workflows";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
-const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading"]);
+const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "agents", "reports", "command", "knowledge", "projects", "research", "workflows"]);
 
 export function App() {
   return (
@@ -31,6 +38,13 @@ export function App() {
           <Route path="calendar" element={<Calendar />} />
           <Route path="finance" element={<Finance />} />
           <Route path="trading" element={<Trading />} />
+          <Route path="agents" element={<Agents />} />
+          <Route path="reports" element={<Analytics />} />
+          <Route path="command" element={<CommandCenter />} />
+          <Route path="knowledge" element={<Knowledge />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="research" element={<Research />} />
+          <Route path="workflows" element={<Workflows />} />
           {NAV.filter((n) => !BUILT.has(n.id)).map((n) => (
             <Route key={n.id} path={n.path.slice(1)} element={<ModulePage id={n.id} />} />
           ))}

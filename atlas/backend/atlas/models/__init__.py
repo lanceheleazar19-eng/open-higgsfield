@@ -5,6 +5,8 @@ from atlas.models.core import ActivityLog, Setting
 from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, WorkoutSet
 from atlas.models.email import EmailMessage
 from atlas.models.money import Budget, HealthDay, PaperTrade
+from atlas.models.intel import (AgentRun, Approval, DocChunk, Document, Entity, ModelCall, Notification, Relation,
+                                Research, Workflow, WorkflowRun)
 from atlas.models.nutrition import Food, MealEntry
 from atlas.models.memory import Conversation, ConversationMessage, Memory
 from atlas.models.domain import (
@@ -31,6 +33,8 @@ __all__ = [
     "Budget",
     "PaperTrade",
     "HealthDay",
+    "Document", "DocChunk", "Entity", "Relation", "Research", "AgentRun", "Approval", "Workflow", "WorkflowRun",
+    "Notification", "ModelCall",
     "EmailMessage",
     "Food",
     "MealEntry",

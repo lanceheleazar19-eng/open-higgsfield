@@ -98,9 +98,12 @@ export type ChatEvent =
   | { type: "gym"; action: "logged"; session: GymSession }
   | { type: "meal"; action: "logged" | "not_found"; entries: MealEntryItem[]; missing: string[] }
   | { type: "finance"; action: "logged"; transaction: TxItem }
+  | { type: "agents"; run: import("./v4").AgentRunItem }
+  | { type: "sources"; items: { n: number; document_id: number; title: string; chunk: number; url: string | null; kind: string }[] }
+  | { type: "research"; research: import("./v4").ResearchItem }
   | { type: "status"; state: "thinking"; model: string }
   | { type: "delta"; text: string }
-  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance"; model: string | null; reason?: string | null }
+  | { type: "done"; mode: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance" | "research"; model: string | null; reason?: string | null; provider?: string }
   | { type: "error"; message: string };
 
 export interface ChatMessage {
@@ -111,7 +114,7 @@ export interface ChatMessage {
 export interface Dashboard {
   trading?: { open: number; closed: number; pnl: number };
   generated_at: string;
-  greeting: { name: string; part_of_day: "morning" | "afternoon" | "night"; timezone: string };
+  greeting: { name: string; custom?: string; part_of_day: "morning" | "afternoon" | "night"; timezone: string };
   summary: {
     pending_tasks: number;
     overdue_tasks: number;
@@ -250,7 +253,7 @@ export interface BodyEntry {
 export interface ParsedLog { exercise_id: number; name: string; reps: number[]; weight: number | null; rir: number | null; warmup_sets: number; per_side: boolean; notes: string[] }
 
 export interface Profile {
-  display_name: string; username: string; preferences: string; created_at: string;
+  display_name: string; username: string; preferences: string; greeting?: string; created_at: string;
   has_avatar: boolean; avatar_version: number | null;
 }
 export interface SystemMetrics { cpu_percent: number; ram_percent: number; ram_used_bytes: number; ram_total_bytes: number }

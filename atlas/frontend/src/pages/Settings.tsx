@@ -7,6 +7,9 @@ import { VoiceSettings } from "../components/VoiceSettings";
 import { ProfileSettings } from "../components/ProfileSettings";
 import { IntegrationsSettings } from "../components/IntegrationsSettings";
 import { NotificationSettings } from "../components/NotificationSettings";
+import { ModelsSettings } from "../components/ModelsSettings";
+import { ProactiveSettings } from "../components/ProactiveSettings";
+import { SecuritySettings } from "../components/SecuritySettings";
 
 const CURRENCIES = ["EUR", "USD", "MXN", "GBP", "COP", "ARS", "CLP"];
 
@@ -43,6 +46,11 @@ export function Settings() {
       </header>
       <ProfileSettings />
       <div id="integraciones"><IntegrationsSettings /></div>
+      <div id="modelos"><ModelsSettings /></div>
+      <div className="grid grid-2">
+        <div id="seguridad"><SecuritySettings /></div>
+        <div id="proactividad"><ProactiveSettings /></div>
+      </div>
       <div className="grid grid-2">
         <Panel title="Región">
           <form className="form" onSubmit={submit}>

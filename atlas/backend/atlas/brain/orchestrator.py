@@ -61,8 +61,31 @@ def brain_status(prefs: dict, provider: LLMProvider | None = None) -> dict:
 
 
 def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
-                provider: LLMProvider | None = None, memory: dict | None = None) -> Iterator[dict]:
-    """Eventos: status → delta* → done (o error). `d` = datos del dashboard con alertas."""
+                provider: LLMProvider | None = None, memory: dict | None = None, task: str = "chat") -> Iterator[dict]:
+    """Eventos: status → delta* → done (o error). `d` = datos del dashboard con alertas.
+    El Model Router decide si esta tarea va a un proveedor en la nube (solo con tu API key y política)."""
+    import time
+
+    from atlas.brain import router
+    clean = [{"role": m["role"], "content": str(m["content"])[:4000]} for m in history[-MAX_HISTORY:]
+             if m.get("role") in ("user", "assistant") and m.get("content")]
+    choice = router.cloud_choice(task, prefs) if provider is None else None
+    if choice:
+        prov_name, model = choice
+        yield {"type": "status", "state": "thinking", "model": f"{prov_name}:{model}"}
+        messages = [{"role": "system", "content": system_prompt(d, memory)}, *clean, {"role": "user", "content": text}]
+        produced = False
+        try:
+            for chunk in router.stream_cloud(prov_name, model, messages, task, prefs):
+                produced = True
+                yield {"type": "delta", "text": chunk}
+            yield {"type": "done", "mode": "ai", "model": f"{model}", "provider": prov_name}
+            return
+        except ProviderError as exc:
+            if produced:
+                yield {"type": "error", "message": str(exc)}
+                return
+            # la nube falló sin responder: seguimos con Ollama/local
     provider = provider or get_provider()
     status = brain_status(prefs, provider)
     if not status["configured"]:
@@ -80,11 +103,13 @@ def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
     ]
     messages = [{"role": "system", "content": system_prompt(d, memory)}, *clean_history, {"role": "user", "content": text}]
     produced = False
+    t0 = time.perf_counter()
     try:
         for chunk in provider.chat_stream(model, messages):
             produced = True
             yield {"type": "delta", "text": chunk}
     except ProviderError as exc:
+        router.record(provider.name, model, task, t0, False, str(exc), prefs=prefs)
         if produced:
             yield {"type": "error", "message": str(exc)}
             return
@@ -93,6 +118,7 @@ def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
         yield {"type": "delta", "text": r["reply"]}
         yield {"type": "done", "mode": "local", "model": None, "reason": str(exc)}
         return
+    router.record(provider.name, model, task, t0, True, prefs=prefs)
     yield {"type": "done", "mode": "ai", "model": model, "provider": provider.name}
 
 

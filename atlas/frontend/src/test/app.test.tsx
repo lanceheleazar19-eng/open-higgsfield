@@ -60,12 +60,27 @@ test("backend caído muestra estado sin conexión con reintento", async () => {
   expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
 });
 
-test("sidebar marca módulos planificados con su fase y abre su página", async () => {
-  mockFetch({ ...base, "/api/dashboard": emptyDashboard });
-  renderAt("/projects");
-  expect(await screen.findByText("F7")).toBeInTheDocument();
-  expect(await screen.findByText("Fase 7 · en desarrollo")).toBeInTheDocument();
-  expect(screen.getByText("Ideas y estudios de mercado")).toBeInTheDocument();
+const agentsFx = {
+  core: { name: "ATLAS CORE", role: "Recibe cada petición y coordina agentes." },
+  levels: { READ: "Consultar", WRITE: "Crear", EXECUTE: "Ejecutar", ADMIN: "Admin" },
+  policy: { READ: "auto", WRITE: "auto", EXECUTE: "confirm", ADMIN: "confirm" },
+  agents: [{ id: "finance", name: "Finance Agent", role: "Finanzas reales.", limits: "Nunca hace pagos.", runs: 2, last: null,
+    tools: [{ name: "finance.summary", level: "READ", description: "Resumen del mes" }], actions: [{ name: "finance.record", level: "WRITE", description: "Apuntar un gasto" }] }],
+};
+
+test("agentes: catálogo real con niveles de permiso y aprobaciones pendientes", async () => {
+  const calls = mockFetch({
+    ...base, "/api/agents": agentsFx, "/api/agents/runs": [],
+    "/api/agents/approvals?": [{ id: 4, action: "workflow.backup", level: "EXECUTE", summary: "«Cierre» quiere: Copia de seguridad", payload: {}, status: "pending", result: null, workflow_run_id: 1, created_at: "2026-11-24T10:00:00", decided_at: null }],
+    "POST /api/agents/approvals/4": { id: 4, status: "approved" },
+  });
+  renderAt("/agents");
+  expect(await screen.findByText("Finance Agent")).toBeInTheDocument();
+  expect(screen.getByText("Nunca hace pagos.", { exact: false })).toBeInTheDocument();
+  expect(screen.getAllByText("READ").length).toBeGreaterThan(0);
+  fireEvent.click(await screen.findByRole("tab", { name: "Aprobaciones (1)" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Autorizar" }));
+  await waitFor(() => expect(calls.some((c) => c.url === "/api/agents/approvals/4" && JSON.parse(c.init!.body as string).approve === true)).toBe(true));
 });
 
 test("perfil: guarda el nombre y actualiza el saludo", async () => {
@@ -631,4 +646,32 @@ test("chat: foto de comida propone y solo guarda al pulsar «Guardar comida»", 
   expect(await screen.findByText(/Guardado en comida/)).toBeInTheDocument();
   const body = JSON.parse(calls.find((c) => c.url === "/api/nutrition/entries")!.init!.body as string);
   expect(body).toMatchObject({ meal: "comida", items: [{ food_id: 3, grams: 200 }], source: "photo" });
+});
+
+test("paleta de comandos: Ctrl+K busca y crea una tarea real", async () => {
+  const calls = mockFetch({ ...base, "/api/dashboard": emptyDashboard, "/api/search?": { tasks: [], memories: [], documents: [], projects: [], research: [] },
+    "POST /api/tasks": { id: 1, title: "comprar creatina" } });
+  renderAt("/");
+  await screen.findByText(/Buenos días/);
+  fireEvent.keyDown(window, { key: "k", ctrlKey: true });
+  const input = await screen.findByRole("textbox", { name: "Comando" });
+  fireEvent.change(input, { target: { value: "comprar creatina" } });
+  fireEvent.click(await screen.findByRole("button", { name: /Crear tarea: «comprar creatina»/ }));
+  expect(await screen.findByText("Tarea creada.")).toBeInTheDocument();
+  expect(JSON.parse(calls.find((c) => c.url === "/api/tasks" && c.init?.method === "POST")!.init!.body as string)).toEqual({ title: "comprar creatina" });
+});
+
+test("chat: muestra qué agentes intervinieron y las fuentes de tus documentos", async () => {
+  const run = { id: 3, request: "¿cuánto he gastado?", agents: ["finance"], agent_names: ["Finance Agent"], intent: "consulta", status: "running",
+    steps: [{ agent: "finance", tool: "finance.summary", level: "READ", ok: true, ms: 4, summary: "9 campo(s)" }], result: null, model: null, duration_ms: null, source: "chat", created_at: "2026-11-24T10:00:00" };
+  mockFetch({ ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/assistant/chat": { ndjson: [{ type: "meta", conversation_id: 1 }, { type: "agents", run },
+      { type: "sources", items: [{ n: 1, document_id: 2, title: "presupuesto", chunk: 0, url: null, kind: "txt" }] },
+      { type: "delta", text: "Llevas 45 € este mes [1]." }, { type: "done", mode: "local", model: null }] } });
+  renderAt("/");
+  const box = await screen.findByRole("textbox", { name: "Mensaje para ATLAS" });
+  fireEvent.change(box, { target: { value: "¿cuánto he gastado?" } });
+  fireEvent.submit(box.closest("form")!);
+  expect(await screen.findByText(/Finance Agent · 1 herramienta/, {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(screen.getByText("[1] presupuesto")).toBeInTheDocument();
 });

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import type { MealProposal, MemoryItem, MemorySuggestion, TaskItem, TxItem } from "../../api/types";
 import { formatMoney } from "../../lib/format";
+import type { AgentRunItem, ResearchItem } from "../../api/v4";
+import { Trace } from "../../pages/Agents";
 import { KIND_LABEL } from "../../lib/memory";
 
 export interface Exchange {
@@ -8,7 +10,10 @@ export interface Exchange {
   question: string;
   reply: string;
   phase: "thinking" | "streaming" | "done" | "error" | "stopped";
-  mode?: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance";
+  mode?: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance" | "research";
+  agents?: AgentRunItem;
+  sources?: { n: number; document_id: number; title: string; chunk: number; url: string | null; kind: string }[];
+  research?: ResearchItem;
   money?: { item: TxItem; state: "shown" | "undone" | "error" };
   photo?: { items: MealProposal[]; state: "shown" | "saving" | "saved" | "error"; meal?: string; error?: string };
   meal?: { count: number };
@@ -28,6 +33,7 @@ function Source({ x }: { x: Exchange }) {
   if (x.mode === "tasks") return <span className="src src-task">Tareas</span>;
   if (x.mode === "gym") return <span className="src src-gym">Gimnasio</span>;
   if (x.mode === "nutrition") return <span className="src src-gym">Nutrición</span>;
+  if (x.mode === "research") return <span className="src src-task">Investigación</span>;
   if (x.mode === "finance") return <span className="src src-task">Finanzas</span>;
   if (x.mode === "local") return <span className="src" title={x.note ?? undefined}>Modo local</span>;
   return null;
@@ -134,6 +140,13 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMon
             {x.memory && <MemoryNote x={x} onForget={onForget} />}
             {x.task && <TaskNote x={x} onTask={onTask} />}
             {x.money && <MoneyNote x={x} onUndo={onMoneyUndo} />}
+            {x.research && <p className="mem-note">🔎 Investigación #{x.research.id} en marcha · <Link to={`/research?id=${x.research.id}`}>Seguirla</Link></p>}
+            {x.sources && x.sources.length > 0 && (
+              <p className="mem-note">📄 De tus documentos: {x.sources.map((s) => <Link key={s.n} to="/knowledge" className="cite">[{s.n}] {s.title}</Link>)}</p>
+            )}
+            {x.agents && x.agents.agents.length > 0 && (
+              <details className="agents-note"><summary>⚙ {x.agents.agent_names.join(" + ")} · {x.agents.steps.length} herramienta(s) · <Link to="/agents?tab=runs">ver</Link></summary><Trace run={x.agents} /></details>
+            )}
             {x.photo && x.phase === "done" && <PhotoNote x={x} onSave={onPhotoSave} />}
             {x.meal && x.meal.count > 0 && <p className="mem-note">🍽️ Comida registrada · <Link to="/nutrition">Ver nutrición</Link></p>}
             {x.gym && <p className="mem-note">🏋️ Sesión de hoy: {x.gym.sets} series · <Link to="/gym">Ver entreno</Link></p>}

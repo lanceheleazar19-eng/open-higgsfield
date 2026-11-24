@@ -42,6 +42,7 @@ def _profile(db) -> dict:  # noqa: ANN001
         "display_name": prefs["user_name"],
         "username": prefs.get("username") or "",
         "preferences": prefs.get("personal_preferences") or "",
+        "greeting": prefs.get("greeting") or "",
         "created_at": prefs["profile_created_at"],
         "has_avatar": p.exists(),
         "avatar_version": int(p.stat().st_mtime) if p.exists() else None,
@@ -52,8 +53,9 @@ class ProfileIn(BaseModel):
     display_name: str | None = Field(default=None, max_length=80)
     username: str | None = Field(default=None, pattern=r"^$|^[a-zA-Z0-9._-]{3,30}$")
     preferences: str | None = Field(default=None, max_length=2000)
+    greeting: str | None = Field(default=None, max_length=120)
 
-    @field_validator("display_name", "preferences")
+    @field_validator("display_name", "preferences", "greeting")
     @classmethod
     def strip(cls, v: str | None) -> str | None:
         return v.strip() if v is not None else v
@@ -73,6 +75,8 @@ def update(body: ProfileIn, db: DB) -> dict:
         changes["username"] = body.username.lower()
     if body.preferences is not None:
         changes["personal_preferences"] = body.preferences
+    if body.greeting is not None:
+        changes["greeting"] = body.greeting
     if changes:
         set_prefs(db, changes)
         log_activity(db, "settings", "profile", "Perfil actualizado")

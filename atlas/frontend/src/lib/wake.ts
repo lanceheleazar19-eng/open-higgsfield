@@ -5,7 +5,7 @@ export function norm(s: string): string {
 }
 
 // «atlas», «oye atlas», «hey atlas»… y lo que suelen entender mal los reconocedores («hatlas», «at las»)
-const WAKE = /(?:^|\s)(?:(?:oye|hey|ey|eh|ok|okay|vale)\s+)?h?at\s?las(?=\s|$)/;
+const WAKE = /(?:^|\s)(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\s+)?h?at\s?las(?=\s|$)/;
 
 /** Busca la palabra de activación. Devuelve lo que se dijo DESPUÉS de ella (puede estar vacío) o null. */
 export function matchWake(transcript: string): { rest: string } | null {
@@ -44,14 +44,14 @@ export function isEcho(heard: string, spoken: string): boolean {
 }
 
 const HF_KEY = "atlas.handsfree";
-export interface HandsFree { wake: boolean; continuous: boolean }
+export interface HandsFree { wake: boolean; continuous: boolean; clap: boolean }
 
 export function loadHandsFree(): HandsFree {
   try {
     const v = JSON.parse(localStorage.getItem(HF_KEY) ?? "{}") as Partial<HandsFree>;
-    return { wake: v.wake === true, continuous: v.continuous !== false };
+    return { wake: v.wake === true, continuous: v.continuous !== false, clap: v.clap === true };
   } catch {
-    return { wake: false, continuous: true };
+    return { wake: false, continuous: true, clap: false };
   }
 }
 
@@ -63,6 +63,6 @@ export function saveHandsFree(p: Partial<HandsFree>): HandsFree {
 
 /** Lo dicho después de «ATLAS» conservando mayúsculas y tildes (para la IA y los intérpretes). */
 export function afterWake(original: string): string | null {
-  const m = /(?:^|[\s,.¿¡])(?:(?:oye|hey|ey|eh|ok|okay|vale)[\s,]+)?h?[aá]t\s?l[aá]s(?=[\s,.:;!?¿¡]|$)[\s,.:;!]*/i.exec(original);
+  const m = /(?:^|[\s,.¿¡])(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)[\s,]+)?h?[aá]t\s?l[aá]s(?=[\s,.:;!?¿¡]|$)[\s,.:;!]*/i.exec(original);
   return m ? original.slice(m.index + m[0].length).trim() : null;
 }
