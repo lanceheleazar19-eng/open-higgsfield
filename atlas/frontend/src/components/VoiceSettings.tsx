@@ -4,6 +4,7 @@ import { loadVoicePrefs, pickVoice, qualityLabel, saveVoicePrefs, spanishVoices 
 import { loadHandsFree, saveHandsFree } from "../lib/wake";
 import { WELCOME_KEY, welcomeEnabled } from "./BootScreen";
 import { Panel } from "./Panel";
+import { VoiceStudioSettings } from "./VoiceStudioSettings";
 
 const SAMPLE = "Hola, soy VISTAN. Así sonará mi voz cuando te responda. ¿Te gusta cómo suena?";
 
@@ -27,6 +28,7 @@ export function VoiceSettings() {
 
   return (
     <Panel title="Voz de VISTAN">
+      <div className="form"><VoiceStudioSettings /></div>
       {!supported ? (
         <p className="muted">Este navegador no puede hablar. Usa Chrome, Safari o Edge.</p>
       ) : (

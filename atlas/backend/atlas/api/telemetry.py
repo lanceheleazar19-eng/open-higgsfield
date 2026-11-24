@@ -63,6 +63,11 @@ def _ollama() -> dict:
         return {"reachable": False, "ping_ms": None, "installed": None, "loaded": None}
 
 
+def _voicestudio() -> dict:
+    from atlas.voice.voicestudio import status
+    return status(timeout=0.8)
+
+
 @router.get("/telemetry")
 def telemetry(db: DB) -> dict:
     from atlas.brain import router as mr
@@ -99,6 +104,8 @@ def telemetry(db: DB) -> dict:
     conns = [
         conn("Ollama (IA local)", "ok" if ol["reachable"] else "off", f"{ol['ping_ms']} ms" if ol["ping_ms"] is not None else "no responde"),
         conn("Base de datos", "ok", "SQLite"),
+        (lambda v: conn("VoiceStudio (voz)", "ok" if v["reachable"] else "off",
+                        f"{v['ping_ms']} ms · {len(v['voices'])} voces" if v["reachable"] else "no abierto"))(_voicestudio()),
         conn("Gmail", "ok" if get_secret("gmail_app_password") else "off", f"sync {prefs.get('gmail_last_sync') or 'nunca'}" if get_secret("gmail_app_password") else "no conectado"),
         conn("iCloud Calendar", "ok" if get_secret("icloud_app_password") else "off", f"sync {prefs.get('icloud_last_sync') or 'nunca'}" if get_secret("icloud_app_password") else "no conectado"),
         conn("Apple Salud", "ok" if hd else "off", f"último dato {hd:%d/%m %H:%M} UTC" if hd else "sin datos"),

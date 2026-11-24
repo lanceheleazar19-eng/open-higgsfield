@@ -12,6 +12,7 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("ATLAS_FRONTEND_DIST", str(tmp_path / "no-dist"))
     # Por defecto, sin Ollama (puerto cerrado). Los tests de IA usan fake_ollama.
     monkeypatch.setenv("ATLAS_OLLAMA_URL", "http://127.0.0.1:9")
+    monkeypatch.setenv("ATLAS_VOICESTUDIO_URL", "http://127.0.0.1:9")  # sin VoiceStudio por defecto
     monkeypatch.setenv("ATLAS_NO_KEYRING", "1")  # nunca tocar el llavero real en pruebas
     get_settings.cache_clear()
     atlas_db.reset_engine()

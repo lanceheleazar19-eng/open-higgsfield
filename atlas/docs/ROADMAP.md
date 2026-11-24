@@ -241,3 +241,13 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   Lo que no se puede medir se muestra como **N/D**; las gráficas solo usan muestras tomadas (nada interpolado).
 - Widgets que se pueden ocultar, mostrar y reordenar (⚙ en cada panel; se guarda en el navegador).
 - En pantallas pequeñas se reorganiza en columna: núcleo, consola, franja, inteligencia y telemetría.
+
+## VISTAN · voz con VoiceStudio
+- Integración con [VoiceStudio](https://github.com/debpalash/VoiceStudio) (app de voz neuronal local, API en
+  `127.0.0.1:3900`). VISTAN no ejecuta sus modelos: el núcleo hace de puente (`GET /api/voicestudio/status`,
+  `POST /api/voicestudio/speak`), así el iPhone también oye la voz generada en el Mac.
+- Configuración → Voz → **Motor de voz**: navegador o VoiceStudio, elección de voz (incluidos tus perfiles
+  clonados) y prueba. Si VoiceStudio no está abierto, cada frase se lee con la voz del navegador.
+- Estado real en la telemetría del HUD (conectado + latencia + nº de voces, o «no abierto»).
+- Variables: `ATLAS_VOICESTUDIO_URL` (por defecto local) y `ATLAS_VOICESTUDIO_API_KEY` (solo si está en otro
+  equipo; la clave nunca viaja por HTTP sin cifrar fuera del propio equipo).

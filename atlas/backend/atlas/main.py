@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
 from atlas.api import (agents, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
-                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, workflows)
+                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows)
 from atlas.config import get_settings
 from atlas.db import init_db
 
@@ -77,7 +77,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router, body.router, telemetry.router):
+              projects.router, center.router, body.router, telemetry.router, voice.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

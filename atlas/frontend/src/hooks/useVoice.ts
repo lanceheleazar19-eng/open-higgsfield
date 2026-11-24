@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadVoicePrefs, pickVoice, saveVoicePrefs, speechChunks } from "../lib/speech";
+import { usingVoiceStudio, vsEnqueue, vsStop, vsUnlock } from "../lib/voicestudio";
 import { afterWake, isEcho, loadHandsFree, matchWake, saveHandsFree, voiceIntent, type HandsFree } from "../lib/wake";
 
 /* Tipos mínimos de la Web Speech API (no están en lib.dom). */
@@ -69,7 +70,7 @@ function beep() {
  *  `busy`: VISTAN está generando una respuesta (no se reabre el micrófono hasta que termine). */
 export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const Ctor = typeof window !== "undefined" ? getRecognition() : null;
-  const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
+  const canSpeak = typeof window !== "undefined" && ("speechSynthesis" in window || usingVoiceStudio());
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const bgRef = useRef<SpeechRecognitionLike | null>(null);
   const finalRef = useRef(onFinal);
@@ -109,6 +110,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
 
   const pending = useRef(0);
   const stopSpeaking = useCallback(() => {
+    vsStop();
     window.speechSynthesis?.cancel();
     pending.current = 0;
     setSpeaking(false);
@@ -296,6 +298,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     const b = bgRef.current;
     bgRef.current = null;
     b?.abort();
+    vsStop();
     window.speechSynthesis?.cancel();
   }, [canSpeak]);
 
@@ -313,6 +316,7 @@ export function unlockSpeechOnFirstTouch() {
   const unlock = () => {
     if (unlocked) return;
     unlocked = true;
+    vsUnlock();
     try {
       const u = new SpeechSynthesisUtterance(" ");
       u.volume = 0;
@@ -348,7 +352,21 @@ export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
 
 /** Lee un texto frase a frase con la voz y velocidad elegidas en Configuración (interrumpe lo anterior). */
 export function speakText(text: string, onStart?: () => void, onEnd?: () => void, override?: { voiceURI?: string | null; rate?: number }) {
-  window.speechSynthesis.cancel();
+  vsStop();
+  window.speechSynthesis?.cancel();
+  if (usingVoiceStudio()) {
+    // VoiceStudio: una petición por frase, en paralelo; si falla una, esa se lee con la voz del navegador
+    const rate = { ...loadVoicePrefs(), ...override }.rate;
+    const chunks = speechChunks(text, 400);
+    let started = false;
+    chunks.forEach((chunk, i) => {
+      const last = i === chunks.length - 1;
+      const start = () => { if (!started) { started = true; onStart?.(); } };
+      const end = () => { if (last) onEnd?.(); };
+      vsEnqueue(chunk, rate, start, end, () => browserSpeak(chunk, start, end, override));
+    });
+    return;
+  }
   void afterCancel().then(() => voicesReady()).then((voices) => {
     const synth = window.speechSynthesis;
     const prefs = { ...loadVoicePrefs(), ...override };
@@ -385,6 +403,13 @@ export function useSystemVoices(): SpeechSynthesisVoice[] {
 let queueTail: Promise<unknown> = Promise.resolve();
 
 function queueSpeech(text: string, onChunkStart: () => void, onChunkEnd: () => void) {
+  if (usingVoiceStudio()) {
+    const rate = loadVoicePrefs().rate;
+    for (const chunk of speechChunks(text, 400)) {
+      vsEnqueue(chunk, rate, onChunkStart, onChunkEnd, () => browserSpeak(chunk, onChunkStart, onChunkEnd));
+    }
+    return;
+  }
   // Encadenado para conservar el orden de las frases aunque las voces tarden en cargar
   queueTail = queueTail.then(() => voicesReady()).then((voices) => speakChunks(voices, text, onChunkStart, onChunkEnd));
 }
@@ -403,4 +428,21 @@ function speakChunks(voices: SpeechSynthesisVoice[], text: string, onChunkStart:
     u.onerror = onChunkEnd;
     synth.speak(u);
   }
+}
+
+/** Una sola frase con la voz del navegador (respaldo cuando VoiceStudio no responde). */
+function browserSpeak(text: string, onStart?: () => void, onEnd?: () => void, override?: { voiceURI?: string | null; rate?: number }) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) { onEnd?.(); return; }
+  void voicesReady().then((voices) => {
+    const prefs = { ...loadVoicePrefs(), ...override };
+    const voice = pickVoice(voices, prefs.voiceURI ?? null);
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = voice?.lang ?? "es-ES";
+    if (voice) u.voice = voice;
+    u.rate = prefs.rate;
+    u.onstart = () => onStart?.();
+    u.onend = () => onEnd?.();
+    u.onerror = () => onEnd?.();
+    window.speechSynthesis.speak(u);
+  });
 }

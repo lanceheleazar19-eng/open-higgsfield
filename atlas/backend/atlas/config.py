@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     database_url: str | None = None  # p.ej. postgresql+psycopg://... en el futuro
     timezone: str = "Europe/Madrid"
     ollama_url: str = "http://127.0.0.1:11434"
+    voicestudio_url: str = "http://127.0.0.1:3900"  # VoiceStudio (voz local); ATLAS_VOICESTUDIO_URL
+    voicestudio_api_key: str | None = None  # solo si VoiceStudio está en otro equipo (OMNIVOICE_API_KEY)
     sync_interval_s: int = 1800
     frontend_dist: Path = ATLAS_ROOT / "frontend" / "dist"
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
