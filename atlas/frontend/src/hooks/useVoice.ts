@@ -292,6 +292,30 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   };
 }
 
+/** iPhone/iPad: Safari solo deja hablar si la voz se "estrena" dentro de un toque del usuario.
+ *  Las respuestas llegan después (asíncronas), así que la desbloqueamos con el primer toque. */
+let unlocked = false;
+export function unlockSpeechOnFirstTouch() {
+  if (typeof window === "undefined" || !("speechSynthesis" in window) || unlocked) return;
+  const unlock = () => {
+    if (unlocked) return;
+    unlocked = true;
+    try {
+      const u = new SpeechSynthesisUtterance(" ");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    } catch { /* sin voz */ }
+    window.removeEventListener("touchend", unlock, true);
+    window.removeEventListener("click", unlock, true);
+  };
+  window.addEventListener("touchend", unlock, true);
+  window.addEventListener("click", unlock, true);
+}
+unlockSpeechOnFirstTouch();
+
+/** Safari descarta lo que se pide hablar justo después de cancel(): deja un respiro. */
+const afterCancel = () => new Promise((r) => setTimeout(r, 80));
+
 /** Chrome carga las voces de forma asíncrona: al abrir la página getVoices() está vacío.
  *  Espera a que estén disponibles (máx. 1,5 s) para no usar la voz por defecto del navegador. */
 export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
@@ -312,7 +336,7 @@ export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
 /** Lee un texto frase a frase con la voz y velocidad elegidas en Configuración (interrumpe lo anterior). */
 export function speakText(text: string, onStart?: () => void, onEnd?: () => void, override?: { voiceURI?: string | null; rate?: number }) {
   window.speechSynthesis.cancel();
-  void voicesReady().then((voices) => {
+  void afterCancel().then(() => voicesReady()).then((voices) => {
     const synth = window.speechSynthesis;
     const prefs = { ...loadVoicePrefs(), ...override };
     const voice = pickVoice(voices, prefs.voiceURI ?? null);

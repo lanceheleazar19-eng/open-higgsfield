@@ -613,3 +613,22 @@ test("chat: un gasto apuntado se puede deshacer", async () => {
   await waitFor(() => expect(calls.some((c) => c.init?.method === "DELETE" && c.url === "/api/finance/transactions/9")).toBe(true));
   expect(await screen.findByText("Movimiento eliminado.")).toBeInTheDocument();
 });
+
+test("chat: foto de comida propone y solo guarda al pulsar «Guardar comida»", async () => {
+  const food = { id: 3, name: "Arroz blanco cocido", kcal: 130, protein: 2.7, carbs: 28, fat: 0.3, unit_grams: null, aliases: [], custom: false };
+  const calls = mockFetch({
+    ...base, "/api/dashboard": emptyDashboard,
+    "POST /api/nutrition/photo": { model: "qwen2.5vl:7b", note: "Estimación", items: [{ food, grams: 200, text: "arroz", kcal: 260, protein: 5.4, carbs: 56, fat: 0.6 }] },
+    "/api/nutrition/day": { date: "2026-11-24", entries: [], totals: { kcal: 0, protein: 0, carbs: 0, fat: 0 }, targets: null, tips: [], suggested_meal: "comida" },
+    "POST /api/nutrition/entries": { items: [] },
+  });
+  renderAt("/");
+  const input = await screen.findByLabelText("Elegir foto de comida");
+  fireEvent.change(input, { target: { files: [new File(["x"], "plato.jpg", { type: "image/jpeg" })] } });
+  expect(await screen.findByText(/Aproximadamente 260 kcal y 5 g de proteína/, {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(calls.some((c) => c.url === "/api/nutrition/entries")).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: "Guardar comida" }));
+  expect(await screen.findByText(/Guardado en comida/)).toBeInTheDocument();
+  const body = JSON.parse(calls.find((c) => c.url === "/api/nutrition/entries")!.init!.body as string);
+  expect(body).toMatchObject({ meal: "comida", items: [{ food_id: 3, grams: 200 }], source: "photo" });
+});

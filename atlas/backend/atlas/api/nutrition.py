@@ -16,6 +16,13 @@ from atlas.models import Food, MealEntry
 from atlas.nutrition import service as nut
 from atlas.services.preferences import get_prefs, set_prefs
 
+try:  # fotos HEIC del iPhone
+    from pillow_heif import register_heif_opener
+
+    register_heif_opener()
+except ImportError:  # pragma: no cover
+    pass
+
 router = APIRouter(prefix="/api/nutrition", tags=["nutrition"])
 MEAL_RX = "^(" + "|".join(nut.MEALS) + ")$"
 

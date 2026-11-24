@@ -15,7 +15,8 @@ export const QUICK_COMMANDS = [
   "Proyectos activos",
 ];
 
-export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggleSpeak, onAsk, onBriefing }: {
+export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggleSpeak, onAsk, onBriefing, onPhoto }: {
+  onPhoto: (file: File) => void;
   busy: boolean;
   offline: boolean;
   onStop: () => void;
@@ -27,6 +28,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
 }) {
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
 
   // «/» enfoca la barra; Esc interrumpe voz y escucha
   useEffect(() => {
@@ -58,6 +60,12 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           <Icon name="mic" size={22} />
           {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /></span>}
         </button>
+        <button type="button" className="bar-btn" onClick={() => photoRef.current?.click()} disabled={busy || offline}
+          aria-label="Foto de comida" title="Foto de tu comida: ATLAS calcula calorías y proteína">
+          <Icon name="camera" size={18} />
+        </button>
+        <input ref={photoRef} type="file" accept="image/*" hidden aria-label="Elegir foto de comida"
+          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { voice.endConversation(); onPhoto(f); } }} />
         <span className={`wave ${voice.listening || voice.speaking || busy ? "on" : ""}`} aria-hidden="true">
           {Array.from({ length: 14 }, (_, i) => <i key={i} style={{ animationDelay: `${(i % 7) * 0.09}s` }} />)}
         </span>

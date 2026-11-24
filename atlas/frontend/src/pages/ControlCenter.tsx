@@ -196,6 +196,48 @@ export function ControlCenter() {
     }
   };
 
+  /** Foto de comida desde el chat: el análisis es local (Ollama) y nada se guarda sin tu botón. */
+  const photoMeal = async (file: File) => {
+    const id = ++seq.current;
+    setLog((l) => [...l, { id, question: "📷 Foto de comida", reply: "", phase: "thinking" }]);
+    setBusy(true);
+    setRipple((r) => r + 1);
+    try {
+      const r = await api.analyzePhoto(file);
+      const found = r.items.filter((i) => i.food && i.grams);
+      const n0 = (v: number) => Math.round(v);
+      let reply: string;
+      if (!r.items.length) reply = "No he detectado comida en la foto.";
+      else {
+        const parts = r.items.map((i) => i.food && i.grams ? `${i.food.name} (~${n0(i.grams)} g)` : `${i.text} (no lo tengo en la base de alimentos)`);
+        const kcal = found.reduce((a, i) => a + (i.kcal ?? (i.food!.kcal * i.grams!) / 100), 0);
+        const prot = found.reduce((a, i) => a + (i.protein ?? (i.food!.protein * i.grams!) / 100), 0);
+        reply = `He visto: ${parts.join(", ")}.` + (found.length ? ` Aproximadamente ${n0(kcal)} kcal y ${n0(prot)} g de proteína. Es una estimación por foto: revisa los gramos si quieres y pulsa «Guardar comida».` : "");
+      }
+      patch(id, { reply, phase: "done", mode: "nutrition", model: r.model, photo: { items: r.items, state: "shown" } });
+      if (speakRef.current) voiceRef.current?.speak(reply);
+    } catch (e) {
+      patch(id, { phase: "error", reply: (e as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const photoSave = async (exId: number) => {
+    const x = logRef.current.find((e) => e.id === exId);
+    if (!x?.photo) return;
+    const ok = x.photo.items.filter((i) => i.food && i.grams);
+    patch(exId, { photo: { ...x.photo, state: "saving" } });
+    try {
+      const day = await api.nutritionDay();
+      const meal = day.suggested_meal || "comida";
+      await api.addMeal(meal, ok.map((i) => ({ food_id: i.food!.id, grams: i.grams! })), "photo");
+      patch(exId, { photo: { ...x.photo, state: "saved", meal } });
+    } catch (e) {
+      patch(exId, { photo: { ...x.photo, state: "error", error: (e as Error).message } });
+    }
+  };
+
   const moneyUndo = async (exId: number) => {
     const x = logRef.current.find((e) => e.id === exId);
     if (!x?.money) return;
@@ -284,7 +326,7 @@ export function ControlCenter() {
           )}
 
           <div className="dock">
-            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} onMoneyUndo={moneyUndo} />
+            <Transcript items={log} onNew={newConversation} onForget={confirmForget} onSuggestion={decideSuggestion} onTask={taskAction} onMoneyUndo={moneyUndo} onPhotoSave={photoSave} />
             <CommandBar
               busy={busy}
               offline={offline}
@@ -294,6 +336,7 @@ export function ControlCenter() {
               onToggleSpeak={() => setSpeakReplies((v) => !v)}
               onAsk={converse}
               onBriefing={briefing}
+              onPhoto={(f) => void photoMeal(f)}
             />
           </div>
         </div>

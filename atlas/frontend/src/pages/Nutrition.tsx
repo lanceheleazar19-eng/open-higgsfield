@@ -133,7 +133,7 @@ function Today() {
               <button type="button" className="mini-btn" onClick={() => fileRef.current?.click()} disabled={analyzing}>
                 <Icon name="camera" size={14} /> {analyzing ? "Analizando foto…" : "Foto del plato"}
               </button>
-              <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden aria-label="Foto del plato"
+              <input ref={fileRef} type="file" accept="image/*" hidden aria-label="Foto del plato"
                 onChange={(e) => { void photo(e.target.files?.[0]); e.target.value = ""; }} />
             </div>
             {items.length > 0 && <Proposal items={items} foods={foods.data?.items ?? []} onChange={setItems} />}

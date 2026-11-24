@@ -960,3 +960,20 @@ body::before { background-image: linear-gradient(rgba(255, 64, 78, .028) 1px, tr
 /* Fase 9 — manos libres */
 fieldset.field { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 4px 0 0; display: grid; gap: 10px; min-width: 0; }
 fieldset.field legend { padding: 0 6px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+
+/* Móvil estrecho: la cabecera no debe ensanchar la página (el reloj ya está en el teléfono) */
+.hdr > * { min-width: 0; }
+@media (max-width: 460px) {
+  .hdr-clock { display: none; }
+  .hdr-title { font-size: 18px; letter-spacing: .26em; }
+  .bar .bar-btn, .bar .mic { flex: none; }
+}
+/* Ninguna página puede ensancharse más que la pantalla */
+.page { grid-template-columns: minmax(0, 1fr); }
+.page h1 { flex-wrap: wrap; }
+.tabs { overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { flex: none; white-space: nowrap; }
+@media (max-width: 1100px) { .control { grid-template-columns: minmax(0, 1fr); } }
+.command { min-width: 0; max-width: 100%; }
+.command > .bar, .command > .console-foot { min-width: 0; max-width: 100%; }

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { MemoryItem, MemorySuggestion, TaskItem, TxItem } from "../../api/types";
+import type { MealProposal, MemoryItem, MemorySuggestion, TaskItem, TxItem } from "../../api/types";
 import { formatMoney } from "../../lib/format";
 import { KIND_LABEL } from "../../lib/memory";
 
@@ -10,6 +10,7 @@ export interface Exchange {
   phase: "thinking" | "streaming" | "done" | "error" | "stopped";
   mode?: "ai" | "local" | "memory" | "tasks" | "gym" | "nutrition" | "finance";
   money?: { item: TxItem; state: "shown" | "undone" | "error" };
+  photo?: { items: MealProposal[]; state: "shown" | "saving" | "saved" | "error"; meal?: string; error?: string };
   meal?: { count: number };
   gym?: { sets: number; tonnage: number };
   model?: string | null;
@@ -75,6 +76,22 @@ function TaskNote({ x, onTask }: { x: Exchange; onTask: (exchangeId: number, act
   return null;
 }
 
+function PhotoNote({ x, onSave }: { x: Exchange; onSave: (exchangeId: number) => void }) {
+  const p = x.photo!;
+  const ok = p.items.filter((i) => i.food && i.grams);
+  if (p.state === "saved") return <p className="mem-note">🍽️ Guardado en {p.meal} · <Link to="/nutrition">Ver nutrición</Link></p>;
+  if (!ok.length) return <p className="mem-note"><Link to="/nutrition">Regístralo a mano en Nutrición</Link></p>;
+  return (
+    <p className="mem-note">
+      <button type="button" className="mini-btn" disabled={p.state === "saving"} onClick={() => onSave(x.id)}>
+        {p.state === "saving" ? "Guardando…" : "Guardar comida"}
+      </button>{" "}
+      <Link to="/nutrition">Ajustar gramos en Nutrición</Link>
+      {p.state === "error" && <span className="t-warn"> {p.error ?? "No se pudo guardar."}</span>}
+    </p>
+  );
+}
+
 function MoneyNote({ x, onUndo }: { x: Exchange; onUndo: (exchangeId: number) => void }) {
   const m = x.money!;
   if (m.state === "undone") return <p className="mem-note">Movimiento eliminado.</p>;
@@ -87,8 +104,9 @@ function MoneyNote({ x, onUndo }: { x: Exchange; onUndo: (exchangeId: number) =>
   );
 }
 
-export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMoneyUndo }: {
+export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMoneyUndo, onPhotoSave }: {
   items: Exchange[];
+  onPhotoSave: (exchangeId: number) => void;
   onMoneyUndo: (exchangeId: number) => void;
   onTask: (exchangeId: number, action: "undo" | "complete") => void;
   onNew: () => void;
@@ -116,6 +134,7 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMon
             {x.memory && <MemoryNote x={x} onForget={onForget} />}
             {x.task && <TaskNote x={x} onTask={onTask} />}
             {x.money && <MoneyNote x={x} onUndo={onMoneyUndo} />}
+            {x.photo && x.phase === "done" && <PhotoNote x={x} onSave={onPhotoSave} />}
             {x.meal && x.meal.count > 0 && <p className="mem-note">🍽️ Comida registrada · <Link to="/nutrition">Ver nutrición</Link></p>}
             {x.gym && <p className="mem-note">🏋️ Sesión de hoy: {x.gym.sets} series · <Link to="/gym">Ver entreno</Link></p>}
             {x.suggestions?.some((s) => s.state !== "dismissed") && (

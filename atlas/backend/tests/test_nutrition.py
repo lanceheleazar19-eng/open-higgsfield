@@ -94,3 +94,17 @@ def test_photo_with_vision_model_proposes_not_saves(ollama, client):
     assert req["model"] == "qwen2.5vl:7b" and req["messages"][0]["images"]  # imagen enviada al modelo LOCAL
     assert client.get("/api/nutrition/day").json()["entries"] == []  # nada guardado sin confirmar
     assert client.post("/api/nutrition/photo", files={"file": ("x.jpg", b"nope", "image/jpeg")}).status_code == 415
+
+
+def test_photo_heic_del_iphone(ollama, client):
+    """Las fotos HEIC del iPhone se aceptan (llegan al modelo de visión, aquí ausente → 503, no 415)."""
+    import io
+
+    import pillow_heif
+    from PIL import Image
+
+    pillow_heif.register_heif_opener()
+    buf = io.BytesIO()
+    Image.new("RGB", (64, 48), (200, 120, 40)).save(buf, format="HEIF")
+    r = client.post("/api/nutrition/photo", files={"file": ("IMG_0001.HEIC", buf.getvalue(), "image/heic")})
+    assert r.status_code == 503
