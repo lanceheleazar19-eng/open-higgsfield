@@ -20,6 +20,14 @@ esc() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' <<<"$1"; }
 
 case "${1:-}" in
   install)
+    # macOS no deja que los procesos en segundo plano entren en Documentos, Escritorio, Descargas ni iCloud Drive
+    case "$ROOT" in
+      "$HOME/Documents"*|"$HOME/Desktop"*|"$HOME/Downloads"*|"$HOME/Library/Mobile Documents"*)
+        echo "✖ VISTAN está en una carpeta protegida por macOS ($ROOT)."
+        echo "  En segundo plano no podría leerla. Muévelo a tu carpeta personal y repite:"
+        echo "    ./atlas/scripts/autostart.sh uninstall && cd ~ && mv \"$(dirname "$ROOT")\" ~/ && cd ~/$(basename "$(dirname "$ROOT")") && ./atlas/scripts/autostart.sh install"
+        exit 1 ;;
+    esac
     # Prepara dependencias e interfaz ahora (con mensajes visibles), no en segundo plano
     echo "▸ Preparando VISTAN…"
     ATLAS_PREPARE_ONLY=1 "$ROOT/scripts/start.sh"

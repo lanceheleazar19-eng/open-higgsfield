@@ -103,7 +103,7 @@ VISTAN vive en tu ordenador; el móvil se conecta a él. La forma segura y recom
 ### Que VISTAN arranque solo (Mac, sin Terminal abierta)
 
 ```bash
-cd ~/Documents/open-higgsfield && ./atlas/scripts/autostart.sh install
+cd ~/open-higgsfield && ./atlas/scripts/autostart.sh install
 ```
 
 VISTAN queda funcionando en segundo plano, arranca solo al encender el Mac y se reinicia si falla.
