@@ -55,4 +55,27 @@ describe("voz con VoiceStudio", () => {
     expect(spoken.join(" ")).toContain("Primera frase.");
     vi.useRealTimers();
   });
+
+  it("si ya empezó a hablar con VoiceStudio, no cambia a otra voz a mitad de respuesta", async () => {
+    vi.useFakeTimers();
+    saveEngine({ engine: "voicestudio" });
+    let n = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => (++n === 1
+      ? Promise.resolve({ ok: true, blob: async () => new Blob(["a"]) } as unknown as Response)
+      : new Promise(() => undefined)));
+    globalThis.URL.createObjectURL = vi.fn(() => "blob:x");
+    globalThis.URL.revokeObjectURL = vi.fn();
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(function (this: HTMLMediaElement) {
+      setTimeout(() => this.onended?.(new Event("ended")), 10);
+      return Promise.resolve();
+    });
+    const spoken: string[] = [];
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      cancel: vi.fn(), getVoices: () => [], speak: (u: { text: string }) => spoken.push(u.text), addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    };
+    speakText("Primera frase completa aquí. " + "Segunda frase bastante larga para que vaya en otro trozo. ".repeat(8));
+    await vi.advanceTimersByTimeAsync(VS_WAIT_MS * 3);
+    expect(spoken).toEqual([]);
+    vi.useRealTimers();
+  });
 });

@@ -84,11 +84,11 @@ test("llamada: escucha, responde, vuelve a escuchar sola y se interrumpe habland
   act(() => { vi.advanceTimersByTime(50); });
   const bg = live().find((r) => r.continuous)!;
   expect(bg).toBeTruthy();
-  act(() => bg.say("espera una cosa", false));
+  act(() => bg.say("espera una cosa más", false));
   expect(result.current.speaking).toBe(false);
   const fg2 = live().find((r) => !r.continuous)!;
   act(() => { fg2.say("pon la reunión a las seis"); fg2.stop(); });
-  expect(onFinal).toHaveBeenLastCalledWith("espera una cosa pon la reunión a las seis");
+  expect(onFinal).toHaveBeenLastCalledWith("espera una cosa más pon la reunión a las seis");
   // Silencio: la llamada sigue y el micrófono se vuelve a abrir solo
   const fg3Before = FakeRec.all.length;
   act(() => { vi.advanceTimersByTime(600); });

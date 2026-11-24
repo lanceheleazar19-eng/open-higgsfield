@@ -261,3 +261,6 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Conversación continua sin pulsar nada; tras un silencio el micrófono se vuelve a abrir mientras dure la llamada.
 - Se interrumpe a VISTAN simplemente hablando (filtro de eco); «eso es todo» o Esc cuelgan.
 - La voz cuenta como «hablando» desde que se encola, para no abrir el micrófono encima de VoiceStudio.
+- Voz estable: una respuesta nunca mezcla dos voces (el cambio al navegador solo ocurre antes de empezar a
+  hablar); en el modo llamada se usa por defecto la voz del navegador (instantánea, ajustable); para interrumpir
+  en llamada hacen falta 4+ palabras que no sean el eco de VISTAN.

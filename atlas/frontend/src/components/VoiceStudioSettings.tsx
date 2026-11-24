@@ -17,7 +17,7 @@ export function VoiceStudioSettings({ sample = SAMPLE }: { sample?: string }) {
   }, []);
   useEffect(check, [check]);
 
-  const update = (p: { engine?: VoiceEngine; vsVoice?: string | null }) => { saveEngine(p); setPref(loadEngine()); vsWarmup(true); };
+  const update = (p: { engine?: VoiceEngine; vsVoice?: string | null; callBrowser?: boolean }) => { saveEngine(p); setPref(loadEngine()); vsWarmup(true); };
   const on = pref.engine === "voicestudio";
 
   return (
@@ -56,6 +56,12 @@ export function VoiceStudioSettings({ sample = SAMPLE }: { sample?: string }) {
               <option key={v.id} value={v.id}>{v.name}{v.type === "profile" ? " · tu perfil" : ""}{v.language ? ` · ${v.language}` : ""}</option>
             ))}
           </select>
+        </label>
+      )}
+      {on && (
+        <label className="check">
+          <input type="checkbox" checked={pref.callBrowser} onChange={(e) => update({ callBrowser: e.target.checked })} />
+          En el modo llamada, usar la voz del navegador (instantánea; VoiceStudio en tu Mac tarda en generar cada frase)
         </label>
       )}
       {on && (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadVoicePrefs, pickVoice, saveVoicePrefs, speechChunks } from "../lib/speech";
-import { usingVoiceStudio, vsEnqueue, vsStop, vsUnlock, vsWarmup } from "../lib/voicestudio";
+import { setCallActive, usingVoiceStudio, vsEnqueue, vsStop, vsUnlock, vsWarmup } from "../lib/voicestudio";
 import { afterWake, isEcho, loadHandsFree, matchWake, saveHandsFree, voiceIntent, type HandsFree } from "../lib/wake";
 
 /* Tipos mínimos de la Web Speech API (no están en lib.dom). */
@@ -163,7 +163,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     if (intent === "stop") { stopSpeaking(); setConv(false); replyPending.current = false; return; }
     if (intent === "end") {
       stopSpeaking(); setConv(false); replyPending.current = false;
-      if (callRef.current) { callRef.current = false; setInCall(false); speak("De acuerdo, hasta luego."); return; }
+      if (callRef.current) { callRef.current = false; setCallActive(false); setInCall(false); speak("De acuerdo, hasta luego."); return; }
       speak("De acuerdo."); return;
     }
     if (intent === "repeat") {
@@ -236,6 +236,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     if (!Ctor) { setError("Este navegador no puede escuchar: usa Chrome, Edge o Safari"); return; }
     vsUnlock();
     callRef.current = true; mutedRef.current = false;
+    setCallActive(true);
     setMutedState(false); setInCall(true); setConv(true);
     denied.current = false;
     beep();
@@ -244,6 +245,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
 
   const endCall = useCallback(() => {
     callRef.current = false;
+    setCallActive(false);
     setInCall(false);
     setConv(false);
     replyPending.current = false;
@@ -306,7 +308,8 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
         const heard = r[0].transcript;
         if (speakingRef.current && isEcho(heard, spokenRef.current)) continue; // es la voz de VISTAN
         // En llamada basta con empezar a hablar para interrumpir (como en una llamada de verdad)
-        if (callRef.current && speakingRef.current && heard.trim().split(/\s+/).length >= 2 && voiceIntent(heard) !== "stop") {
+        // (al menos 4 palabras que no sean lo que VISTAN está diciendo: evita que se corte con su propio eco)
+        if (callRef.current && speakingRef.current && heard.trim().split(/\s+/).length >= 4 && voiceIntent(heard) !== "stop") {
           handled = true;
           stopSpeaking();
           stopBg();

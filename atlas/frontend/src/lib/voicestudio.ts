@@ -10,19 +10,22 @@ export const vsStatus = () => request<VsStatus>("/api/voicestudio/status");
 
 const ENGINE_KEY = "vistan.voice.engine";
 const VS_VOICE_KEY = "vistan.voice.vs_voice";
+const CALL_KEY = "vistan.voice.call_browser";
 export type VoiceEngine = "browser" | "voicestudio";
 
-export function loadEngine(): { engine: VoiceEngine; vsVoice: string | null } {
+export function loadEngine(): { engine: VoiceEngine; vsVoice: string | null; callBrowser: boolean } {
   try {
-    return { engine: localStorage.getItem(ENGINE_KEY) === "voicestudio" ? "voicestudio" : "browser", vsVoice: localStorage.getItem(VS_VOICE_KEY) };
+    return { engine: localStorage.getItem(ENGINE_KEY) === "voicestudio" ? "voicestudio" : "browser", vsVoice: localStorage.getItem(VS_VOICE_KEY),
+      callBrowser: localStorage.getItem(CALL_KEY) !== "0" };
   } catch {
-    return { engine: "browser", vsVoice: null };
+    return { engine: "browser", vsVoice: null, callBrowser: true };
   }
 }
 
-export function saveEngine(p: { engine?: VoiceEngine; vsVoice?: string | null }) {
+export function saveEngine(p: { engine?: VoiceEngine; vsVoice?: string | null; callBrowser?: boolean }) {
   try {
     if (p.engine) localStorage.setItem(ENGINE_KEY, p.engine);
+    if (p.callBrowser !== undefined) localStorage.setItem(CALL_KEY, p.callBrowser ? "1" : "0");
     if (p.vsVoice !== undefined) {
       if (p.vsVoice) localStorage.setItem(VS_VOICE_KEY, p.vsVoice);
       else localStorage.removeItem(VS_VOICE_KEY);
@@ -30,7 +33,14 @@ export function saveEngine(p: { engine?: VoiceEngine; vsVoice?: string | null })
   } catch { /* sin almacenamiento */ }
 }
 
-export const usingVoiceStudio = () => typeof Audio !== "undefined" && loadEngine().engine === "voicestudio";
+/** En llamada se usa, por defecto, la voz del navegador: es instantánea y no se corta. */
+let callActive = false;
+export const setCallActive = (v: boolean) => { callActive = v; };
+export const usingVoiceStudio = () => {
+  if (typeof Audio === "undefined") return false;
+  const e = loadEngine();
+  return e.engine === "voicestudio" && !(callActive && e.callBrowser);
+};
 
 /** Si una frase tarda más que esto, esa respuesta sigue con la voz del navegador (no te deja esperando). */
 export const VS_WAIT_MS = 7000;
@@ -67,6 +77,7 @@ let audio: HTMLAudioElement | null = null;
 const player = () => (audio ??= new Audio());
 let generation = 0;
 let degraded = -1; // respuesta (generation) que ya pasó a la voz del navegador por lentitud o fallo
+let committed = -1; // respuesta que ya empezó a sonar con VoiceStudio: ya no se cambia de voz a mitad
 let tail: Promise<void> = Promise.resolve();
 
 function play(blob: Blob, gen: number): Promise<void> {
@@ -96,10 +107,16 @@ export function vsEnqueue(text: string, rate: number, onStart: () => void, onEnd
   const blob = vsSynth(text, rate, 60000);
   tail = tail.then(async () => {
     // El plazo cuenta desde que le toca sonar (las frases siguientes se generan mientras suena la anterior)
+    // Solo se cambia a la voz del navegador ANTES de empezar a hablar: nunca dos voces en la misma respuesta
     const b = degraded === gen ? null
-      : await Promise.race([blob, new Promise<null>((r) => setTimeout(() => r(null), VS_WAIT_MS))]);
+      : committed === gen ? await blob
+        : await Promise.race([blob, new Promise<null>((r) => setTimeout(() => r(null), VS_WAIT_MS))]);
     if (gen !== generation) return;
-    if (!b) { degraded = gen; fallback(); return; }
+    if (!b) {
+      if (committed === gen) { onEnd(); return; } // fallo raro a mitad: se salta la frase, sin cambiar de voz
+      degraded = gen; fallback(); return;
+    }
+    committed = gen;
     onStart();
     await play(b, gen);
     onEnd();
