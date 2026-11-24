@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { speakText } from "../hooks/useVoice";
-import { saveEngine } from "../lib/voicestudio";
+import { saveEngine, VS_WAIT_MS } from "../lib/voicestudio";
 
 const flush = () => new Promise((r) => setTimeout(r, 20));
 
@@ -39,5 +39,20 @@ describe("voz con VoiceStudio", () => {
     speakText("Respaldo.");
     await flush(); await flush();
     expect(spoken).toEqual(["Respaldo."]);
+  });
+
+  it("si VoiceStudio tarda demasiado, esa respuesta sigue con la voz del navegador", async () => {
+    vi.useFakeTimers();
+    saveEngine({ engine: "voicestudio" });
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => new Promise(() => undefined));
+    const spoken: string[] = [];
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      cancel: vi.fn(), getVoices: () => [{ name: "Mónica", lang: "es-ES", voiceURI: "m", localService: true }],
+      speak: (u: { text: string }) => spoken.push(u.text), addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    };
+    speakText("Primera frase. Segunda frase.");
+    await vi.advanceTimersByTimeAsync(VS_WAIT_MS + 500);
+    expect(spoken.join(" ")).toContain("Primera frase.");
+    vi.useRealTimers();
   });
 });

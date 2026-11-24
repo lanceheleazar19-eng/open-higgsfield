@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { speakText } from "../hooks/useVoice";
-import { loadEngine, saveEngine, vsStatus, vsStop, type VoiceEngine, type VsStatus } from "../lib/voicestudio";
+import { loadEngine, saveEngine, vsStatus, vsStop, vsWarmup, VS_WAIT_MS, type VoiceEngine, type VsStatus } from "../lib/voicestudio";
 
 const SAMPLE = "Hola, soy VISTAN. Esta es mi voz con VoiceStudio, generada en tu propio ordenador.";
 
@@ -17,7 +17,7 @@ export function VoiceStudioSettings({ sample = SAMPLE }: { sample?: string }) {
   }, []);
   useEffect(check, [check]);
 
-  const update = (p: { engine?: VoiceEngine; vsVoice?: string | null }) => { saveEngine(p); setPref(loadEngine()); };
+  const update = (p: { engine?: VoiceEngine; vsVoice?: string | null }) => { saveEngine(p); setPref(loadEngine()); vsWarmup(true); };
   const on = pref.engine === "voicestudio";
 
   return (
@@ -38,6 +38,15 @@ export function VoiceStudioSettings({ sample = SAMPLE }: { sample?: string }) {
         {!checking && st && !st.reachable && st.error ? ` (${st.error})` : ""}
         {" "}<button type="button" className="mini-btn ghost" onClick={check} disabled={checking}>Comprobar</button>
       </p>
+      {on && st?.reachable && (
+        <p className="muted small">
+          Tiempo real por frase: {st.synthesis.avg_ms != null
+            ? <strong>{(st.synthesis.avg_ms / 1000).toFixed(1)} s de media · última {((st.synthesis.last_ms ?? 0) / 1000).toFixed(1)} s</strong>
+            : "N/D (aún no ha generado ninguna)"}
+          {st.synthesis.errors ? ` · ${st.synthesis.errors} fallos` : ""}.
+          {" "}Si una frase tarda más de {VS_WAIT_MS / 1000} s, esa respuesta sigue con la voz del navegador para no dejarte esperando.
+        </p>
+      )}
       {on && st?.reachable && (
         <label>
           <span>Voz de VoiceStudio</span>

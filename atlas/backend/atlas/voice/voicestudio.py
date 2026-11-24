@@ -23,6 +23,21 @@ class VoiceStudioError(RuntimeError):
     pass
 
 
+# Tiempos reales de síntesis (segundos por frase) medidos en esta sesión del núcleo
+_timings: list[dict] = []
+
+
+def _record(chars: int, ms: int, ok: bool) -> None:
+    _timings.append({"chars": chars, "ms": ms, "ok": ok, "at": time.time()})
+    del _timings[:-30]
+
+
+def timings() -> dict:
+    ok = [t["ms"] for t in _timings if t["ok"]]
+    return {"count": len(_timings), "errors": sum(1 for t in _timings if not t["ok"]),
+            "last_ms": ok[-1] if ok else None, "avg_ms": round(sum(ok) / len(ok)) if ok else None}
+
+
 def _base() -> str:
     return get_settings().voicestudio_url.rstrip("/")
 
@@ -43,7 +58,7 @@ def status(timeout: float = 1.5) -> dict:
     """Estado real: responde o no, latencia medida y voces que expone VoiceStudio."""
     url = _base()
     out: dict = {"url": url, "local": is_local(url), "reachable": False, "ping_ms": None,
-                 "protocol": None, "voices": [], "error": None}
+                 "protocol": None, "voices": [], "error": None, "synthesis": timings()}
     t0 = time.perf_counter()
     try:
         r = httpx.get(f"{url}/.well-known/voicestudio-speech", headers=_headers(), timeout=timeout)
@@ -85,10 +100,13 @@ def speak(text: str, voice: str | None = None, speed: float = 1.0, fmt: str = "m
                   "speed": max(0.25, min(4.0, float(speed)))}
     if language:
         body["language"] = language
+    t0 = time.perf_counter()
     try:
         r = httpx.post(f"{_base()}/v1/audio/speech", json=body, headers=_headers(), timeout=timeout)
     except httpx.HTTPError as exc:
+        _record(len(text), round((time.perf_counter() - t0) * 1000), False)
         raise VoiceStudioError("VoiceStudio no está abierto o no responde") from exc
+    _record(len(text), round((time.perf_counter() - t0) * 1000), r.status_code < 400)
     if r.status_code >= 400:
         detail = ""
         try:

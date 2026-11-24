@@ -3,7 +3,8 @@
 import { request } from "../api/client";
 
 export interface VsVoice { id: string; name: string; type: string | null; language: string | null }
-export interface VsStatus { url: string; local: boolean; reachable: boolean; ping_ms: number | null; protocol: string | null; voices: VsVoice[]; error: string | null }
+export interface VsStatus { url: string; local: boolean; reachable: boolean; ping_ms: number | null; protocol: string | null; voices: VsVoice[]; error: string | null;
+  synthesis: { count: number; errors: number; last_ms: number | null; avg_ms: number | null } }
 
 export const vsStatus = () => request<VsStatus>("/api/voicestudio/status");
 
@@ -31,24 +32,41 @@ export function saveEngine(p: { engine?: VoiceEngine; vsVoice?: string | null })
 
 export const usingVoiceStudio = () => typeof Audio !== "undefined" && loadEngine().engine === "voicestudio";
 
-/** Pide el audio a VISTAN (que lo pide a VoiceStudio). null si no está disponible. */
-export async function vsSynth(text: string, rate: number): Promise<Blob | null> {
+/** Si una frase tarda más que esto, esa respuesta sigue con la voz del navegador (no te deja esperando). */
+export const VS_WAIT_MS = 7000;
+
+/** Pide el audio a VISTAN (que lo pide a VoiceStudio). null si no está disponible o tarda demasiado. */
+export async function vsSynth(text: string, rate: number, waitMs = VS_WAIT_MS): Promise<Blob | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), waitMs);
   try {
     const res = await fetch("/api/voicestudio/speak", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, voice: loadEngine().vsVoice, speed: Math.max(0.25, Math.min(4, rate)), language: "es" }),
+      signal: ctrl.signal,
     });
     if (!res.ok) return null;
     return await res.blob();
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+/** Carga el modelo de VoiceStudio en memoria antes de la primera respuesta (sin reproducir nada). */
+let warmed = false;
+export function vsWarmup(force = false) {
+  if ((warmed && !force) || !usingVoiceStudio()) return;
+  warmed = true;
+  void vsSynth("Hola.", 1, 120000);
 }
 
 let audio: HTMLAudioElement | null = null;
 const player = () => (audio ??= new Audio());
 let generation = 0;
+let degraded = -1; // respuesta (generation) que ya pasó a la voz del navegador por lentitud o fallo
 let tail: Promise<void> = Promise.resolve();
 
 function play(blob: Blob, gen: number): Promise<void> {
@@ -74,11 +92,14 @@ export function vsStop() {
 /** Añade una frase a la cola. El audio se pide en cuanto llega (en paralelo) y suena en orden. */
 export function vsEnqueue(text: string, rate: number, onStart: () => void, onEnd: () => void, fallback: () => void) {
   const gen = generation;
-  const blob = vsSynth(text, rate);
+  if (degraded === gen) { tail = tail.then(() => { if (gen === generation) fallback(); }); return; }
+  const blob = vsSynth(text, rate, 60000);
   tail = tail.then(async () => {
-    const b = await blob;
+    // El plazo cuenta desde que le toca sonar (las frases siguientes se generan mientras suena la anterior)
+    const b = degraded === gen ? null
+      : await Promise.race([blob, new Promise<null>((r) => setTimeout(() => r(null), VS_WAIT_MS))]);
     if (gen !== generation) return;
-    if (!b) { fallback(); return; }
+    if (!b) { degraded = gen; fallback(); return; }
     onStart();
     await play(b, gen);
     onEnd();

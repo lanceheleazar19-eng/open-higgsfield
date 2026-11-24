@@ -63,7 +63,9 @@ class OllamaProvider(LLMProvider):
     def complete_json(self, model: str, messages: list[dict]) -> dict:
         """`messages` puede incluir "images": [base64] (modelos de visión)."""
         payload = {"model": model, "messages": messages, "stream": False, "format": "json",
-                   "options": {"temperature": 0.1, "num_ctx": 4096}, "keep_alive": "15m"}
+                   "options": {"temperature": 0.1, "num_ctx": 4096},
+                   # Los modelos de visión pesan mucho: se liberan enseguida para no frenar el chat ni la voz
+                   "keep_alive": "1m" if any(m.get("images") for m in messages) else "15m"}
         try:
             r = httpx.post(f"{self.base_url}/api/chat", json=payload, timeout=httpx.Timeout(self.timeout, connect=3.0))
         except httpx.HTTPError as exc:

@@ -251,3 +251,6 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Estado real en la telemetría del HUD (conectado + latencia + nº de voces, o «no abierto»).
 - Variables: `ATLAS_VOICESTUDIO_URL` (por defecto local) y `ATLAS_VOICESTUDIO_API_KEY` (solo si está en otro
   equipo; la clave nunca viaja por HTTP sin cifrar fuera del propio equipo).
+- Rendimiento: tiempo real de síntesis por frase (Configuración y telemetría); si una frase tarda más de 7 s,
+  esa respuesta sigue con la voz del navegador; el modelo de voz se precarga al abrir VISTAN; los modelos de
+  visión de Ollama se liberan al minuto para dejar memoria al chat y a la voz.

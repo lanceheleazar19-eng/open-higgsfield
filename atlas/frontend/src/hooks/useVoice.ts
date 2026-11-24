@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { loadVoicePrefs, pickVoice, saveVoicePrefs, speechChunks } from "../lib/speech";
-import { usingVoiceStudio, vsEnqueue, vsStop, vsUnlock } from "../lib/voicestudio";
+import { usingVoiceStudio, vsEnqueue, vsStop, vsUnlock, vsWarmup } from "../lib/voicestudio";
 import { afterWake, isEcho, loadHandsFree, matchWake, saveHandsFree, voiceIntent, type HandsFree } from "../lib/wake";
 
 /* Tipos mínimos de la Web Speech API (no están en lib.dom). */
@@ -92,6 +92,8 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const restarts = useRef<number[]>([]);
 
   const setConv = (v: boolean) => { conversingRef.current = v; setConversing(v); };
+
+  useEffect(() => { vsWarmup(); }, []);
 
   useEffect(() => {
     const sync = () => setHF(loadHandsFree());
