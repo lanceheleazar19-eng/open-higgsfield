@@ -254,3 +254,10 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Rendimiento: tiempo real de síntesis por frase (Configuración y telemetría); si una frase tarda más de 7 s,
   esa respuesta sigue con la voz del navegador; el modelo de voz se precarga al abrir VISTAN; los modelos de
   visión de Ollama se liberan al minuto para dejar memoria al chat y a la voz.
+
+## VISTAN · modo llamada
+- Botón de teléfono en la consola: pantalla completa tipo llamada con un orbe que refleja el estado real
+  (escuchando / pensando / hablando / silenciado), subtítulos en vivo, silenciar, interrumpir y colgar.
+- Conversación continua sin pulsar nada; tras un silencio el micrófono se vuelve a abrir mientras dure la llamada.
+- Se interrumpe a VISTAN simplemente hablando (filtro de eco); «eso es todo» o Esc cuelgan.
+- La voz cuenta como «hablando» desde que se encola, para no abrir el micrófono encima de VoiceStudio.

@@ -12,6 +12,7 @@ import { BootScreen, alreadyBooted, welcomeEnabled } from "../components/BootScr
 import { HudGoals, HudLeft, HudProjects, HudRight, HudToday } from "../components/hud/Panels";
 import { useTelemetry } from "../components/hud/Hud";
 import { useVoice } from "../hooks/useVoice";
+import { CallOverlay } from "../components/control/CallOverlay";
 import { formatMoney, greetingFor } from "../lib/format";
 import { v4, type CommandCenter as CommandCenterData } from "../api/v4";
 
@@ -352,6 +353,10 @@ export function ControlCenter() {
   return (
     <div className="control-page hud-page">
       {booting && <BootScreen health={health} onStart={(v) => void startAtlas(v)} />}
+      {voice.inCall && (
+        <CallOverlay voice={voice} busy={busy} reply={log[log.length - 1]?.reply ?? ""}
+          onHangUp={() => { abortRef.current?.abort(); voice.endCall(); }} />
+      )}
       <div className={`hud ${offline ? "is-offline" : ""}`}>
         <HudLeft t={tele.data} hist={tele.hist} error={tele.error || offline} state={offline ? "error" : coreState} />
 

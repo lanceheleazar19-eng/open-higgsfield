@@ -60,6 +60,10 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           <Icon name="mic" size={22} />
           {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /></span>}
         </button>
+        <button type="button" className="bar-btn" onClick={voice.startCall} disabled={offline || !voice.canListen}
+          aria-label="Llamar a VISTAN" title={voice.canListen ? "Llamada: habla con VISTAN de forma continua, como en una llamada" : "Este navegador no puede escuchar"}>
+          <Icon name="phone" size={18} />
+        </button>
         <button type="button" className="bar-btn" onClick={() => photoRef.current?.click()} disabled={busy || offline}
           aria-label="Foto de comida" title="Foto de tu comida: VISTAN calcula calorías y proteína">
           <Icon name="camera" size={18} />

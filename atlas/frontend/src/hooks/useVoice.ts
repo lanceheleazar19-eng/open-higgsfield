@@ -45,6 +45,12 @@ export interface Voice {
   endConversation: () => void;
   /** Empieza una respuesta nueva (para «repite» y el filtro de eco). */
   beginReply: () => void;
+  /** Modo llamada: conversación de voz continua a pantalla completa, se puede interrumpir hablando. */
+  inCall: boolean;
+  startCall: () => void;
+  endCall: () => void;
+  muted: boolean;
+  setMuted: (m: boolean) => void;
 }
 
 const LANG = "es-ES";
@@ -82,6 +88,11 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const [handsFree, setHF] = useState<HandsFree>(loadHandsFree);
   const [wakeActive, setWakeActive] = useState(false);
   const [conversing, setConversing] = useState(false);
+  const [inCall, setInCall] = useState(false);
+  const [muted, setMutedState] = useState(false);
+  const callRef = useRef(false);
+  const mutedRef = useRef(false);
+  const speechGen = useRef(0); // invalida finales de voz pendientes al interrumpir
   const [bgTick, setBgTick] = useState(0);
   const conversingRef = useRef(false);
   const replyPending = useRef(false);
@@ -111,7 +122,10 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   }, [Ctor]);
 
   const pending = useRef(0);
+  const outstanding = useRef(0); // trozos de respuesta encolados que aún no han terminado de sonar
   const stopSpeaking = useCallback(() => {
+    speechGen.current += 1;
+    outstanding.current = 0;
     vsStop();
     window.speechSynthesis?.cancel();
     pending.current = 0;
@@ -119,18 +133,25 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   }, [canSpeak]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const speak = useCallback((text: string) => {
-    if (!canSpeak) return;
+    if (!canSpeak || !text.trim()) return;
     pending.current = 0;
     spokenRef.current = text;
-    speakText(text, () => setSpeaking(true), () => setSpeaking(false));
+    const g = ++speechGen.current;
+    outstanding.current = 0;
+    setSpeaking(true); // desde ya: la voz puede tardar en empezar (VoiceStudio) y no debe abrirse el micro encima
+    speakText(text, undefined, () => { if (g === speechGen.current) setSpeaking(false); });
   }, [canSpeak]);
 
   const enqueue = useCallback((text: string) => {
     if (!canSpeak || !text.trim()) return;
     spokenRef.current += " " + text;
-    queueSpeech(text, () => { pending.current += 1; setSpeaking(true); }, () => {
-      pending.current = Math.max(0, pending.current - 1);
-      if (pending.current === 0) setSpeaking(false);
+    const g = speechGen.current;
+    outstanding.current += 1;
+    setSpeaking(true);
+    queueSpeech(text, () => {
+      if (g !== speechGen.current) return;
+      outstanding.current = Math.max(0, outstanding.current - 1);
+      if (outstanding.current === 0) setSpeaking(false);
     });
   }, [canSpeak]);
 
@@ -140,7 +161,11 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     if (!text) return;
     const intent = voiceIntent(text);
     if (intent === "stop") { stopSpeaking(); setConv(false); replyPending.current = false; return; }
-    if (intent === "end") { stopSpeaking(); setConv(false); replyPending.current = false; speak("De acuerdo."); return; }
+    if (intent === "end") {
+      stopSpeaking(); setConv(false); replyPending.current = false;
+      if (callRef.current) { callRef.current = false; setInCall(false); speak("De acuerdo, hasta luego."); return; }
+      speak("De acuerdo."); return;
+    }
     if (intent === "repeat") {
       const last = spokenRef.current.trim();
       if (last) { replyPending.current = conversingRef.current; speak(last); }
@@ -166,12 +191,12 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     if (r) { r.onend = null; r.onresult = null; r.onerror = null; r.abort(); }
   }, []);
 
-  const listen = useCallback((followUp = false) => {
+  const listen = useCallback((followUp = false, prefix = "") => {
     if (!Ctor || recRef.current) return;
     stopBg(); // solo puede haber un reconocedor activo
     stopSpeaking(); // interrumpe a VISTAN si estaba hablando
     const rec = make(false)!;
-    let finalText = "";
+    let finalText = prefix;
     rec.onresult = (e) => {
       let live = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -194,7 +219,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
       const lead = /^\W*(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\W+)?(?:[vb]i[sz]\s?t[aá]n|h?[aá]t\s?l[aá]s)(?![a-zñ])/i.test(finalText);
       const said = (lead ? afterWake(finalText) ?? "" : finalText).trim();
       if (said) handleUtterance(said);
-      else if (followUp) setConv(false); // silencio tras la respuesta → vuelve a esperar «VISTAN»
+      else if (followUp && !callRef.current) setConv(false); // silencio tras la respuesta → vuelve a esperar «VISTAN»
       setBgTick((t) => t + 1);
     };
     recRef.current = rec;
@@ -206,6 +231,31 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const stopListening = useCallback(() => recRef.current?.stop(), []);
 
   const endConversation = useCallback(() => { setConv(false); replyPending.current = false; }, []);
+
+  const startCall = useCallback(() => {
+    if (!Ctor) { setError("Este navegador no puede escuchar: usa Chrome, Edge o Safari"); return; }
+    vsUnlock();
+    callRef.current = true; mutedRef.current = false;
+    setMutedState(false); setInCall(true); setConv(true);
+    denied.current = false;
+    beep();
+    listen(true);
+  }, [Ctor, listen]);
+
+  const endCall = useCallback(() => {
+    callRef.current = false;
+    setInCall(false);
+    setConv(false);
+    replyPending.current = false;
+    recRef.current?.abort();
+    stopSpeaking();
+  }, [stopSpeaking]);
+
+  const setMuted = useCallback((m: boolean) => {
+    mutedRef.current = m;
+    setMutedState(m);
+    if (m) recRef.current?.abort();
+  }, []);
   const beginReply = useCallback(() => { spokenRef.current = ""; }, []);
 
   const setHandsFree = useCallback((p: Partial<HandsFree>) => {
@@ -224,8 +274,19 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     return () => clearTimeout(t);
   }, [handsFree.continuous, conversing, busy, speaking, listening, listen]);
 
+  // Llamada: mientras VISTAN no piensa ni habla, el micrófono vuelve a abrirse solo (también tras un silencio)
+  useEffect(() => {
+    if (!inCall || muted || busy || speaking || listening || denied.current) return;
+    const t = setTimeout(() => {
+      if (!callRef.current || mutedRef.current || speakingRef.current || recRef.current) return;
+      replyPending.current = false;
+      listen(true);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [inCall, muted, busy, speaking, listening, listen, bgTick]);
+
   // Escucha en segundo plano: palabra de activación y poder interrumpir a VISTAN hablando
-  const bgWanted = !!Ctor && !denied.current && !listening && (handsFree.wake || (speaking && conversing));
+  const bgWanted = !!Ctor && !denied.current && !listening && (handsFree.wake || (speaking && (conversing || (inCall && !muted))));
   useEffect(() => {
     if (!bgWanted) { stopBg(); return; }
     if (bgRef.current || document.visibilityState === "hidden") return;
@@ -244,6 +305,14 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
         const r = e.results[i];
         const heard = r[0].transcript;
         if (speakingRef.current && isEcho(heard, spokenRef.current)) continue; // es la voz de VISTAN
+        // En llamada basta con empezar a hablar para interrumpir (como en una llamada de verdad)
+        if (callRef.current && speakingRef.current && heard.trim().split(/\s+/).length >= 2 && voiceIntent(heard) !== "stop") {
+          handled = true;
+          stopSpeaking();
+          stopBg();
+          listen(false, heard + " ");
+          return;
+        }
         const w = handsFree.wake || speakingRef.current ? matchWake(heard) : null;
         const stopWord = speakingRef.current && voiceIntent(heard) === "stop";
         const words = w ? w.rest.split(" ").filter(Boolean).length : 0;
@@ -306,7 +375,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
 
   return {
     canListen: !!Ctor, canSpeak, listening, speaking, interim, error, listen: () => listen(false), stopListening, speak, enqueue, stopSpeaking,
-    handsFree, setHandsFree, wakeActive, conversing, endConversation, beginReply,
+    handsFree, setHandsFree, wakeActive, conversing, endConversation, beginReply, inCall, startCall, endCall, muted, setMuted,
   };
 }
 
@@ -404,8 +473,13 @@ export function useSystemVoices(): SpeechSynthesisVoice[] {
 /** Encola cada trozo como locución independiente; onStart/onEnd se llaman por trozo. */
 let queueTail: Promise<unknown> = Promise.resolve();
 
-function queueSpeech(text: string, onChunkStart: () => void, onChunkEnd: () => void) {
-  if (usingVoiceStudio()) {
+function queueSpeech(text: string, onDone: () => void) {
+  const vs = usingVoiceStudio();
+  let left = speechChunks(text, vs ? 400 : 180).length;
+  if (!left) { onDone(); return; }
+  const onChunkStart = () => undefined;
+  const onChunkEnd = () => { left -= 1; if (left === 0) onDone(); };
+  if (vs) {
     const rate = loadVoicePrefs().rate;
     for (const chunk of speechChunks(text, 400)) {
       vsEnqueue(chunk, rate, onChunkStart, onChunkEnd, () => browserSpeak(chunk, onChunkStart, onChunkEnd));

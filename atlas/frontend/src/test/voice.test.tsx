@@ -60,3 +60,44 @@ test("con «Oye VISTAN» apagado no se escucha en segundo plano", () => {
   expect(result.current.wakeActive).toBe(false);
   expect(live()).toHaveLength(0);
 });
+
+test("llamada: escucha, responde, vuelve a escuchar sola y se interrumpe hablando", () => {
+  vi.useFakeTimers();
+  localStorage.setItem("atlas.handsfree", JSON.stringify({ wake: false, continuous: false }));
+  const utters: { text: string; onend?: () => void }[] = [];
+  vi.stubGlobal("speechSynthesis", { speak: (u: { text: string }) => utters.push(u), cancel: vi.fn(),
+    getVoices: () => [{ name: "Mónica", lang: "es-ES", voiceURI: "m", localService: true }], addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  const onFinal = vi.fn();
+  let busy = false;
+  const { result, rerender } = renderHook(() => useVoice(onFinal, busy));
+  act(() => result.current.startCall());
+  expect(result.current.inCall).toBe(true);
+  const fg = live().find((r) => !r.continuous)!;
+  act(() => { fg.say("¿qué tengo hoy?"); fg.stop(); });
+  expect(onFinal).toHaveBeenCalledWith("¿qué tengo hoy?");
+  // VISTAN responde (la voz cuenta como «hablando» desde que se encola)
+  busy = true; rerender();
+  act(() => result.current.enqueue("Tienes dos tareas pendientes y una reunión a las cinco de la tarde."));
+  busy = false; rerender();
+  expect(result.current.speaking).toBe(true);
+  // Interrumpir hablando (no hace falta decir «VISTAN»)
+  act(() => { vi.advanceTimersByTime(50); });
+  const bg = live().find((r) => r.continuous)!;
+  expect(bg).toBeTruthy();
+  act(() => bg.say("espera una cosa", false));
+  expect(result.current.speaking).toBe(false);
+  const fg2 = live().find((r) => !r.continuous)!;
+  act(() => { fg2.say("pon la reunión a las seis"); fg2.stop(); });
+  expect(onFinal).toHaveBeenLastCalledWith("espera una cosa pon la reunión a las seis");
+  // Silencio: la llamada sigue y el micrófono se vuelve a abrir solo
+  const fg3Before = FakeRec.all.length;
+  act(() => { vi.advanceTimersByTime(600); });
+  const fg3 = live().find((r) => !r.continuous);
+  if (fg3) act(() => fg3.stop());
+  act(() => { vi.advanceTimersByTime(600); });
+  expect(FakeRec.all.length).toBeGreaterThan(fg3Before);
+  expect(result.current.inCall).toBe(true);
+  act(() => result.current.endCall());
+  expect(result.current.inCall).toBe(false);
+  vi.useRealTimers();
+});
