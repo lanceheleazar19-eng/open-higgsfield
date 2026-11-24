@@ -50,7 +50,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
     setText("");
   }
 
-  const micLabel = !voice.canListen ? "Micrófono no disponible en este navegador" : voice.listening ? "Dejar de escuchar" : "Hablar con ATLAS";
+  const micLabel = !voice.canListen ? "Micrófono no disponible en este navegador" : voice.listening ? "Dejar de escuchar" : "Hablar con VISTAN";
 
   return (
     <div className={`command ${voice.listening ? "is-listening" : ""}`}>
@@ -61,7 +61,7 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           {voice.listening && <span className="mic-waves" aria-hidden="true"><i /><i /><i /></span>}
         </button>
         <button type="button" className="bar-btn" onClick={() => photoRef.current?.click()} disabled={busy || offline}
-          aria-label="Foto de comida" title="Foto de tu comida: ATLAS calcula calorías y proteína">
+          aria-label="Foto de comida" title="Foto de tu comida: VISTAN calcula calorías y proteína">
           <Icon name="camera" size={18} />
         </button>
         <input ref={photoRef} type="file" accept="image/*" hidden aria-label="Elegir foto de comida"
@@ -73,8 +73,8 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
           ref={inputRef}
           value={voice.listening ? voice.interim : text}
           onChange={(e) => setText(e.target.value)}
-          placeholder={voice.listening ? "Escuchando…" : "Pregunta a ATLAS…"}
-          aria-label="Mensaje para ATLAS"
+          placeholder={voice.listening ? "Escuchando…" : "Pregunta a VISTAN…"}
+          aria-label="Mensaje para VISTAN"
           maxLength={2000}
           readOnly={voice.listening}
         />
@@ -101,12 +101,12 @@ export function CommandBar({ busy, offline, onStop, voice, speakReplies, onToggl
       </form>
       <div className="console-foot">
         <span className="listen-state"><i className={voice.listening ? "on" : ""} aria-hidden="true" />
-          {voice.listening ? "Escuchando…" : busy ? "Procesando…" : voice.speaking ? (voice.conversing ? "Hablando… (di «para» o «ATLAS» para interrumpir)" : "Hablando…") : voice.wakeActive ? "Di «ATLAS»…" : "En espera"}</span>
+          {voice.listening ? "Escuchando…" : busy ? "Procesando…" : voice.speaking ? (voice.conversing ? "Hablando… (di «para» o «VISTAN» para interrumpir)" : "Hablando…") : voice.wakeActive ? "Di «VISTAN»…" : "En espera"}</span>
         {voice.canListen && (
           <button type="button" className={`chip ${voice.handsFree.wake ? "on" : ""}`} aria-pressed={voice.handsFree.wake} disabled={offline}
-            title="Escucha la palabra «ATLAS» mientras esta pestaña está abierta"
+            title="Escucha la palabra «VISTAN» mientras esta pestaña está abierta"
             onClick={() => voice.setHandsFree({ wake: !voice.handsFree.wake })}>
-            <Icon name="mic" size={14} /> Hola ATLAS: {voice.handsFree.wake ? "activo" : "apagado"}
+            <Icon name="mic" size={14} /> Hola VISTAN: {voice.handsFree.wake ? "activo" : "apagado"}
           </button>
         )}
         <div className="quick" role="group" aria-label="Comandos rápidos">

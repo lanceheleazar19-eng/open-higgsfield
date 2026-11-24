@@ -79,7 +79,7 @@ def parse_meal_text(text: str, foods: list[Food]) -> list[dict]:
 
 
 MEAL_TRIGGER = re.compile(
-    r"^(?:atlas[,:\s]+)?(?:hoy\s+)?(?:he\s+(?P<verb>desayunado|comido|almorzado|merendado|cenado|tomado|picado)|"
+    r"^(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:hoy\s+)?(?:he\s+(?P<verb>desayunado|comido|almorzado|merendado|cenado|tomado|picado)|"
     r"(?P<label>desayuno|comida|almuerzo|merienda|cena|snack)\s*:)\s*(?P<body>.+)$", re.IGNORECASE | re.DOTALL)
 VERB_MEAL = {"desayunado": "desayuno", "comido": "comida", "almorzado": "comida", "merendado": "merienda",
              "cenado": "cena", "tomado": None, "picado": "snack"}

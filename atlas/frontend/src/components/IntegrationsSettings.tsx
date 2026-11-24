@@ -64,19 +64,19 @@ export function IntegrationsSettings() {
             userLabel="Tu dirección de Gmail" onChange={() => void st.reload()} steps={
               <ol className="steps">
                 <li>Activa la <strong>verificación en dos pasos</strong> en myaccount.google.com → Seguridad.</li>
-                <li>Abre <strong>myaccount.google.com/apppasswords</strong>, escribe «ATLAS» y pulsa Crear.</li>
+                <li>Abre <strong>myaccount.google.com/apppasswords</strong>, escribe «VISTAN» y pulsa Crear.</li>
                 <li>Copia la contraseña de 16 letras y pégala aquí.</li>
               </ol>} />
           <Connector name="icloud" title="Calendario de iCloud" connected={d.icloud.connected} account={d.icloud.user} lastSync={d.icloud.last_sync}
             userLabel="Tu Apple ID (correo)" onChange={() => void st.reload()} steps={
               <ol className="steps">
                 <li>Entra en <strong>account.apple.com</strong> → Inicio de sesión y seguridad.</li>
-                <li>Pulsa <strong>Contraseñas específicas de app</strong> → «+», escribe «ATLAS».</li>
+                <li>Pulsa <strong>Contraseñas específicas de app</strong> → «+», escribe «VISTAN».</li>
                 <li>Copia la contraseña (xxxx-xxxx-xxxx-xxxx) y pégala aquí.</li>
               </ol>} />
         </div>
       )}
-      <p className="muted small">ATLAS solo lee tu correo (asunto, remitente y un extracto) para avisarte de lo importante; nunca envía ni borra. Las contraseñas se guardan en el Llavero de tu Mac. Se sincroniza cada 30 minutos mientras ATLAS está abierto.</p>
+      <p className="muted small">VISTAN solo lee tu correo (asunto, remitente y un extracto) para avisarte de lo importante; nunca envía ni borra. Las contraseñas se guardan en el Llavero de tu Mac. Se sincroniza cada 30 minutos mientras VISTAN está abierto.</p>
     </Panel>
   );
 }

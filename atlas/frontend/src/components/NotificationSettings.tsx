@@ -9,12 +9,12 @@ export function NotificationSettings() {
   async function ask() {
     const r = await Notification.requestPermission();
     setPerm(r);
-    if (r === "granted") new Notification("ATLAS", { body: "Notificaciones activadas. Así te avisaré de tus recordatorios." });
+    if (r === "granted") new Notification("VISTAN", { body: "Notificaciones activadas. Así te avisaré de tus recordatorios." });
   }
 
   return (
     <Panel title="Notificaciones">
-      <p className="muted small">Los recordatorios siempre aparecen dentro de ATLAS. Con este permiso también saldrán como notificación del sistema aunque estés en otra pestaña (ATLAS debe estar abierto).</p>
+      <p className="muted small">Los recordatorios siempre aparecen dentro de VISTAN. Con este permiso también saldrán como notificación del sistema aunque estés en otra pestaña (VISTAN debe estar abierto).</p>
       {perm === "unsupported" && <p className="muted">Este navegador no admite notificaciones.</p>}
       {perm === "granted" && <p className="pos">Activadas ✓</p>}
       {perm === "denied" && <p className="callout">Bloqueadas por el navegador. Actívalas en el candado de la barra de direcciones → Notificaciones → Permitir.</p>}

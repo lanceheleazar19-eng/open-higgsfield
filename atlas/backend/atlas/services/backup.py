@@ -1,4 +1,4 @@
-"""Copias de seguridad de la base de datos (API de backup de SQLite, coherente aunque ATLAS esté en uso)
+"""Copias de seguridad de la base de datos (API de backup de SQLite, coherente aunque VISTAN esté en uso)
 y exportación completa de tus datos a JSON."""
 
 import json
@@ -58,7 +58,7 @@ def _jsonable(v):  # noqa: ANN001, ANN202
 
 def export_all(db: Session) -> dict:
     """Todas tus tablas (sin índices internos) en un único JSON. Las credenciales NO están en la base de datos."""
-    out: dict = {"exported_at": datetime.now().isoformat(), "app": "ATLAS", "tables": {}}
+    out: dict = {"exported_at": datetime.now().isoformat(), "app": "VISTAN", "tables": {}}
     insp = inspect(db.get_bind())
     for t in insp.get_table_names():
         if t in SKIP_EXPORT or t.endswith("_fts") or "_fts_" in t:

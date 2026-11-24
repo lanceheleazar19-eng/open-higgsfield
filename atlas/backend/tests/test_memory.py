@@ -20,7 +20,7 @@ def _chat(client, text, cid=None):
 # ---------- lenguaje natural ----------
 
 def test_parse_command_variants():
-    assert mem.parse_command("ATLAS, recuerda que prefiero entrenar por la mañana") == (
+    assert mem.parse_command("VISTAN, recuerda que prefiero entrenar por la mañana") == (
         "remember", "Prefiero entrenar por la mañana")
     assert mem.parse_command("Recuerda: mi objetivo es ahorrar 5000 €")[0] == "remember"
     assert mem.parse_command("no olvides que el viernes viene mi madre")[1] == "El viernes viene mi madre"
@@ -97,7 +97,7 @@ def test_naive_expiry_rejected(client):
 # ---------- chat: órdenes, persistencia, contexto ----------
 
 def test_remember_and_forget_through_chat(client):
-    ev = _chat(client, "ATLAS, recuerda que prefiero entrenar por la mañana")
+    ev = _chat(client, "VISTAN, recuerda que prefiero entrenar por la mañana")
     cid = ev[0]["conversation_id"]
     saved = next(e for e in ev if e["type"] == "memory")
     assert saved["action"] == "saved" and saved["memory"]["kind"] == "preference"
@@ -144,7 +144,7 @@ def test_memory_and_past_conversations_reach_the_model(ollama, client, session):
     session.commit()
     _chat(client, "¿Qué decidimos sobre la tienda online la semana pasada?")
     system = ollama.requests[-1]["messages"][0]["content"]
-    assert "MEMORIA DE ATLAS" in system
+    assert "MEMORIA DE VISTAN" in system
     assert "Prefiero respuestas muy breves" in system  # perfil siempre presente
     assert "lanzar la tienda online en enero" in system  # recuerdo relevante
     assert "decidimos usar Shopify" in system  # conversación anterior encontrada

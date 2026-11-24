@@ -39,7 +39,7 @@ export function Calendar() {
       <header className="page-head">
         <p className="eyebrow">Fase 8 · activo</p>
         <h1><Icon name="calendar" size={26} /> Calendario</h1>
-        <p className="lead">Tus eventos de iCloud y los que crees en ATLAS, con avisos de choques de horario.</p>
+        <p className="lead">Tus eventos de iCloud y los que crees en VISTAN, con avisos de choques de horario.</p>
       </header>
       {cal.data && !cal.data.connected && <p className="callout">Conecta tu calendario de iCloud en <Link to="/settings#integraciones">Configuración › Integraciones</Link>.</p>}
       <div className="grid grid-tasks">
@@ -67,7 +67,7 @@ export function Calendar() {
                 {items.filter((e) => e.start_at.startsWith(d)).map((e) => (
                   <li key={e.id} className={`task ${conflictIds.has(e.id) ? "is-overdue" : ""}`}>
                     <span className="task-main"><span className="task-title">{e.title}</span>
-                      <span className="mem-meta">{hm(e.start_at)}{e.end_at ? `–${hm(e.end_at)}` : ""}{e.location ? ` · ${e.location}` : ""} · {e.source === "icloud" ? "iCloud" : "ATLAS"}{conflictIds.has(e.id) ? " · ⚠ se solapa con otro evento" : ""}</span></span>
+                      <span className="mem-meta">{hm(e.start_at)}{e.end_at ? `–${hm(e.end_at)}` : ""}{e.location ? ` · ${e.location}` : ""} · {e.source === "icloud" ? "iCloud" : "VISTAN"}{conflictIds.has(e.id) ? " · ⚠ se solapa con otro evento" : ""}</span></span>
                     {e.source === "local" && <button className="mini-btn danger" aria-label={`Borrar ${e.title}`} onClick={async () => { await api.deleteEvent(e.id); await cal.reload(); }}>Borrar</button>}
                   </li>
                 ))}

@@ -33,7 +33,7 @@ def session(client):
 
 @pytest.fixture()
 def ollama(client, monkeypatch):
-    """Servidor Ollama falso con el protocolo real (NDJSON). Apunta ATLAS a él."""
+    """Servidor Ollama falso con el protocolo real (NDJSON). Apunta VISTAN a él."""
     from tests.fake_ollama import FakeOllama
 
     fake = FakeOllama()

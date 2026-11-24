@@ -32,6 +32,7 @@ const PATHS: Record<string, string> = {
   shield: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
   upload: "M12 16V4M7 9l5-5 5 5M4 20h16",
   plus: "M12 5v14M5 12h14",
+  progress: "M4 19h16M6 16l4-5 3 3 5-7M15 7h3v3",
   alert: "M12 9v4M12 17h.01M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z",
 };
 

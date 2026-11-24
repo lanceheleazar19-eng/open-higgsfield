@@ -66,8 +66,8 @@ def test_paper_trading_stats(client):
 def test_health_ingest(client):
     tok = client.get("/api/health/setup").json()["token"]
     assert client.post("/api/health/ingest", json={"steps": 100}).status_code == 401
-    assert client.post("/api/health/ingest", json={"steps": 100}, headers={"X-Atlas-Token": "mal"}).status_code == 401
-    h = {"X-Atlas-Token": tok}
+    assert client.post("/api/health/ingest", json={"steps": 100}, headers={"X-Vistan-Token": "mal"}).status_code == 401
+    h = {"X-Vistan-Token": tok}
     r = client.post("/api/health/ingest", headers=h, json={"day": "2026-11-20", "steps": "8.432", "sleep_minutes": [200, 250],
                                                           "weight_kg": "75,6", "active_kcal": "512,4\n100"})
     assert r.status_code == 200, r.text

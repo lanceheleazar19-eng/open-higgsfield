@@ -50,18 +50,18 @@ test("dashboard con datos muestra nombre, tareas atrasadas y finanzas", async ()
   expect(screen.getAllByText(/Atrasada ·/).length).toBeGreaterThan(0);
   expect(screen.getByText("Vivienda")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "1 tarea atrasada." })).toHaveAttribute("href", "/tasks");
-  expect(screen.getByRole("button", { name: /Abrir Finanzas: 1500,00\s€ mes/ })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /^Finance: 1500,00\s€ mes/ })).toBeInTheDocument();
 });
 
 test("backend caído muestra estado sin conexión con reintento", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("network"); }));
   renderAt("/");
-  expect(await screen.findByText(/Núcleo de ATLAS sin conexión/)).toBeInTheDocument();
+  expect(await screen.findByText(/Núcleo de VISTAN sin conexión/)).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
 });
 
 const agentsFx = {
-  core: { name: "ATLAS CORE", role: "Recibe cada petición y coordina agentes." },
+  core: { name: "VISTAN CORE", role: "Recibe cada petición y coordina agentes." },
   levels: { READ: "Consultar", WRITE: "Crear", EXECUTE: "Ejecutar", ADMIN: "Admin" },
   policy: { READ: "auto", WRITE: "auto", EXECUTE: "confirm", ADMIN: "confirm" },
   agents: [{ id: "finance", name: "Finance Agent", role: "Finanzas reales.", limits: "Nunca hace pagos.", runs: 2, last: null,
@@ -121,11 +121,15 @@ test("cabecera: muestra la foto de perfil y enlaza al perfil", async () => {
 test("los nodos del núcleo muestran datos reales y abren su módulo", async () => {
   mockFetch({ ...base, "/api/dashboard": { ...emptyDashboard, tasks: { ...emptyDashboard.tasks, pending: 3 } } });
   renderAt("/");
-  const node = await screen.findByRole("button", { name: "Abrir Tareas: 3 pendientes" });
-  expect(screen.getByRole("button", { name: "Abrir Memoria: 3 recuerdos" })).toBeInTheDocument();
+  const node = await screen.findByRole("button", { name: /^Tasks: 3 pendientes\. Pulsa para ver detalles/ });
+  expect(screen.getByRole("button", { name: /^Memory: 3 recuerdos/ })).toBeInTheDocument();
+  expect(screen.getAllByRole("button", { name: /Pulsa para ver detalles/ })).toHaveLength(12); // 12 planetas
+  fireEvent.click(node); // 1.er clic: selecciona el planeta y muestra su contexto
+  expect((await screen.findAllByRole("button", { name: "Abrir Tasks" })).length).toBeGreaterThan(0); // tarjeta del planeta y panel derecho
+  expect(node).toHaveAttribute("aria-pressed", "true");
   mockFetch({ ...base, "/api/tasks?": { items: [], categories: [] }, "/api/goals?": { items: [] },
     "/api/tasks/summary?": { period: "day", from: "", to: "", completed: 0, completed_titles: [], created: 0, due: 0, due_open: 0, overdue: 0, completion_rate: null } });
-  fireEvent.click(node);
+  fireEvent.click(screen.getAllByRole("button", { name: "Abrir Tasks" })[0]); // abrir su espacio
   expect(await screen.findByRole("heading", { name: /Tareas y objetivos/ })).toBeInTheDocument();
 });
 
@@ -139,7 +143,7 @@ test("comando rápido consulta al asistente y muestra la respuesta", async () =>
   expect(await screen.findByText("No tienes tareas pendientes registradas.", {}, { timeout: 5000 })).toBeInTheDocument();
   const post = calls.find((c) => c.init?.method === "POST");
   expect(JSON.parse(post!.init!.body as string)).toEqual({ text: "¿Qué tengo pendiente hoy?" });
-  expect(within(screen.getByRole("region", { name: "Conversación con ATLAS" })).getByText("Modo local")).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "Conversación con VISTAN" })).getByText("Modo local")).toBeInTheDocument();
 });
 
 test("barra de conversación: texto libre y resumen ejecutivo", async () => {
@@ -148,10 +152,10 @@ test("barra de conversación: texto libre y resumen ejecutivo", async () => {
     "POST /api/assistant/chat": chatReply("Hola, Lance. Todo en orden.", "ai", "qwen2.5:7b"),
   });
   renderAt("/");
-  const input = await screen.findByLabelText("Mensaje para ATLAS");
+  const input = await screen.findByLabelText("Mensaje para VISTAN");
   const send = screen.getByRole("button", { name: "Enviar" });
   expect(send).toBeDisabled();
-  fireEvent.change(input, { target: { value: "Hola ATLAS" } });
+  fireEvent.change(input, { target: { value: "Hola VISTAN" } });
   fireEvent.click(send);
   expect(await screen.findByText("Hola, Lance. Todo en orden.", {}, { timeout: 5000 })).toBeInTheDocument();
   expect(screen.getByText("IA · qwen2.5:7b")).toBeInTheDocument();
@@ -186,7 +190,7 @@ test("página de IA: estado de Ollama, modelos y selección", async () => {
   });
   renderAt("/ai");
   expect(await screen.findByText("Conectado")).toBeInTheDocument();
-  const select = await screen.findByLabelText("Modelo que usa ATLAS");
+  const select = await screen.findByLabelText("Modelo que usa VISTAN");
   expect(screen.getByRole("option", { name: "Automático (qwen2.5:7b)" })).toBeInTheDocument();
   fireEvent.change(select, { target: { value: "llama3.2:3b" } });
   await screen.findByText("Modelo fijado: llama3.2:3b");
@@ -216,10 +220,10 @@ test("«recuerda que…» muestra que se ha guardado en memoria", async () => {
     "POST /api/assistant/chat": chatReply("Hecho. Lo recordaré.", "memory", null, [{ type: "memory", action: "saved", memory: mem() }]),
   });
   renderAt("/");
-  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "recuerda que prefiero entrenar por la mañana" } });
+  fireEvent.change(await screen.findByLabelText("Mensaje para VISTAN"), { target: { value: "recuerda que prefiero entrenar por la mañana" } });
   fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
   expect(await screen.findByText(/Guardado en memoria/, {}, { timeout: 5000 })).toBeInTheDocument();
-  expect(within(screen.getByRole("region", { name: "Conversación con ATLAS" })).getByText("Memoria")).toBeInTheDocument();
+  expect(within(screen.getByRole("region", { name: "Conversación con VISTAN" })).getByText("Memoria")).toBeInTheDocument();
 });
 
 test("olvidar requiere confirmación con botón", async () => {
@@ -229,7 +233,7 @@ test("olvidar requiere confirmación con botón", async () => {
     "DELETE /api/memory/1": {},
   });
   renderAt("/");
-  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "olvida que entreno por la mañana" } });
+  fireEvent.change(await screen.findByLabelText("Mensaje para VISTAN"), { target: { value: "olvida que entreno por la mañana" } });
   fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
   const btn = await screen.findByRole("button", { name: "Olvidar «Prefiero entrenar por la mañana»" }, { timeout: 5000 });
   expect(calls.some((c) => c.init?.method === "DELETE")).toBe(false);
@@ -249,9 +253,9 @@ test("la IA propone recuerdos y solo se guardan si lo apruebas", async () => {
     "POST /api/memory": { memory: mem({ id: 9, content: "Quiere correr una media maratón", kind: "goal" }), created: true },
   });
   renderAt("/");
-  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "Quiero correr una media maratón en primavera" } });
+  fireEvent.change(await screen.findByLabelText("Mensaje para VISTAN"), { target: { value: "Quiero correr una media maratón en primavera" } });
   fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
-  expect(await screen.findByText("ATLAS propone recordar", {}, { timeout: 5000 })).toBeInTheDocument();
+  expect(await screen.findByText("VISTAN propone recordar", {}, { timeout: 5000 })).toBeInTheDocument();
   expect(calls.some((c) => c.url === "/api/memory" && c.init?.method === "POST")).toBe(false);
   const [save] = screen.getAllByRole("button", { name: "Guardar" });
   fireEvent.click(save);
@@ -262,7 +266,7 @@ test("la IA propone recuerdos y solo se guardan si lo apruebas", async () => {
   await waitFor(() => expect(screen.queryByText("Entrena tres días por semana")).not.toBeInTheDocument());
 });
 
-test("al volver a abrir ATLAS retoma la última conversación", async () => {
+test("al volver a abrir VISTAN retoma la última conversación", async () => {
   localStorage.setItem("atlas.conversation", "7");
   mockFetch({
     ...base, "/api/dashboard": emptyDashboard,
@@ -289,7 +293,7 @@ test("página Memoria: lista, añade y olvida recuerdos", async () => {
   renderAt("/memory");
   expect(await screen.findByText("Prefiero entrenar por la mañana")).toBeInTheDocument();
   expect(screen.getByText(/Temporal · hasta/)).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("¿Qué debe recordar ATLAS?"), { target: { value: "Mi objetivo es ahorrar" } });
+  fireEvent.change(screen.getByLabelText("¿Qué debe recordar VISTAN?"), { target: { value: "Mi objetivo es ahorrar" } });
   fireEvent.change(screen.getByLabelText("Tipo"), { target: { value: "goal" } });
   fireEvent.click(screen.getByRole("button", { name: "Guardar recuerdo" }));
   expect(await screen.findByText("Guardado.")).toBeInTheDocument();
@@ -320,7 +324,7 @@ test("con el altavoz activo lee la respuesta por frases, con la voz y velocidad 
     "POST /api/assistant/chat": chatReply("Buenos días, Lance. Hoy tienes dos tareas. ¿Empezamos por la más urgente?", "ai", "qwen2.5:7b"),
   });
   renderAt("/");
-  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "Buenos días" } });
+  fireEvent.change(await screen.findByLabelText("Mensaje para VISTAN"), { target: { value: "Buenos días" } });
   fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
   await waitFor(() => expect(spoken.map((s) => s.text).join(" ")).toContain("¿Empezamos por la más urgente?"), { timeout: 5000 });
   expect(spoken.map((s) => s.text).join(" ")).toBe("Buenos días, Lance. Hoy tienes dos tareas. ¿Empezamos por la más urgente?");
@@ -344,7 +348,7 @@ test("«apúntame…» crea la tarea y permite deshacer", async () => {
     "DELETE /api/tasks/1": {},
   });
   renderAt("/");
-  fireEvent.change(await screen.findByLabelText("Mensaje para ATLAS"), { target: { value: "apúntame llamar al gestor el viernes a las 10" } });
+  fireEvent.change(await screen.findByLabelText("Mensaje para VISTAN"), { target: { value: "apúntame llamar al gestor el viernes a las 10" } });
   fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
   expect(await screen.findByText(/Tarea creada/, {}, { timeout: 5000 })).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Deshacer" }));
@@ -463,7 +467,7 @@ test("gimnasio hoy: ver objetivo, última vez y registrar una serie", async () =
   expect(await screen.findByText(/2×\(8\/8\)/, {}, { timeout: 3000 })).toBeInTheDocument();
 });
 
-test("pantalla de arranque: al pulsar Iniciar, ATLAS da la bienvenida en voz alta", async () => {
+test("pantalla de arranque: al pulsar Iniciar, VISTAN da la bienvenida en voz alta", async () => {
   localStorage.setItem("atlas.welcome", "1");
   const spoken: string[] = [];
   class FakeUtterance { text: string; rate = 1; lang = ""; voice?: unknown; onend?: () => void; onerror?: () => void; onstart?: () => void;
@@ -474,8 +478,8 @@ test("pantalla de arranque: al pulsar Iniciar, ATLAS da la bienvenida en voz alt
   mockFetch({ ...base, "/api/dashboard": emptyDashboard,
     "/api/assistant/welcome": { intent: "welcome", mode: "local", reply: "Buenas tardes, Lance. Bienvenido de nuevo. ¿En qué te ayudo?" } });
   renderAt("/");
-  expect(await screen.findByRole("dialog", { name: "Inicio de ATLAS" })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Iniciar ATLAS" }));
+  expect(await screen.findByRole("dialog", { name: "Inicio de VISTAN" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Iniciar VISTAN" }));
   await waitFor(() => expect(spoken.join(" ")).toContain("Bienvenido de nuevo"), { timeout: 3000 });
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(sessionStorage.getItem("atlas.booted")).toBe("1");
@@ -498,7 +502,7 @@ test("la bienvenida espera a que el navegador cargue las voces y usa la elegida"
   mockFetch({ ...base, "/api/dashboard": emptyDashboard,
     "/api/assistant/welcome": { intent: "welcome", mode: "local", reply: "Bienvenido de nuevo." } });
   renderAt("/");
-  fireEvent.click(await screen.findByRole("button", { name: "Iniciar ATLAS" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Iniciar VISTAN" }));
   await new Promise((r) => setTimeout(r, 100));
   expect(spoken).toEqual([]); // aún no hay voces: espera en lugar de usar la voz por defecto
   voices = [{ name: "Eddy (Spanish (Spain))", lang: "es-ES", voiceURI: "eddy", localService: true },
@@ -669,9 +673,46 @@ test("chat: muestra qué agentes intervinieron y las fuentes de tus documentos",
       { type: "sources", items: [{ n: 1, document_id: 2, title: "presupuesto", chunk: 0, url: null, kind: "txt" }] },
       { type: "delta", text: "Llevas 45 € este mes [1]." }, { type: "done", mode: "local", model: null }] } });
   renderAt("/");
-  const box = await screen.findByRole("textbox", { name: "Mensaje para ATLAS" });
+  const box = await screen.findByRole("textbox", { name: "Mensaje para VISTAN" });
   fireEvent.change(box, { target: { value: "¿cuánto he gastado?" } });
   fireEvent.submit(box.closest("form")!);
   expect(await screen.findByText(/Finance Agent · 1 herramienta/, {}, { timeout: 5000 })).toBeInTheDocument();
   expect(screen.getByText("[1] presupuesto")).toBeInTheDocument();
+});
+
+test("progress: tendencias reales y avisa cuando faltan datos", async () => {
+  const insuf = { status: "insuficiente", points: 1, reason: "Hacen falta al menos 4 registros en 14 días." };
+  mockFetch({ ...base, "/api/progress/photos": [],
+    "/api/progress": { weights: [{ date: "2026-10-01", kg: 75 }, { date: "2026-11-20", kg: 76.4 }],
+      weight_trend: { status: "subiendo", points: 8, days: 50, per_week: 0.2, change: 1.4, noise: 0.3, first: 75, last: 76.4, unit: "kg" },
+      training_weeks: [], sessions_trend: insuf, tonnage_trend: insuf, nutrition_days: [], targets: null, kcal_trend: insuf,
+      protein_days_met: 0, goals: [], photos: [], weeks_trained: 0,
+      facts: ["Peso: sube (+0,20 kg/semana en 50 días).", "Entrenamiento: no hay sesiones registradas en las últimas 12 semanas."] } });
+  renderAt("/progress");
+  expect(await screen.findByText(/tendencia al alza · \+0,2 kg\/sem/)).toBeInTheDocument();
+  expect(screen.getByText("Peso: sube (+0,20 kg/semana en 50 días).")).toBeInTheDocument();
+  expect(screen.getByText("No hay entrenamientos registrados.")).toBeInTheDocument();
+  expect(screen.getByText(/Aún no hay fotos de progreso/)).toBeInTheDocument();
+});
+
+test("físico: si el análisis iría a la nube, pide consentimiento antes de enviar la foto", async () => {
+  const photo = { id: 1, taken_on: "2026-11-20", pose: "front", pose_es: "frente", note: null, width: 800, height: 1000, url: "/x", thumb: "/x" };
+  let calls = 0;
+  vi.stubGlobal("confirm", vi.fn(() => false));
+  const fetchCalls = mockFetch({ ...base, "/api/vision/route": { provider: "openai", label: "OpenAI", model: "gpt-x", local: false, available: true, note: null },
+    "/api/progress/photos": [photo], "/api/progress/analyses?": [] });
+  const orig = globalThis.fetch as unknown as (u: string, i?: RequestInit) => Promise<Response>;
+  vi.stubGlobal("fetch", vi.fn(async (u: string, i?: RequestInit) => {
+    if (u === "/api/progress/photos/analyze") { calls++; return new Response(JSON.stringify({ detail: { needs_consent: true, provider: "OpenAI", model: "gpt-x", message: "x" } }), { status: 409 }); }
+    return orig(u, i);
+  }));
+  renderAt("/gym");
+  fireEvent.click(await screen.findByRole("tab", { name: "Físico (fotos)" }));
+  expect(await screen.findByText(/se enviarían a OpenAI/)).toBeInTheDocument();
+  fireEvent.click(await screen.findByRole("button", { name: "Seleccionar foto del 2026-11-20" }));
+  fireEvent.click(screen.getByRole("button", { name: "Analizar con IA" }));
+  expect(await screen.findByText(/No has autorizado enviar la foto/)).toBeInTheDocument();
+  expect(calls).toBe(1); // sin permiso no se reintenta con allow_cloud
+  expect(window.confirm).toHaveBeenCalled();
+  void fetchCalls;
 });

@@ -1,6 +1,6 @@
 # Instrucciones para agentes de código (Codex, Claude Code, etc.)
 
-Proyecto: ATLAS, asistente personal local. Lee `docs/ARCHITECTURE.md` y `docs/ROADMAP.md` primero.
+Proyecto: VISTAN, asistente personal local. Lee `docs/ARCHITECTURE.md` y `docs/ROADMAP.md` primero.
 
 ## Comandos
 - Backend: `cd backend && .venv/bin/pytest -q` (Windows: `.venv\Scripts\pytest -q`)

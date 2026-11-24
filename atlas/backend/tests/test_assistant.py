@@ -60,7 +60,7 @@ def test_answers_and_alerts_use_real_data(session):
     fin = answer("¿cuánto he gastado?", d)["reply"]
     assert "gastos 1.500,50 €" in fin and "neto -500,50 €" in fin and "Viajes" in fin
     assert "Reunión socio — 23/11 a las 10:45" in answer("próximos eventos", d)["reply"]
-    assert answer("Buenos días, ATLAS", d)["intent"] == "briefing"
+    assert answer("Buenos días, VISTAN", d)["intent"] == "briefing"
 
 
 def test_welcome_uses_real_data(client):

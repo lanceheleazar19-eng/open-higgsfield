@@ -5,7 +5,7 @@ import { loadHandsFree, saveHandsFree } from "../lib/wake";
 import { WELCOME_KEY, welcomeEnabled } from "./BootScreen";
 import { Panel } from "./Panel";
 
-const SAMPLE = "Hola, soy ATLAS. Así sonará mi voz cuando te responda. ¿Te gusta cómo suena?";
+const SAMPLE = "Hola, soy VISTAN. Así sonará mi voz cuando te responda. ¿Te gusta cómo suena?";
 
 /** Elección de voz y velocidad (se guardan en este navegador: las voces dependen de cada dispositivo). */
 export function VoiceSettings() {
@@ -26,7 +26,7 @@ export function VoiceSettings() {
   };
 
   return (
-    <Panel title="Voz de ATLAS">
+    <Panel title="Voz de VISTAN">
       {!supported ? (
         <p className="muted">Este navegador no puede hablar. Usa Chrome, Safari o Edge.</p>
       ) : (
@@ -52,7 +52,7 @@ export function VoiceSettings() {
               setWelcome(e.target.checked);
               try { localStorage.setItem(WELCOME_KEY, e.target.checked ? "1" : "0"); } catch { /* sin almacenamiento */ }
             }} />
-            Pantalla de inicio con bienvenida hablada al abrir ATLAS
+            Pantalla de inicio con bienvenida hablada al abrir VISTAN
           </label>
           <div className="form-actions">
             <button type="button" className="btn" onClick={() => speakText(SAMPLE)} disabled={!voices.length}>Probar voz</button>
@@ -66,7 +66,7 @@ export function VoiceSettings() {
             {!canListen && <p className="callout">Este navegador no puede escuchar. Usa Chrome, Edge o Safari.</p>}
             <label className="check">
               <input type="checkbox" disabled={!canListen} checked={hf.wake} onChange={(e) => setHf(saveHandsFree({ wake: e.target.checked }))} />
-              «Hola ATLAS»: escuchar la palabra de activación mientras ATLAS está abierto
+              «Hola VISTAN»: escuchar la palabra de activación mientras VISTAN está abierto
             </label>
             <label className="check">
               <input type="checkbox" disabled={!canListen} checked={hf.continuous} onChange={(e) => setHf(saveHandsFree({ continuous: e.target.checked }))} />
@@ -74,20 +74,20 @@ export function VoiceSettings() {
             </label>
             <label className="check">
               <input type="checkbox" disabled={!canListen} checked={hf.clap} onChange={(e) => setHf(saveHandsFree({ clap: e.target.checked }))} />
-              Dos palmadas: ATLAS empieza a escucharte (experimental; se detecta en tu ordenador, sin grabar audio)
+              Dos palmadas: VISTAN empieza a escucharte (experimental; se detecta en tu ordenador, sin grabar audio)
             </label>
             <p className={hf.wake ? "callout" : "muted small"}>
-              <strong>Privacidad:</strong> el reconocimiento de voz lo hace el navegador, no ATLAS.
+              <strong>Privacidad:</strong> el reconocimiento de voz lo hace el navegador, no VISTAN.
               {browser === "Chrome" || browser === "Edge"
                 ? ` En ${browser}, el audio se envía a los servidores de ${browser === "Chrome" ? "Google" : "Microsoft"} para pasarlo a texto.`
                 : browser === "Safari" ? " En Safari lo procesa Apple (dictado de Siri), en el dispositivo o en sus servidores según tu Mac." : ""}
-              {" "}Con «Oye ATLAS» activo, el micrófono escucha de forma continua mientras la pestaña está abierta y en primer plano. Lo que se dice antes de «ATLAS» se descarta y no se guarda.
+              {" "}Con «Oye VISTAN» activo, el micrófono escucha de forma continua mientras la pestaña está abierta y en primer plano. Lo que se dice antes de «VISTAN» se descarta y no se guarda.
             </p>
             <details className="help">
               <summary>Órdenes de voz</summary>
               <ul className="steps">
-                <li><strong>«Hola ATLAS, …»</strong>, <strong>«Oye ATLAS, …»</strong> o <strong>«ATLAS, …»</strong> seguido de tu pregunta. Si solo dices «ATLAS», suena un pitido y te escucho.</li>
-                <li><strong>«Para» / «Calla»</strong> o <strong>«ATLAS, …»</strong> mientras hablo: me interrumpes.</li>
+                <li><strong>«Hola VISTAN, …»</strong>, <strong>«Oye VISTAN, …»</strong> o <strong>«VISTAN, …»</strong> seguido de tu pregunta. Si solo dices «VISTAN», suena un pitido y te escucho.</li>
+                <li><strong>«Para» / «Calla»</strong> o <strong>«VISTAN, …»</strong> mientras hablo: me interrumpes.</li>
                 <li><strong>«Repite»</strong>, <strong>«Más despacio»</strong>, <strong>«Más rápido»</strong>.</li>
                 <li><strong>«Eso es todo»</strong> o <strong>«Gracias»</strong>: termino la conversación y vuelvo a esperar.</li>
                 <li>Tecla <strong>Esc</strong>: corta la voz y la escucha.</li>

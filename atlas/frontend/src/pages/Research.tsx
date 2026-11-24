@@ -31,7 +31,7 @@ export function Research() {
       <header className="page-head">
         <p className="eyebrow">Research Engine</p>
         <h1><Icon name="research" size={26} /> Investigación</h1>
-        <p className="lead">ATLAS divide la pregunta, busca en varias fuentes públicas, las lee, compara lo que dicen y te entrega un informe con fuentes, fecha de consulta y nivel de confianza. También desde el chat: «investiga…».</p>
+        <p className="lead">VISTAN divide la pregunta, busca en varias fuentes públicas, las lee, compara lo que dicen y te entrega un informe con fuentes, fecha de consulta y nivel de confianza. También desde el chat: «investiga…».</p>
       </header>
       <div className="grid grid-tasks">
         <div className="stack">

@@ -16,7 +16,7 @@ export function Knowledge() {
       <header className="page-head">
         <p className="eyebrow">Second Brain</p>
         <h1><Icon name="knowledge" size={26} /> Conocimiento</h1>
-        <p className="lead">Tus documentos, notas y enlaces, indexados en tu ordenador para que ATLAS los consulte y cite. Lo que viene de tus documentos se distingue siempre de la información externa.</p>
+        <p className="lead">Tus documentos, notas y enlaces, indexados en tu ordenador para que VISTAN los consulte y cite. Lo que viene de tus documentos se distingue siempre de la información externa.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones de conocimiento">
         {([["docs", "Documentos"], ["graph", "Grafo"], ["search", "Buscar"]] as const).map(([k, l]) => (
@@ -224,7 +224,7 @@ function Graph() {
                 </select>
               </label>
             </div>
-            <p className="muted small">Si su nombre aparece en tus recuerdos, tareas o documentos, ATLAS las conecta solas.</p>
+            <p className="muted small">Si su nombre aparece en tus recuerdos, tareas o documentos, VISTAN las conecta solas.</p>
             <div className="form-actions"><button className="btn" disabled={!ent.name.trim()}>Añadir</button></div>
           </form>
         </Panel>

@@ -25,20 +25,20 @@ beforeEach(() => {
 });
 afterEach(() => { vi.unstubAllGlobals(); localStorage.clear(); });
 
-test("«Oye ATLAS, …» en una frase envía la pregunta sin la palabra de activación", () => {
+test("«Oye VISTAN, …» en una frase envía la pregunta sin la palabra de activación", () => {
   const onFinal = vi.fn();
   const { result } = renderHook(() => useVoice(onFinal));
   expect(result.current.wakeActive).toBe(true);
   const bg = live()[0];
   expect(bg.continuous).toBe(true);
-  act(() => bg.say("me voy a la ducha")); // sin «ATLAS»: se ignora
+  act(() => bg.say("me voy a la ducha")); // sin «VISTAN»: se ignora
   expect(onFinal).not.toHaveBeenCalled();
-  act(() => bg.say("Oye ATLAS, ¿qué tengo mañana?"));
+  act(() => bg.say("Oye VISTAN, ¿qué tengo mañana?"));
   expect(onFinal).toHaveBeenCalledWith("¿qué tengo mañana?");
   expect(result.current.conversing).toBe(true);
 });
 
-test("solo «ATLAS» abre el micrófono y lo siguiente va a ATLAS; «repite» se resuelve en local", () => {
+test("solo «VISTAN» abre el micrófono y lo siguiente va a VISTAN; «repite» se resuelve en local", () => {
   const onFinal = vi.fn();
   const { result } = renderHook(() => useVoice(onFinal));
   act(() => live()[0].say("atlas"));
@@ -54,7 +54,7 @@ test("solo «ATLAS» abre el micrófono y lo siguiente va a ATLAS; «repite» se
   expect(onFinal).toHaveBeenCalledTimes(1);
 });
 
-test("con «Oye ATLAS» apagado no se escucha en segundo plano", () => {
+test("con «Oye VISTAN» apagado no se escucha en segundo plano", () => {
   localStorage.setItem("atlas.handsfree", JSON.stringify({ wake: false, continuous: true }));
   const { result } = renderHook(() => useVoice(vi.fn()));
   expect(result.current.wakeActive).toBe(false);

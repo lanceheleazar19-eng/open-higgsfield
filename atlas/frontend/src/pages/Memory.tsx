@@ -27,7 +27,7 @@ export function Memory() {
       <header className="page-head">
         <p className="eyebrow">Fase 3 · activo</p>
         <h1><Icon name="memory" size={26} /> Memoria</h1>
-        <p className="lead">Lo que ATLAS sabe de ti. Está guardado solo en tu ordenador: puedes consultarlo, corregirlo o borrarlo cuando quieras.</p>
+        <p className="lead">Lo que VISTAN sabe de ti. Está guardado solo en tu ordenador: puedes consultarlo, corregirlo o borrarlo cuando quieras.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones de memoria">
         <button role="tab" aria-selected={tab === "memories"} className={tab === "memories" ? "on" : ""} onClick={() => setTab("memories")}>Recuerdos</button>
@@ -84,7 +84,7 @@ function Memories() {
     <div className="grid grid-mem">
       <Panel title="Añadir recuerdo">
         <AddMemory onSaved={(created, content) => void refresh(created ? "Guardado." : `Ya estaba guardado: «${content}»`)} />
-        <p className="muted small">También puedes decírselo a ATLAS: «recuerda que…» o «olvida que…».</p>
+        <p className="muted small">También puedes decírselo a VISTAN: «recuerda que…» o «olvida que…».</p>
       </Panel>
       <Panel title={`Recuerdos${list.data ? ` (${list.data.memories})` : ""}`} className="mem-list" aside={
         <span className="row-actions">
@@ -103,7 +103,7 @@ function Memories() {
         {msg && <p role="status" className={`small ${msg.tone}`}>{msg.text}</p>}
         {list.error && <p className="neg small">{list.error.message}</p>}
         {items.length === 0 ? (
-          <Empty>{q ? "No hay recuerdos que coincidan." : "ATLAS todavía no recuerda nada. Añade algo o díselo en el centro de control."}</Empty>
+          <Empty>{q ? "No hay recuerdos que coincidan." : "VISTAN todavía no recuerda nada. Añade algo o díselo en el centro de control."}</Empty>
         ) : (
           <ul className="mem-items">
             {items.map((m) => editing === m.id ? (
@@ -115,7 +115,7 @@ function Memories() {
                   {m.content}
                   <span className="mem-meta">
                     {m.permanent ? "Permanente" : m.expired ? "Caducado" : `Temporal · hasta ${formatDateTime(m.expires_at!, tz)}`}
-                    {" · "}{m.source === "manual" ? "añadido a mano" : m.source === "chat" ? "por conversación" : "sugerido por ATLAS"}
+                    {" · "}{m.source === "manual" ? "añadido a mano" : m.source === "chat" ? "por conversación" : "sugerido por VISTAN"}
                     {" · "}{formatDateTime(m.updated_at, tz)}
                   </span>
                 </span>
@@ -161,7 +161,7 @@ function AddMemory({ onSaved }: { onSaved: (created: boolean, content: string) =
   return (
     <form className="form" onSubmit={submit}>
       <label>
-        <span>¿Qué debe recordar ATLAS?</span>
+        <span>¿Qué debe recordar VISTAN?</span>
         <textarea rows={3} maxLength={2000} value={content} onChange={(e) => setContent(e.target.value)}
           placeholder="Ej.: Mi objetivo es ahorrar 5.000 € este año" />
       </label>
@@ -257,7 +257,7 @@ function Conversations() {
               {hits.map((h) => (
                 <li key={h.id}>
                   <button className="conv-btn" onClick={() => setOpen(h.conversation_id)}>
-                    <span className="mem-meta">{formatDateTime(h.created_at, tz)} · {h.role === "user" ? "Tú" : "ATLAS"}</span>
+                    <span className="mem-meta">{formatDateTime(h.created_at, tz)} · {h.role === "user" ? "Tú" : "VISTAN"}</span>
                     <span className="conv-snippet">{h.content}</span>
                   </button>
                 </li>
@@ -285,7 +285,7 @@ function Conversations() {
           <ol className="conv-messages">
             {detail.data.messages.map((m) => (
               <li key={m.id} className={m.role}>
-                <span className="mem-meta">{m.role === "user" ? "Tú" : `ATLAS${m.model ? ` · ${m.model}` : ""}`} · {formatDateTime(m.created_at, tz)}</span>
+                <span className="mem-meta">{m.role === "user" ? "Tú" : `VISTAN${m.model ? ` · ${m.model}` : ""}`} · {formatDateTime(m.created_at, tz)}</span>
                 <p>{m.content}</p>
               </li>
             ))}

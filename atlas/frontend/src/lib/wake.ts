@@ -5,7 +5,9 @@ export function norm(s: string): string {
 }
 
 // «atlas», «oye atlas», «hey atlas»… y lo que suelen entender mal los reconocedores («hatlas», «at las»)
-const WAKE = /(?:^|\s)(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\s+)?h?at\s?las(?=\s|$)/;
+// «VISTAN» y cómo suelen escribirlo los reconocedores (bistan, vistán, vis tan…); «ATLAS» se sigue aceptando
+const NAME = "(?:[vb]i[sz]\\s?t[aá]n|h?at\\s?las)";
+const WAKE = new RegExp(`(?:^|\\s)(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\\s+)?${NAME}(?=\\s|$)`);
 
 /** Busca la palabra de activación. Devuelve lo que se dijo DESPUÉS de ella (puede estar vacío) o null. */
 export function matchWake(transcript: string): { rest: string } | null {
@@ -18,9 +20,9 @@ export function matchWake(transcript: string): { rest: string } | null {
 export type VoiceIntent = "stop" | "end" | "repeat" | "slower" | "faster";
 
 const INTENTS: [VoiceIntent, RegExp][] = [
-  ["stop", /^(para|parate|calla|callate|basta|stop|silencio|espera|cancela|cancelar)( ya| atlas| por favor)?$/],
-  ["end", /^(eso es todo|nada mas|ya esta|gracias|muchas gracias|adios|hasta luego|terminamos|fin)( atlas| por ahora| por hoy)?$/],
-  ["repeat", /^(repite|repitelo|repitemelo|que has dicho|como|perdona|otra vez|repite por favor)( atlas| por favor)?$/],
+  ["stop", /^(para|parate|calla|callate|basta|stop|silencio|espera|cancela|cancelar)( ya| atlas| vistan| por favor)?$/],
+  ["end", /^(eso es todo|nada mas|ya esta|gracias|muchas gracias|adios|hasta luego|terminamos|fin)( atlas| vistan| por ahora| por hoy)?$/],
+  ["repeat", /^(repite|repitelo|repitemelo|que has dicho|como|perdona|otra vez|repite por favor)( atlas| vistan| por favor)?$/],
   ["slower", /^(habla )?(mas despacio|mas lento|despacio)( por favor)?$/],
   ["faster", /^(habla )?(mas rapido|mas deprisa|rapido)( por favor)?$/],
 ];
@@ -32,7 +34,7 @@ export function voiceIntent(text: string): VoiceIntent | null {
   return null;
 }
 
-/** ¿Lo que oye el micrófono es la propia voz de ATLAS saliendo por los altavoces? */
+/** ¿Lo que oye el micrófono es la propia voz de VISTAN saliendo por los altavoces? */
 export function isEcho(heard: string, spoken: string): boolean {
   const h = norm(heard), s = norm(spoken);
   if (!h || !s) return false;
@@ -61,8 +63,8 @@ export function saveHandsFree(p: Partial<HandsFree>): HandsFree {
   return next;
 }
 
-/** Lo dicho después de «ATLAS» conservando mayúsculas y tildes (para la IA y los intérpretes). */
+/** Lo dicho después de «VISTAN» conservando mayúsculas y tildes (para la IA y los intérpretes). */
 export function afterWake(original: string): string | null {
-  const m = /(?:^|[\s,.¿¡])(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)[\s,]+)?h?[aá]t\s?l[aá]s(?=[\s,.:;!?¿¡]|$)[\s,.:;!]*/i.exec(original);
+  const m = /(?:^|[\s,.¿¡])(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)[\s,]+)?(?:[vb]i[sz]\s?t[aá]n|h?[aá]t\s?l[aá]s)(?=[\s,.:;!?¿¡]|$)[\s,.:;!]*/i.exec(original);
   return m ? original.slice(m.index + m[0].length).trim() : null;
 }

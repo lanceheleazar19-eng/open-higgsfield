@@ -125,7 +125,7 @@ def chat_events(d: dict, prefs: dict, text: str, history: list[dict],
 SUGGEST_PROMPT = """Analiza el último mensaje del USUARIO y extrae solo información personal duradera y útil
 que un asistente personal debería recordar: preferencias, objetivos, decisiones tomadas o datos estables
 sobre su vida, trabajo, salud, proyectos o finanzas. NO extraigas preguntas, saludos, peticiones puntuales,
-opiniones de ATLAS ni datos que ya estén en la lista de recuerdos existentes.
+opiniones de VISTAN ni datos que ya estén en la lista de recuerdos existentes.
 Responde SOLO con JSON: {"recuerdos": [{"contenido": "frase breve en tercera persona o neutra",
 "tipo": "preferencia|objetivo|decision|dato", "temporal": true|false}]}. Máximo 3. Si no hay nada, {"recuerdos": []}."""
 

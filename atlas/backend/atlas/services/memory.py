@@ -1,4 +1,4 @@
-"""Memoria persistente de ATLAS: recuerdos, búsqueda y contexto para el cerebro.
+"""Memoria persistente de VISTAN: recuerdos, búsqueda y contexto para el cerebro.
 
 - Recuerdos permanentes (expires_at NULL) o temporales (con caducidad).
 - Sin duplicados: huella normalizada + similitud con los candidatos más parecidos.
@@ -199,13 +199,13 @@ def purge_expired(db: Session) -> int:
 # ----------------------------------------------------------------- lenguaje natural
 
 _REMEMBER = re.compile(
-    r"^(?:oye\s+)?(?:atlas[,:\s]+)?(?:por favor\s+)?"
+    r"^(?:oye\s+)?(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:por favor\s+)?"
     r"(?:recuerda(?:\s+siempre)?|no olvides|memoriza|apunta que|anota que|guarda en (?:la |tu )?memoria)"
     r"(?:\s+que|\s+esto|:)?[\s:,]+(?P<body>.{3,})$",
     re.IGNORECASE | re.DOTALL,
 )
 _FORGET = re.compile(
-    r"^(?:oye\s+)?(?:atlas[,:\s]+)?(?:por favor\s+)?(?:olvida|borra de (?:la |tu )?memoria)(?:\s+que|:)?[\s:,]+(?P<body>.{3,})$",
+    r"^(?:oye\s+)?(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:por favor\s+)?(?:olvida|borra de (?:la |tu )?memoria)(?:\s+que|:)?[\s:,]+(?P<body>.{3,})$",
     re.IGNORECASE | re.DOTALL,
 )
 
@@ -309,7 +309,7 @@ def memory_context(db: Session, query: str, tz: str, conversation_id: int | None
         "relevante": [fmt(m) for m in relevant],
         "conversaciones": [
             {"fecha": utc_naive_to_local(m.created_at, tz).strftime("%d/%m/%Y %H:%M"),
-             "quien": "usuario" if m.role == "user" else "ATLAS", "texto": m.content[:400]}
+             "quien": "usuario" if m.role == "user" else "VISTAN", "texto": m.content[:400]}
             for m in msgs
         ],
     }

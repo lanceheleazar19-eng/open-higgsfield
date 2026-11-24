@@ -163,7 +163,7 @@ def _task_command(db, text: str, tz: str):  # noqa: ANN001
             reply += f", prioridad {PRIO_ES[p.priority]}"
         reply += "."
         if reminder:
-            reply += " Te avisaré a su hora mientras ATLAS esté abierto."
+            reply += " Te avisaré a su hora mientras VISTAN esté abierto."
         return {"type": "task", "action": "created", "task": tasks_svc.to_dict(t, tz)}, reply
     target = parse_complete_command(text)
     if target:
@@ -181,7 +181,7 @@ def _line(ev: dict) -> str:
 
 @router.post("/api/assistant/chat")
 def chat(body: ChatIn) -> StreamingResponse:
-    """Conversación en streaming (NDJSON). Guarda la conversación y usa la memoria de ATLAS."""
+    """Conversación en streaming (NDJSON). Guarda la conversación y usa la memoria de VISTAN."""
 
     def gen():
         with session_scope() as db:
@@ -288,7 +288,7 @@ def chat(body: ChatIn) -> StreamingResponse:
             t_start = _time.perf_counter()
             d = build_dashboard(db, prefs)
             d["alerts"] = build_alerts(d)
-            # ATLAS CORE: elige agentes y ejecuta sus herramientas sobre los datos reales
+            # VISTAN CORE: elige agentes y ejecuta sus herramientas sobre los datos reales
             run_, actx = agent_core.run(db, body.text, prefs, tz)
             if run_.agents:
                 d["agentes"] = actx

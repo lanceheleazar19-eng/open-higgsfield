@@ -5,24 +5,25 @@ import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Icon } from "../components/Icon";
 import { HealthTab } from "../components/HealthTab";
+import { PhysiqueTab } from "../components/PhysiqueTab";
 import { LineChart } from "../components/LineChart";
 import { Empty, Panel } from "../components/Panel";
 import { formatDayLabel } from "../lib/tasks";
 
-type Tab = "today" | "history" | "progress" | "routines" | "body" | "health";
+type Tab = "today" | "history" | "progress" | "routines" | "body" | "physique" | "health";
 const DAYS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"];
 const kg = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(v)} kg`);
 const num = (s: string) => Number(s.replace(",", "."));
 
 export function Gym() {
   const [tab, setTab] = useState<Tab>("today");
-  const tabs: [Tab, string][] = [["today", "Hoy"], ["history", "Historial"], ["progress", "Progreso"], ["routines", "Rutinas"], ["body", "Cuerpo"], ["health", "Salud"]];
+  const tabs: [Tab, string][] = [["today", "Hoy"], ["history", "Historial"], ["progress", "Progreso"], ["routines", "Rutinas"], ["body", "Cuerpo"], ["physique", "Físico (fotos)"], ["health", "Salud"]];
   return (
     <div className="page page-wide">
       <header className="page-head">
         <p className="eyebrow">Fase 5 · activo</p>
         <h1><Icon name="gym" size={26} /> Gimnasio</h1>
-        <p className="lead">Registra como lo apuntas: «inclinado 2x8 40kg rir 2». ATLAS calcula tu progresión, tu volumen por músculo y te avisa si te estancas.</p>
+        <p className="lead">Registra como lo apuntas: «inclinado 2x8 40kg rir 2». VISTAN calcula tu progresión, tu volumen por músculo y te avisa si te estancas.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones del gimnasio">
         {tabs.map(([k, label]) => (
@@ -34,6 +35,7 @@ export function Gym() {
       {tab === "progress" && <ProgressTab />}
       {tab === "routines" && <RoutinesTab />}
       {tab === "body" && <BodyTab />}
+      {tab === "physique" && <PhysiqueTab />}
       {tab === "health" && <HealthTab />}
     </div>
   );
@@ -331,7 +333,7 @@ function ProgressTab() {
             </>
           )}
         </Panel>
-        <Panel title="Lo que ATLAS detecta">
+        <Panel title="Lo que VISTAN detecta">
           {!insights.data ? <p className="muted">Cargando…</p> : (
             <ul className="goal-insights">
               {insights.data.stagnations.length > 0 && (

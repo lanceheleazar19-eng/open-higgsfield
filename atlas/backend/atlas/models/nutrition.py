@@ -37,4 +37,5 @@ class MealEntry(Base):
     carbs: Mapped[float] = mapped_column(Float)
     fat: Mapped[float] = mapped_column(Float)
     source: Mapped[str] = mapped_column(String(8), default="manual")  # manual | text | photo
+    photo_id: Mapped[int | None] = mapped_column(ForeignKey("meal_photos.id", ondelete="SET NULL"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

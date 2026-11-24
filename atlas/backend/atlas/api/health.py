@@ -1,5 +1,5 @@
-"""Apple Salud vía Atajo del iPhone. El Atajo envía un POST con la clave en la cabecera X-Atlas-Token.
-ATLAS no accede a HealthKit directamente: solo recibe lo que tu Atajo decide enviar."""
+"""Apple Salud vía Atajo del iPhone. El Atajo envía un POST con la clave en la cabecera X-Vistan-Token.
+VISTAN no accede a HealthKit directamente: solo recibe lo que tu Atajo decide enviar."""
 
 import secrets as pysecrets
 from datetime import date, datetime, timedelta
@@ -72,10 +72,13 @@ def day_dict(h: HealthDay) -> dict:
 
 
 @router.post("/ingest")
-def ingest(body: HealthIn, db: DB, x_atlas_token: str | None = Header(default=None)) -> dict:
+def ingest(body: HealthIn, db: DB, x_vistan_token: str | None = Header(default=None),
+           x_atlas_token: str | None = Header(default=None)) -> dict:
+    """Acepta la cabecera X-Vistan-Token (y X-Atlas-Token, para Atajos creados antes del cambio de nombre)."""
     expected = get_secret("health_token")
-    if not expected or not x_atlas_token or not pysecrets.compare_digest(x_atlas_token, expected):
-        raise HTTPException(401, "Clave de ATLAS incorrecta")
+    sent = x_vistan_token or x_atlas_token
+    if not expected or not sent or not pysecrets.compare_digest(sent, expected):
+        raise HTTPException(401, "Clave de VISTAN incorrecta")
     data = body.model_dump()
     if data.get("sleep_minutes") is not None and data.get("sleep_hours") is None:
         data["sleep_hours"] = data["sleep_minutes"] / 60
@@ -113,7 +116,7 @@ def days(db: DB, n: int = 30) -> list[dict]:
 
 @router.get("/setup")
 def setup() -> dict:
-    return {"token": _token(), "path": "/api/health/ingest", "header": "X-Atlas-Token", "fields": [*FIELDS, "sleep_minutes", "day"]}
+    return {"token": _token(), "path": "/api/health/ingest", "header": "X-Vistan-Token", "fields": [*FIELDS, "sleep_minutes", "day"]}
 
 
 @router.post("/token")

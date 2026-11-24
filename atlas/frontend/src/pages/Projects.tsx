@@ -23,7 +23,7 @@ export function Projects() {
       <header className="page-head">
         <p className="eyebrow">Workspaces</p>
         <h1><Icon name="projects" size={26} /> Proyectos</h1>
-        <p className="lead">Cada proyecto tiene su propio espacio: tareas, notas, documentos, investigaciones, entidades e historial. ATLAS usa ese contexto sin mezclarlo con lo demás.</p>
+        <p className="lead">Cada proyecto tiene su propio espacio: tareas, notas, documentos, investigaciones, entidades e historial. VISTAN usa ese contexto sin mezclarlo con lo demás.</p>
       </header>
       <div className="grid grid-tasks">
         <div className="stack">

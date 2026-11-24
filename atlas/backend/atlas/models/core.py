@@ -17,7 +17,7 @@ class Setting(Base):
 
 
 class ActivityLog(Base):
-    """Auditoría de lo que ocurre en ATLAS (también alimenta 'Actividad reciente')."""
+    """Auditoría de lo que ocurre en VISTAN (también alimenta 'Actividad reciente')."""
 
     __tablename__ = "activity_log"
 

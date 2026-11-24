@@ -5,7 +5,7 @@ import { formatDayLabel } from "../lib/tasks";
 import { LineChart } from "./LineChart";
 import { Empty, Panel } from "./Panel";
 
-/** Apple Salud vía Atajo del iPhone: ATLAS solo recibe lo que el Atajo envía. */
+/** Apple Salud vía Atajo del iPhone: VISTAN solo recibe lo que el Atajo envía. */
 export function HealthTab() {
   const days = useAsync(() => api.healthDays(30));
   const setup = useAsync(api.healthSetup);
@@ -20,10 +20,10 @@ export function HealthTab() {
   return (
     <div className="grid grid-tasks">
       <Panel title="Conectar Apple Salud (Atajo del iPhone)">
-        <p className="muted small">El iPhone envía tus datos a ATLAS por tu red privada de Tailscale. Abre ATLAS en el iPhone con la dirección de Tailscale para que esta URL sea la correcta.</p>
+        <p className="muted small">El iPhone envía tus datos a VISTAN por tu red privada de Tailscale. Abre VISTAN en el iPhone con la dirección de Tailscale para que esta URL sea la correcta.</p>
         <dl className="kv">
           <div><dt>URL</dt><dd className="mono small">{url} <button className="mini-btn ghost" type="button" onClick={() => copy("url", url)}>{copied === "url" ? "Copiada" : "Copiar"}</button></dd></div>
-          <div><dt>Cabecera</dt><dd className="mono small">X-Atlas-Token</dd></div>
+          <div><dt>Cabecera</dt><dd className="mono small">X-Vistan-Token</dd></div>
           <div><dt>Clave</dt><dd className="mono small">
             {setup.data ? (show ? setup.data.token : "•".repeat(12)) : "…"}{" "}
             <button className="mini-btn ghost" type="button" onClick={() => setShow(!show)}>{show ? "Ocultar" : "Mostrar"}</button>{" "}
@@ -38,8 +38,8 @@ export function HealthTab() {
           <li>Añade <strong>Buscar muestras de salud</strong> → Tipo: <em>Pasos</em>, fecha de inicio: <em>hoy</em>. Después <strong>Calcular estadísticas → Suma</strong>. Repite para <em>Energía activa</em> y <em>Distancia a pie y en carrera</em>.</li>
           <li>Para el sueño: <strong>Buscar muestras de salud</strong> → <em>Análisis del sueño</em>, últimas 24 h, valor <em>Dormido</em> → <strong>Obtener detalles → Duración</strong> → <strong>Calcular estadísticas → Suma</strong> (en minutos).</li>
           <li>Opcional: <strong>Buscar muestras de salud</strong> → <em>Peso</em>, ordenar por fecha, límite 1. El peso también se usa en Gimnasio y Nutrición.</li>
-          <li>Añade <strong>Obtener contenido de URL</strong>: la URL de arriba, método <em>POST</em>, encabezado <em>X-Atlas-Token</em> con tu clave y cuerpo <em>JSON</em> con los campos <code>steps</code>, <code>active_kcal</code>, <code>distance_km</code>, <code>sleep_minutes</code> y <code>weight_kg</code> (cada uno con su resultado).</li>
-          <li>Pulsa ▶︎ para probarlo. Debe responder <code>{"{\"ok\": true}"}</code> y los datos aparecerán aquí. ATLAS tiene que estar abierto en tu Mac.</li>
+          <li>Añade <strong>Obtener contenido de URL</strong>: la URL de arriba, método <em>POST</em>, encabezado <em>X-Vistan-Token</em> con tu clave y cuerpo <em>JSON</em> con los campos <code>steps</code>, <code>active_kcal</code>, <code>distance_km</code>, <code>sleep_minutes</code> y <code>weight_kg</code> (cada uno con su resultado).</li>
+          <li>Pulsa ▶︎ para probarlo. Debe responder <code>{"{\"ok\": true}"}</code> y los datos aparecerán aquí. VISTAN tiene que estar abierto en tu Mac.</li>
         </ol>
         <p className="muted small">La clave se guarda en el Llavero de tu Mac. Puedes enviar solo los campos que quieras: los que falten no se inventan.</p>
       </Panel>

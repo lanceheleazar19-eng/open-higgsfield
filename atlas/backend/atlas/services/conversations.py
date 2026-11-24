@@ -1,4 +1,4 @@
-"""Historial de conversaciones con ATLAS."""
+"""Historial de conversaciones con VISTAN."""
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session

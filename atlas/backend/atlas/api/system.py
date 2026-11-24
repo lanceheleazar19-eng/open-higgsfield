@@ -65,7 +65,7 @@ def _ai(db) -> dict:  # noqa: ANN001
 
 @router.get("/metrics")
 def metrics() -> dict:
-    """Uso real de CPU y RAM del ordenador donde corre ATLAS."""
+    """Uso real de CPU y RAM del ordenador donde corre VISTAN."""
     import psutil
     vm = psutil.virtual_memory()
     return {"cpu_percent": psutil.cpu_percent(interval=0.2), "ram_percent": vm.percent,

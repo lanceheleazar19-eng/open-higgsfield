@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ejecuta todas las pruebas de ATLAS.
+# Ejecuta todas las pruebas de VISTAN.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 echo "== Backend ==";  (cd "$ROOT/backend" && .venv/bin/pytest -q -p no:warnings)

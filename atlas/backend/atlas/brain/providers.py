@@ -231,3 +231,48 @@ class GeminiProvider(CloudProvider):
 
 
 CLOUD = {"openai": OpenAIProvider, "anthropic": AnthropicProvider, "gemini": GeminiProvider}
+
+
+# ---------- Imágenes (solo se usan si eliges un proveedor en la nube para «Imágenes» y das tu consentimiento) ----------
+def openai_images_json(p: OpenAIProvider, model: str, system: str, text: str, images: list[str]) -> dict:
+    content = [{"type": "text", "text": text}] + [{"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b}"}} for b in images]
+    body = {"model": model, "response_format": {"type": "json_object"},
+            "messages": [{"role": "system", "content": system}, {"role": "user", "content": content}]}
+    try:
+        r = p.client.post(f"{p.base_url}/chat/completions", headers=p._h(), json=body)
+    except httpx.HTTPError as exc:
+        raise ProviderError(f"Sin conexión con OpenAI: {type(exc).__name__}") from exc
+    if r.status_code != 200:
+        raise _err(r, "OpenAI")
+    return _json_from_text(r.json()["choices"][0]["message"]["content"] or "")
+
+
+def anthropic_images_json(p: AnthropicProvider, model: str, system: str, text: str, images: list[str]) -> dict:
+    content = [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": b}} for b in images]
+    content.append({"type": "text", "text": text + "\n\nResponde únicamente con un objeto JSON válido."})
+    body = {"model": model, "max_tokens": 3000, "system": system, "messages": [{"role": "user", "content": content}]}
+    try:
+        r = p.client.post(f"{p.base_url}/messages", headers=p._h(), json=body)
+    except httpx.HTTPError as exc:
+        raise ProviderError(f"Sin conexión con Anthropic: {type(exc).__name__}") from exc
+    if r.status_code != 200:
+        raise _err(r, "Anthropic")
+    return _json_from_text("".join(b.get("text", "") for b in r.json().get("content", [])))
+
+
+def gemini_images_json(p: GeminiProvider, model: str, system: str, text: str, images: list[str]) -> dict:
+    parts = [{"inline_data": {"mime_type": "image/jpeg", "data": b}} for b in images] + [{"text": text}]
+    body = {"contents": [{"role": "user", "parts": parts}], "systemInstruction": {"parts": [{"text": system}]},
+            "generationConfig": {"responseMimeType": "application/json"}}
+    try:
+        r = p.client.post(f"{p.base_url}/models/{model}:generateContent", headers=p._h(), json=body)
+    except httpx.HTTPError as exc:
+        raise ProviderError(f"Sin conexión con Gemini: {type(exc).__name__}") from exc
+    if r.status_code != 200:
+        raise _err(r, "Gemini")
+    j = r.json()
+    ps = ((j.get("candidates") or [{}])[0].get("content") or {}).get("parts") or []
+    return _json_from_text("".join(x.get("text", "") for x in ps))
+
+
+IMAGE_JSON = {"openai": openai_images_json, "anthropic": anthropic_images_json, "gemini": gemini_images_json}

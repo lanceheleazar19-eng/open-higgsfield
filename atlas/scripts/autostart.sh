@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ATLAS en segundo plano en macOS (sin ventana de Terminal). Usa un LaunchAgent de tu usuario:
+# VISTAN en segundo plano en macOS (sin ventana de Terminal). Usa un LaunchAgent de tu usuario:
 # arranca al iniciar sesión y se reinicia solo si se cae.
 #   ./atlas/scripts/autostart.sh install     activar (y arrancar ya)
 #   ./atlas/scripts/autostart.sh restart     reiniciar (p. ej. tras actualizar con git pull)
@@ -21,10 +21,10 @@ esc() { sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' <<<"$1"; }
 case "${1:-}" in
   install)
     # Prepara dependencias e interfaz ahora (con mensajes visibles), no en segundo plano
-    echo "▸ Preparando ATLAS…"
+    echo "▸ Preparando VISTAN…"
     ATLAS_PREPARE_ONLY=1 "$ROOT/scripts/start.sh"
     if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1 && ! launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1; then
-      echo "✖ El puerto $PORT está ocupado. Si tienes ATLAS abierto en otra Terminal, ciérralo con Ctrl+C y repite."
+      echo "✖ El puerto $PORT está ocupado. Si tienes VISTAN abierto en otra Terminal, ciérralo con Ctrl+C y repite."
       exit 1
     fi
     mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
@@ -51,7 +51,7 @@ PL
     echo "▸ Arrancando en segundo plano…"
     for _ in $(seq 1 30); do
       if curl -fsS "http://127.0.0.1:$PORT/api/system/health" >/dev/null 2>&1; then
-        echo "✅ ATLAS funciona en segundo plano → http://127.0.0.1:$PORT"
+        echo "✅ VISTAN funciona en segundo plano → http://127.0.0.1:$PORT"
         echo "   Arrancará solo cada vez que enciendas el Mac. Ya puedes cerrar la Terminal."
         TS=/Applications/Tailscale.app/Contents/MacOS/Tailscale
         if [ -x "$TS" ]; then "$TS" serve --bg "$PORT" >/dev/null 2>&1 && echo "   Tailscale apunta al puerto $PORT (móvil listo)."; fi
@@ -62,16 +62,16 @@ PL
     echo "✖ No ha arrancado. Mira el registro con: ./atlas/scripts/autostart.sh logs"
     exit 1 ;;
   restart)
-    launchctl kickstart -k "$DOMAIN/$LABEL" && echo "✅ ATLAS reiniciado." ;;
+    launchctl kickstart -k "$DOMAIN/$LABEL" && echo "✅ VISTAN reiniciado." ;;
   status)
-    if curl -fsS "http://127.0.0.1:$PORT/api/system/health" >/dev/null 2>&1; then echo "✅ ATLAS funcionando → http://127.0.0.1:$PORT"
-    else echo "✖ ATLAS no responde en el puerto $PORT. Registro: ./atlas/scripts/autostart.sh logs"; fi ;;
+    if curl -fsS "http://127.0.0.1:$PORT/api/system/health" >/dev/null 2>&1; then echo "✅ VISTAN funcionando → http://127.0.0.1:$PORT"
+    else echo "✖ VISTAN no responde en el puerto $PORT. Registro: ./atlas/scripts/autostart.sh logs"; fi ;;
   logs)
     tail -n 40 "$LOG" ;;
   uninstall)
     launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
     rm -f "$PLIST"
-    echo "✅ Desactivado. ATLAS ya no arrancará solo (puedes seguir usando start.sh)." ;;
+    echo "✅ Desactivado. VISTAN ya no arrancará solo (puedes seguir usando start.sh)." ;;
   *)
     sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ; exit 1 ;;
 esac

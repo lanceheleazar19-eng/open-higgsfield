@@ -11,7 +11,7 @@ export function ProactiveSettings() {
     <Panel title="Inteligencia proactiva">
       <div className="form">
         <label className="check"><input type="checkbox" checked={config.enabled} onChange={(e) => void save(e.target.checked, config.rules)} />
-          ATLAS analiza tus datos y te avisa de lo importante (explicando qué, por qué y qué recomienda)</label>
+          VISTAN analiza tus datos y te avisa de lo importante (explicando qué, por qué y qué recomienda)</label>
         {config.enabled && Object.entries(rules).map(([k, label]) => (
           <label key={k} className="check"><input type="checkbox" checked={config.rules[k]} onChange={(e) => void save(true, { ...config.rules, [k]: e.target.checked })} /> {label}</label>
         ))}

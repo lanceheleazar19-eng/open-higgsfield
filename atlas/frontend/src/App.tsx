@@ -18,10 +18,11 @@ import { Knowledge } from "./pages/Knowledge";
 import { Projects } from "./pages/Projects";
 import { Research } from "./pages/Research";
 import { Workflows } from "./pages/Workflows";
+import { Progress } from "./pages/Progress";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
-const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "agents", "reports", "command", "knowledge", "projects", "research", "workflows"]);
+const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
 
 export function App() {
   return (
@@ -45,6 +46,7 @@ export function App() {
           <Route path="projects" element={<Projects />} />
           <Route path="research" element={<Research />} />
           <Route path="workflows" element={<Workflows />} />
+          <Route path="progress" element={<Progress />} />
           {NAV.filter((n) => !BUILT.has(n.id)).map((n) => (
             <Route key={n.id} path={n.path.slice(1)} element={<ModulePage id={n.id} />} />
           ))}

@@ -1,4 +1,4 @@
-/** Escena WebGL del núcleo de ATLAS (three.js, cargado bajo demanda).
+/** Escena WebGL del núcleo de VISTAN (three.js, cargado bajo demanda).
  *
  *  Núcleo neuronal (esfera de neuronas + sinapsis), anillos giroscópicos,
  *  órbitas, campo de partículas y líneas de energía hacia cada módulo con
@@ -37,6 +37,8 @@ export interface FrameInput {
   camZ: number;
   nodePositions: Vec3[]; // espacio local (antes de la rotación de vista)
   hovered: number;
+  selected: number;
+  target: Vec3; // punto al que mira la cámara, en espacio de vista
 }
 
 export interface AtlasScene {
@@ -100,7 +102,7 @@ function neighbourLinks(pos: Float32Array, k: number): Float32Array {
   return new Float32Array(segs);
 }
 
-export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opts: { lite: boolean }): AtlasScene {
+export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opts: { lite: boolean; links?: [number, number][] }): AtlasScene {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, opts.lite ? 1.25 : 1.75));
   renderer.setClearColor(0x000000, 0);
@@ -119,10 +121,11 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
 
   // ---------------- Núcleo ----------------
   const core = new THREE.Group();
+  core.scale.setScalar(1.3);
   root.add(core);
 
   const halo = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0xe3192d, opacity: 0.55, ...additive })));
-  halo.scale.setScalar(4.6);
+  halo.scale.setScalar(6);
   core.add(halo);
   const heart = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0xffc2c8, opacity: 0.9, ...additive })));
   heart.scale.setScalar(1.5);
@@ -145,7 +148,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
   core.add(new THREE.LineSegments(linkGeo, linkMat));
 
   const shell = new THREE.LineSegments(
-    track(new THREE.WireframeGeometry(track(new THREE.IcosahedronGeometry(1.42, 1)))),
+    track(new THREE.WireframeGeometry(track(new THREE.IcosahedronGeometry(1.85, 1)))),
     track(new THREE.LineBasicMaterial({ color: 0xff5a66, opacity: 0.1, ...additive })),
   );
   root.add(shell);
@@ -153,7 +156,7 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
   // Anillos giroscópicos alrededor del núcleo
   const gyroMat = track(new THREE.LineBasicMaterial({ color: 0xff3346, opacity: 0.4, ...additive }));
   const gyros: THREE.LineLoop[] = [];
-  for (const [r, rx, rz] of [[1.7, 1.2, 0.3], [1.9, 0.4, -0.9], [2.05, -0.7, 0.5]] as const) {
+  for (const [r, rx, rz] of [[2.15, 1.2, 0.3], [2.35, 0.4, -0.9], [2.5, -0.7, 0.5]] as const) {
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i < 128; i++) {
       const a = (i / 128) * Math.PI * 2;
@@ -167,30 +170,21 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     gyros.push(ring);
   }
 
-  // ---------------- Plataforma holográfica ----------------
+  // ---------------- Disco orbital (brillo sutil en el plano de las órbitas) ----------------
   const platform = new THREE.Group();
-  platform.position.y = -2.2;
   const platMats: THREE.MeshBasicMaterial[] = [];
-  [[0.8, 0.88, 0.55], [1.3, 1.35, 0.4], [1.9, 1.94, 0.3], [2.6, 2.63, 0.2], [3.3, 3.32, 0.12]].forEach(([r1, r2, op]) => {
-    const m = track(new THREE.MeshBasicMaterial({ color: 0xff2e42, opacity: op, side: THREE.DoubleSide, ...additive }));
+  ORBITS.forEach((o, i) => {
+    const m = track(new THREE.MeshBasicMaterial({ color: 0xe11d35, opacity: 0.05, side: THREE.DoubleSide, ...additive }));
     platMats.push(m);
-    const ring = new THREE.Mesh(track(new THREE.RingGeometry(r1, r2, 128)), m);
+    const ring = new THREE.Mesh(track(new THREE.RingGeometry(o.radius - 0.32, o.radius + 0.32, 160)), m);
     ring.rotation.x = -Math.PI / 2;
+    ring.userData.i = i;
     platform.add(ring);
   });
-  const disc = new THREE.Mesh(track(new THREE.CircleGeometry(0.9, 64)),
-    track(new THREE.MeshBasicMaterial({ map: tex, color: 0xff2e42, opacity: 0.55, ...additive })));
-  disc.rotation.x = -Math.PI / 2;
-  platform.add(disc);
-  // haz vertical de luz
-  const beam = new THREE.Mesh(track(new THREE.CylinderGeometry(0.5, 0.95, 1.6, 48, 1, true)),
-    track(new THREE.MeshBasicMaterial({ color: 0xff2e42, opacity: 0.035, side: THREE.DoubleSide, ...additive })));
-  beam.position.y = 0.8;
-  platform.add(beam);
   root.add(platform);
 
   // ---------------- Órbitas ----------------
-  const orbitMat = track(new THREE.LineBasicMaterial({ color: 0xd4142a, opacity: 0.2, ...additive }));
+  const orbitMat = track(new THREE.LineBasicMaterial({ color: 0xe11d35, opacity: 0.26, ...additive }));
   for (const o of ORBITS) {
     const pts: THREE.Vector3[] = [];
     for (let i = 0; i < 192; i++) pts.push(new THREE.Vector3(...orbitPoint(o, (i / 192) * Math.PI * 2)));
@@ -201,11 +195,11 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
   const P = opts.lite ? 380 : 900;
   const fieldPos = new Float32Array(P * 3);
   for (let i = 0; i < P; i++) {
-    const r = 2.2 + Math.pow(Math.random(), 0.7) * 7;
+    const r = 2.4 + Math.pow(Math.random(), 0.6) * 9;
     const th = Math.random() * Math.PI * 2;
     const ph = Math.acos(2 * Math.random() - 1);
     fieldPos[i * 3] = r * Math.sin(ph) * Math.cos(th);
-    fieldPos[i * 3 + 1] = r * Math.cos(ph) * 0.6;
+    fieldPos[i * 3 + 1] = r * Math.cos(ph) * 0.35;
     fieldPos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
   }
   const fieldGeo = track(new THREE.BufferGeometry());
@@ -226,9 +220,21 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     pulse.scale.setScalar(0.16);
     root.add(pulse);
     const planet = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: new THREE.Color(c), opacity: 0.35, ...additive })));
-    planet.scale.setScalar(0.6);
+    planet.scale.setScalar(1.1);
     root.add(planet);
     return { geo, mat, pulse, planet, t: Math.random() };
+  });
+
+  // Enlaces entre módulos relacionados: partículas que viajan de un planeta a otro
+  const between = (opts.links ?? []).map(([a, b]) => {
+    const geo = track(new THREE.BufferGeometry());
+    geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
+    const mat = track(new THREE.LineBasicMaterial({ color: 0xb51224, opacity: 0.1, ...additive }));
+    root.add(new THREE.Line(geo, mat));
+    const pulse = new THREE.Sprite(track(new THREE.SpriteMaterial({ map: tex, color: 0xff8f9b, opacity: 0.7, ...additive })));
+    pulse.scale.setScalar(0.12);
+    root.add(pulse);
+    return { a, b, geo, mat, pulse, t: Math.random() };
   });
 
   // Onda expansiva al recibir una consulta (mira siempre a cámara: fuera de root)
@@ -254,17 +260,17 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
     glow += (L.glow - glow) * k;
 
     root.rotation.set(f.rx, f.ry, 0);
+    root.position.set(-f.target[0], -f.target[1], -f.target[2]);
     core.rotation.y += f.dt * 0.12 * spin;
     core.rotation.x = Math.sin(f.time * 0.15) * 0.2;
     shell.rotation.y -= f.dt * 0.06 * spin;
     shell.rotation.z += f.dt * 0.03 * spin;
     gyros.forEach((g, i) => { g.rotation.z += f.dt * (0.15 + i * 0.07) * spin * (i % 2 ? -1 : 1); });
     field.rotation.y += f.dt * 0.012 * spin;
-    platform.rotation.y += f.dt * 0.05 * spin;
-    platMats.forEach((m, i) => { m.color.copy(col); m.opacity = (0.5 - i * 0.09) * (0.8 + 0.2 * Math.sin(f.time * 1.5 - i)) * glow; });
+    platMats.forEach((m, i) => { m.color.copy(col); m.opacity = (0.045 + 0.02 * Math.sin(f.time * 0.9 - i * 0.8)) * glow; });
 
     const breathe = 1 + Math.sin(f.time * (state === "listening" ? 5 : 1.6)) * (state === "listening" ? 0.06 : 0.03);
-    halo.scale.setScalar(4.6 * breathe * glow);
+    halo.scale.setScalar(6 * breathe * glow);
     heart.scale.setScalar(1.5 * breathe * (0.9 + glow * 0.1));
     (halo.material as THREE.SpriteMaterial).color.copy(col);
     (heart.material as THREE.SpriteMaterial).color.copy(acc).lerp(col, 0.4);
@@ -297,14 +303,26 @@ export function createScene(canvas: HTMLCanvasElement, nodeColors: string[], opt
       arr[0] = tmpA.x; arr[1] = tmpA.y; arr[2] = tmpA.z;
       arr[3] = tmpB.x; arr[4] = tmpB.y; arr[5] = tmpB.z;
       l.geo.attributes.position.needsUpdate = true;
-      const hot = f.hovered === i;
+      const hot = f.hovered === i || f.selected === i;
       l.mat.opacity += ((hot ? 0.85 : 0.14 + (glow - 1) * 0.25) - l.mat.opacity) * Math.min(1, f.dt * 8);
       l.t = (l.t + f.dt * pulseSpeed * (hot ? 2.2 : 1)) % 1;
       const t = L.pulseDir === 1 ? 1 - l.t : l.t;
       l.pulse.position.lerpVectors(tmpA, tmpB, t);
       l.pulse.material.opacity = Math.sin(l.t * Math.PI) * (hot ? 1 : 0.8);
       l.planet.position.copy(tmpB);
-      l.planet.material.opacity = hot ? 0.45 : 0.12;
+      l.planet.material.opacity = hot ? 0.5 : 0.16;
+    });
+    between.forEach((e) => {
+      const pa = f.nodePositions[e.a], pb = f.nodePositions[e.b];
+      if (!pa || !pb) return;
+      const arr = e.geo.attributes.position.array as Float32Array;
+      arr.set([...pa, ...pb]);
+      e.geo.attributes.position.needsUpdate = true;
+      const hot = [e.a, e.b].includes(f.selected) || [e.a, e.b].includes(f.hovered);
+      e.mat.opacity += ((hot ? 0.5 : 0.08 + (glow - 1) * 0.1) - e.mat.opacity) * Math.min(1, f.dt * 6);
+      e.t = (e.t + f.dt * pulseSpeed * 0.6) % 1;
+      e.pulse.position.set(pa[0] + (pb[0] - pa[0]) * e.t, pa[1] + (pb[1] - pa[1]) * e.t, pa[2] + (pb[2] - pa[2]) * e.t);
+      e.pulse.material.opacity = Math.sin(e.t * Math.PI) * (hot ? 1 : 0.55);
     });
 
     if (rippleT >= 0) {

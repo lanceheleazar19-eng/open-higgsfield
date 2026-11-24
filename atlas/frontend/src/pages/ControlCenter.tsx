@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import type { Dashboard, StoredMessage } from "../api/types";
+import type { NutritionDay, Dashboard, StoredMessage } from "../api/types";
 import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { CommandBar } from "../components/control/CommandBar";
@@ -18,38 +18,61 @@ import { v4, type CommandCenter as CommandCenterData } from "../api/v4";
 const MIN_THINK_MS = 450; // deja ver la transición de estado del núcleo
 
 /** Métricas reales de cada nodo; los módulos no construidos muestran su fase. */
-function nodeInfo(d: Dashboard | null, phases: Map<string, number>, memories: number | undefined, aiModel: string | null, c?: CommandCenterData | null): Record<string, NodeInfo> {
-  const phase = (id: string) => ({ metric: `Fase ${phases.get(id) ?? "—"}`, planned: true });
+function nodeInfo(d: Dashboard | null, memories: number | undefined, aiModel: string | null, c?: CommandCenterData | null,
+  nd?: NutritionDay | null, busy?: boolean): Record<string, NodeInfo> {
   const n = (v: number, one: string, many: string) => `${v} ${v === 1 ? one : many}`;
   if (!d) return {};
+  const money = (x: number) => formatMoney(x, d.finance.currency);
+  const next = d.events.items[0];
+  const wfRunning = c?.processes.filter((p) => p.kind === "workflow").length ?? 0;
+  const kcal = nd?.totals.kcal ?? 0;
   return {
-    ai: aiModel ? { metric: aiModel, planned: false } : { metric: "Modo local", planned: false, alert: false },
-    memory: memories !== undefined ? { metric: n(memories, "recuerdo", "recuerdos"), planned: false } : phase("memory"),
-    agents: c ? { metric: `${c.agent_runs_24h} ejec. · 24 h`, planned: false, alert: c.approvals_pending > 0 } : phase("agents"),
-    tasks: { metric: n(d.tasks.pending, "pendiente", "pendientes"), planned: false, alert: d.tasks.overdue > 0 },
-    calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: false },
-    projects: { metric: n(d.projects.active, "activo", "activos"), planned: false },
-    research: c ? { metric: c.research_running ? `${c.research_running} en curso` : n(c.research_total, "informe", "informes"), planned: false } : phase("research"),
-    gym: { metric: d.fitness.today_routine ? `Hoy: ${d.fitness.today_routine}` : `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`, planned: false },
+    ai: { metric: aiModel ?? "Modo local", planned: false, active: !!busy,
+      details: [aiModel ? `Modelo: ${aiModel}` : "Sin modelo de IA: respondo con tus datos", c ? `${c.model_calls_24h.count} llamadas en 24 h` : ""].filter(Boolean) },
+    memory: { metric: memories !== undefined ? n(memories, "recuerdo", "recuerdos") : "—", planned: false,
+      details: c ? [`${c.memory.documents ?? 0} documentos en Conocimiento`] : [] },
+    agents: { metric: c ? `${c.agent_runs_24h} ejec. · 24 h` : "—", planned: false, alert: (c?.approvals_pending ?? 0) > 0,
+      active: (c?.agent_runs_24h ?? 0) > 0,
+      details: c ? [c.approvals_pending ? `${c.approvals_pending} acción(es) esperan tu autorización` : "Nada pendiente de autorizar",
+        c.agents_active_24h.length ? `Activos hoy: ${c.agents_active_24h.join(", ")}` : "Ningún agente ha trabajado hoy"] : [] },
+    tasks: { metric: n(d.tasks.pending, "pendiente", "pendientes"), planned: false, alert: d.tasks.overdue > 0,
+      details: [d.tasks.overdue ? `${d.tasks.overdue} atrasada(s)` : "Nada atrasado", ...d.tasks.items.slice(0, 3).map((t) => `· ${t.title}`)] },
+    calendar: { metric: n(d.events.items.length, "próximo", "próximos"), planned: false, active: !!next,
+      details: next ? [`Siguiente: ${next.title}`] : ["Sin eventos próximos"] },
+    projects: { metric: n(d.projects.active, "activo", "activos"), planned: false, details: d.projects.items.slice(0, 3).map((p) => `· ${p.name}`) },
+    research: { metric: c ? (c.research_running ? `${c.research_running} en curso` : n(c.research_total, "informe", "informes")) : "—",
+      planned: false, active: (c?.research_running ?? 0) > 0, details: c?.processes.filter((p) => p.kind === "research").map((p) => `· ${p.label}`) ?? [] },
+    workflows: { metric: c ? n(c.workflows_scheduled.length, "programado", "programados") : "—", planned: false, active: wfRunning > 0,
+      details: c?.workflows_scheduled.map((w) => `· ${w.name} (${w.schedule})`) ?? [] },
+    gym: { metric: d.fitness.today_routine ? `Hoy: ${d.fitness.today_routine}` : `${n(d.fitness.sessions_7d, "sesión", "sesiones")} · 7d`,
+      planned: false, active: !!d.fitness.today_routine,
+      details: [`${n(d.fitness.sessions_7d, "sesión", "sesiones")} en los últimos 7 días`, "Fotos de progreso y análisis en Fitness › Progress"] },
+    nutrition: { metric: nd ? (kcal ? `${Math.round(kcal)} kcal hoy` : "Sin comidas hoy") : "—", planned: false, active: kcal > 0,
+      details: nd ? [nd.targets ? `Objetivo: ${nd.targets.kcal} kcal y ${nd.targets.protein} g de proteína` : "Completa tu perfil nutricional",
+        `${Math.round(nd.totals.protein)} g de proteína hoy`] : [] },
     finance: d.finance.has_data
-      ? { metric: `${formatMoney(d.finance.net_cents, d.finance.currency)} mes`, planned: false, alert: d.finance.net_cents < 0 || d.finance.budgets?.some((b) => b.status === "over") }
-      : { metric: "Sin datos", planned: false },
+      ? { metric: `${money(d.finance.net_cents)} mes`, planned: false, alert: d.finance.net_cents < 0 || d.finance.budgets?.some((b) => b.status === "over"),
+        details: [`Ingresos: ${money(d.finance.income_cents)}`, `Gastos: ${money(d.finance.expense_cents)}`] }
+      : { metric: "Sin datos", planned: false, details: ["Apunta gastos: «he gastado 12 en comida»"] },
     trading: d.trading && (d.trading.open || d.trading.closed)
-      ? { metric: `Simulado ${d.trading.pnl >= 0 ? "+" : ""}${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(d.trading.pnl)}`, planned: false }
-      : { metric: "Sin operaciones", planned: false },
+      ? { metric: `Simulado ${d.trading.pnl >= 0 ? "+" : ""}${new Intl.NumberFormat("es-ES", { maximumFractionDigits: 2 }).format(d.trading.pnl)}`,
+        planned: false, active: d.trading.open > 0, details: [`${d.trading.open} abiertas · ${d.trading.closed} cerradas (capital virtual)`] }
+      : { metric: "Sin operaciones", planned: false, details: ["Solo simulación: nunca dinero real"] },
   };
 }
 
 export function ControlCenter() {
   const dash = useAsync(api.dashboard, 60_000);
   const cc = useAsync(v4.commandCenter, 20_000);
+  const nday = useAsync(api.nutritionDay, 120_000);
+  const [planet, setPlanet] = useState<string | null>(null);
   const [phase, setPhase] = useState<"executing" | "researching" | null>(null);
   const [errorFlash, setErrorFlash] = useState(false);
   const [consoleMin, setConsoleMin] = useState(() => { try { return localStorage.getItem("atlas.console.min") === "1"; } catch { return false; } });
   const toggleConsole = () => setConsoleMin((m) => { try { localStorage.setItem("atlas.console.min", m ? "0" : "1"); } catch { /* */ } return !m; });
   const flashError = () => { setErrorFlash(true); setTimeout(() => setErrorFlash(false), 3500); };
   useEffect(() => { if (phase === "researching" && cc.data && cc.data.research_running === 0) { const t = setTimeout(() => setPhase(null), 8000); return () => clearTimeout(t); } }, [phase, cc.data]);
-  const { health, healthError, modules, reloadHealth } = useAtlas();
+  const { health, healthError, reloadHealth } = useAtlas();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [streaming, setStreaming] = useState(false);
@@ -169,7 +192,7 @@ export function ControlCenter() {
     }
   }, [dash.reload]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Retoma la última conversación al volver a abrir ATLAS
+  // Retoma la última conversación al volver a abrir VISTAN
   useEffect(() => {
     try {
       if (conversationId) localStorage.setItem("atlas.conversation", String(conversationId));
@@ -319,10 +342,9 @@ export function ControlCenter() {
             : streaming || afterglow ? "responding"
               : researching ? "researching" : "idle";
   const offline = !!healthError || (!!dash.error && !dash.data);
-  const phases = useMemo(() => new Map(modules.map((m) => [m.id, m.phase])), [modules]);
   const info = useMemo(
-    () => nodeInfo(dash.data, phases, health?.storage?.memories, health?.ai.configured ? health.ai.model : null, cc.data),
-    [dash.data, phases, health, cc.data],
+    () => nodeInfo(dash.data, health?.storage?.memories, health?.ai.configured ? health.ai.model : null, cc.data, nday.data, busy),
+    [dash.data, health, cc.data, nday.data, busy],
   );
   const d = dash.data;
 
@@ -342,11 +364,11 @@ export function ControlCenter() {
             {d && !d.greeting.name && <p className="hint"><Link to="/settings">Dime cómo te llamas</Link> para personalizar el saludo.</p>}
           </header>
 
-          <AtlasCore info={info} state={offline ? "idle" : coreState} rippleKey={ripple} onOpen={navigate} />
+          <AtlasCore info={info} state={offline ? "idle" : coreState} rippleKey={ripple} onOpen={navigate} selected={planet} onSelect={setPlanet} />
 
           {offline && (
             <div className="offline-banner" role="alert">
-              <strong>Núcleo de ATLAS sin conexión.</strong>{" "}
+              <strong>Núcleo de VISTAN sin conexión.</strong>{" "}
               {(dash.error ?? healthError)?.message}. Comprueba que el backend está en marcha (scripts/start).
               <button className="btn" onClick={() => void dash.reload()}>Reintentar</button>
             </div>
@@ -371,7 +393,8 @@ export function ControlCenter() {
           </div>
         </div>
 
-        <IntelPanel data={d} onChanged={() => void dash.reload()} />
+        <IntelPanel data={d} onChanged={() => void dash.reload()} module={planet ? { id: planet, info: info[planet] } : null}
+          onOpen={navigate} onClose={() => setPlanet(null)} />
       </div>
 
       {d && (

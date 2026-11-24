@@ -1,4 +1,4 @@
-"""ATLAS 4.0: conocimiento (RAG), grafo, investigación, agentes, workflows, multi-modelo, seguridad,
+"""VISTAN 4.0: conocimiento (RAG), grafo, investigación, agentes, workflows, multi-modelo, seguridad,
 proactividad, proyectos y centro de control."""
 
 import io

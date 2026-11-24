@@ -171,7 +171,7 @@ def _exec_step(db: Session, run: WorkflowRun, step: dict, prefs: dict, tz: str, 
         return ("Guardado en memoria." if created else "Ya estaba en memoria.")
     if t == "notify":
         body = "\n\n".join(o for o in outputs if o)[:4000] or str(params.get("body") or "")
-        notify(db, str(params.get("title") or "ATLAS"), body, link=f"/workflows?run={run.id}")
+        notify(db, str(params.get("title") or "VISTAN"), body, link=f"/workflows?run={run.id}")
         return "Notificación creada."
     if t == "backup":
         from atlas.services.backup import backup_db

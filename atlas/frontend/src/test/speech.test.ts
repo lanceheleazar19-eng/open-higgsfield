@@ -14,7 +14,7 @@ test("prioriza voces de calidad y nunca elige voces de efectos", () => {
 });
 
 test("limpia el texto y lo trocea en frases cortas", () => {
-  expect(cleanForSpeech("**Hola** • «ATLAS»\n- uno")).toBe("Hola ATLAS uno");
+  expect(cleanForSpeech("**Hola** • «VISTAN»\n- uno")).toBe("Hola VISTAN uno");
   const long = "Primera frase. " + "palabra ".repeat(60) + "fin. Última.";
   const chunks = speechChunks(long, 180);
   expect(chunks.every((c) => c.length <= 181)).toBe(true);

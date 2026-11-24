@@ -86,7 +86,7 @@ def test_icloud_sync_upsert_delete_and_conflicts(client, monkeypatch, session):
     client.post("/api/integrations/sync")
     assert [e["title"] for e in client.get("/api/calendar").json()["items"]] == ["Clase de mates"]
     icloud_id = client.get("/api/calendar").json()["items"][0]["id"]
-    assert client.delete(f"/api/calendar/{icloud_id}").status_code == 400  # no se borra desde ATLAS
+    assert client.delete(f"/api/calendar/{icloud_id}").status_code == 400  # no se borra desde VISTAN
 
 
 def test_local_events_and_validation(client):

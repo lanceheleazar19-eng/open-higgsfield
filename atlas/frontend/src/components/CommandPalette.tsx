@@ -47,7 +47,7 @@ export function CommandPalette() {
       out.push({ id: "ask", group: "Acciones", icon: "ai", label: `Preguntar a los agentes: «${t}»`, run: () => { nav(`/agents?tab=try`); setOpen(false); } });
     }
     for (const n of NAV) if (!low || n.label.toLowerCase().includes(low)) out.push({ id: `nav-${n.id}`, group: "Ir a", icon: n.id, label: n.label, run: go(n.path) });
-    const cfg: [string, string][] = [["Modelos de IA y API keys", "/settings#modelos"], ["Seguridad y copias", "/settings#seguridad"], ["Perfil personal", "/settings#perfil"], ["Voz y «Hola ATLAS»", "/settings"], ["Proactividad", "/settings#proactividad"]];
+    const cfg: [string, string][] = [["Modelos de IA y API keys", "/settings#modelos"], ["Seguridad y copias", "/settings#seguridad"], ["Perfil personal", "/settings#perfil"], ["Voz y «Hola VISTAN»", "/settings"], ["Proactividad", "/settings#proactividad"]];
     for (const [l, p] of cfg) if (!low || l.toLowerCase().includes(low)) out.push({ id: `cfg-${p}${l}`, group: "Configuración", icon: "settings", label: l, run: go(p) });
     if (res) {
       res.tasks.forEach((x) => out.push({ id: `t${x.id}`, group: "Tareas", icon: "tasks", label: x.title, hint: x.status === "done" ? "hecha" : "pendiente", run: go("/tasks") }));

@@ -3,18 +3,18 @@
 | Fase | Contenido | Estado |
 |---|---|---|
 | 1 | Arquitectura, estructura, dashboard, configuración | ✅ Completada |
-| 1.5 | ATLAS 2.0: centro de control holográfico | ✅ Completada |
+| 1.5 | VISTAN 2.0: centro de control holográfico | ✅ Completada |
 | 2 | Cerebro IA con Ollama: conversación en streaming anclada a tus datos | ✅ Completada |
 | 3 | Memoria persistente (búsqueda, temporal/permanente, sin duplicados) | ✅ Completada |
 | 4 | Gestor de tareas y objetivos medibles (prioridades, fechas, atrasos, progreso) | ✅ Completada |
 | 5A | Gimnasio (rutinas, series, RIR, volumen, progresión, estancamientos) | ✅ Completada |
 | 5B | Nutrición con fotos (modelo de visión local), macros y recomendaciones | ✅ Completada |
 | 6 | Finanzas (dinero real), Trading (paper trading, separado) y Apple Salud | ✅ Completada |
-| 7 | Proyectos y negocios (espacio y memoria propios) | ✅ Completada (ATLAS 4.0) |
+| 7 | Proyectos y negocios (espacio y memoria propios) | ✅ Completada (VISTAN 4.0) |
 | 8 | Calendario (iCloud) + Gmail importante | ✅ Completada |
 | 9 | Voz manos libres (palabra de activación, interrupción, conversación continua) | ✅ Completada |
-| 10 | Automatizaciones, notificaciones, Daily Briefing | ✅ Completada (ATLAS 4.0) |
-| 11 | Seguridad, copias de seguridad, exportación, optimización | ✅ Completada (ATLAS 4.0) |
+| 10 | Automatizaciones, notificaciones, Daily Briefing | ✅ Completada (VISTAN 4.0) |
+| 11 | Seguridad, copias de seguridad, exportación, optimización | ✅ Completada (VISTAN 4.0) |
 | 4.0 | Multiagente, Second Brain + grafo, RAG, Research Engine, multi-modelo, Command Center | ✅ Completada |
 
 ## Fase 1 — entregado
@@ -33,7 +33,7 @@
 Los módulos aún no construidos no tienen formularios: sus datos aparecerán en el
 dashboard en cuanto su fase los permita registrar.
 
-## ATLAS 2.0 — centro de control holográfico
+## VISTAN 2.0 — centro de control holográfico
 - Núcleo 3D (three.js, cargado bajo demanda): esfera neuronal con sinapsis, anillos
   giroscópicos, órbitas, campo de partículas y líneas de energía con pulsos de datos.
 - 10 módulos orbitando (Intelligence, Memory, Agents, Tasks, Calendar, Projects,
@@ -54,7 +54,7 @@ dashboard en cuanto su fase los permita registrar.
 - `atlas/brain/`: interfaz `LLMProvider` + proveedor **Ollama** (`/api/tags`, `/api/chat` en streaming).
   Añadir otro proveedor (Anthropic, OpenAI-compatible) = una clase nueva, sin tocar el resto.
 - Orquestador: elige modelo (preferencia del usuario o automático: qwen2.5 → llama3.1 → …, descarta
-  modelos de embeddings), construye el prompt de identidad de ATLAS y una **instantánea de tus datos
+  modelos de embeddings), construye el prompt de identidad de VISTAN y una **instantánea de tus datos
   reales** (importes y fechas ya formateados) en cada consulta. Reglas: no inventar cifras, separar
   dinero real y trading, no ejecutar acciones.
 - `POST /api/assistant/chat` (NDJSON: status → delta* → done/error), con historial de la conversación.
@@ -74,14 +74,14 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   confirmación; la IA **propone** recuerdos tras cada respuesta y solo se guardan si el usuario acepta.
 - Cada consulta recibe: perfil (preferencias y objetivos), recuerdos temporales vigentes, recuerdos
   relevantes y fragmentos de conversaciones anteriores (con filtro «ayer», «la semana pasada», «el mes pasado»).
-- Conversaciones guardadas; ATLAS retoma la última al volver a abrirse; «Nueva conversación».
+- Conversaciones guardadas; VISTAN retoma la última al volver a abrirse; «Nueva conversación».
 - Página Memoria: buscar, filtrar, añadir, editar, hacer permanente, olvidar, limpiar caducados,
   exportar JSON; pestaña de conversaciones con búsqueda y borrado.
-- Misión de ATLAS en su identidad: ayudar al usuario a alcanzar su potencial, conectando consejos con sus objetivos.
+- Misión de VISTAN en su identidad: ayudar al usuario a alcanzar su potencial, conectando consejos con sus objetivos.
 
 ## Fase 4 — tareas y objetivos medibles
 - Tareas: prioridad, fecha con hora o de día completo, categoría (#etiqueta), objetivo vinculado,
-  recordatorio (aviso en pantalla + notificación del sistema mientras ATLAS está abierto).
+  recordatorio (aviso en pantalla + notificación del sistema mientras VISTAN está abierto).
 - Lenguaje natural en español (sin IA): «apúntame llamar al gestor el viernes a las 10, es urgente»,
   «recuérdame comprar leche mañana», «he terminado lo del gestor» (pide confirmación).
 - Página Tareas: alta rápida con vista previa de la interpretación, grupos (atrasadas, hoy, próximas,
@@ -111,11 +111,11 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 
 ## Extras
 - Pantalla de arranque con bienvenida hablada (resumen real del día). Los navegadores no permiten
-  hablar sin interacción: el botón «Iniciar ATLAS» la proporciona. Desactivable en Configuración.
+  hablar sin interacción: el botón «Iniciar VISTAN» la proporciona. Desactivable en Configuración.
 - App instalable en el móvil (manifest, iconos, modo pantalla completa, márgenes de la muesca) y guía
-  de acceso seguro con Tailscale (HTTPS, sin exponer ATLAS a Internet).
+  de acceso seguro con Tailscale (HTTPS, sin exponer VISTAN a Internet).
 
-## ATLAS 3.0 — identidad carmesí y perfil personal
+## VISTAN 3.0 — identidad carmesí y perfil personal
 - Nueva identidad visual (carmesí sobre negro) inspirada en la referencia: cabecera con estado real del
   sistema, fecha/hora y foto de perfil; barra lateral fija con «Estado del sistema» (CPU y RAM reales,
   modelo IA, conexión); núcleo neuronal rojo con plataforma holográfica; nodos con línea de estado;
@@ -131,7 +131,7 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Registro escribiendo («200 g de arroz, pechuga de pollo y una manzana») o desde el chat
   («he desayunado 2 huevos y una tostada»), con unidades, gramos y cantidades en palabras.
 - Foto del plato: el modelo de visión LOCAL de Ollama (p. ej. qwen2.5vl:7b) identifica alimentos y
-  estima gramos; ATLAS propone y el usuario revisa antes de guardar. La foto no se almacena.
+  estima gramos; VISTAN propone y el usuario revisa antes de guardar. La foto no se almacena.
   Las macros siempre se calculan en el servidor con la base de alimentos.
 - Perfil nutricional y objetivos (Mifflin-St Jeor × actividad, ±kcal según objetivo, proteína por kg;
   usa el último peso de Gimnasio › Cuerpo). Totales del día, semana con línea de objetivo,
@@ -146,37 +146,37 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   boletines/no-reply) + IA local para los dudosos. Se muestran en el centro de control y la bienvenida
   hablada los menciona SOLO si hay alguno. La IA los conoce cuando se pregunta por el correo.
 - iCloud Calendar (CalDAV): importa −1/+60 días con recurrencias, actualiza y elimina lo borrado;
-  página Calendario con eventos de iCloud y de ATLAS, aviso de solapes y creación de eventos
+  página Calendario con eventos de iCloud y de VISTAN, aviso de solapes y creación de eventos
   (en iCloud solo con confirmación explícita).
-- Sincronización automática cada 30 min mientras ATLAS está abierto (y botón «Sincronizar ahora»).
+- Sincronización automática cada 30 min mientras VISTAN está abierto (y botón «Sincronizar ahora»).
 
 ## Fase 6 — finanzas, trading simulado y Apple Salud
 - **Finanzas (dinero real)**: ingresos y gastos (formulario o chat: «he gastado 12,50 en comida»,
   «he cobrado 300 de nómina», con botón Deshacer), categorías automáticas, resumen mensual, tasa de
   ahorro, evolución de 6 meses y presupuestos por categoría con alertas al 80 % y al superarlos.
-  ATLAS solo registra: nunca hace pagos, transferencias ni se conecta al banco.
+  VISTAN solo registra: nunca hace pagos, transferencias ni se conecta al banco.
 - **Trading (SIMULACIÓN)**: tabla propia (`paper_trades`) separada del dinero real. Capital virtual,
   operaciones largo/corto con SL/TP (validados), R:B planificado, P&L, R múltiple, win rate, profit
   factor, expectativa, drawdown, curva de capital, estadísticas por estrategia y errores recurrentes.
-  Ninguna conexión con brókers. Webhooks de TradingView aplazados: exigirían exponer ATLAS a internet.
+  Ninguna conexión con brókers. Webhooks de TradingView aplazados: exigirían exponer VISTAN a internet.
 - **Apple Salud**: un Atajo del iPhone envía pasos, sueño, kcal activas, distancia y peso a
-  `/api/health/ingest` con la cabecera `X-Atlas-Token` (clave en el Llavero, regenerable). El peso se
+  `/api/health/ingest` con la cabecera `X-Vistan-Token` (clave en el Llavero, regenerable). El peso se
   copia a medidas corporales (Gimnasio/Nutrición). Guía paso a paso en Gimnasio › Salud.
 - La IA recibe finanzas, trading (marcado como simulado) y salud solo cuando la pregunta lo pide.
 
 ## Fase 9 — voz manos libres
-- **«Oye ATLAS»** (opcional, por dispositivo): escucha en segundo plano mientras la pestaña está abierta y
-  visible. «ATLAS, ¿qué tengo hoy?» en una sola frase, o «ATLAS» → pitido → tu pregunta. Lo dicho antes de
+- **«Oye VISTAN»** (opcional, por dispositivo): escucha en segundo plano mientras la pestaña está abierta y
+  visible. «VISTAN, ¿qué tengo hoy?» en una sola frase, o «VISTAN» → pitido → tu pregunta. Lo dicho antes de
   la palabra de activación se descarta. Botón en el centro de control y en Configuración › Voz.
-- **Interrupción por voz**: mientras ATLAS habla, «para», «calla» o «ATLAS, …» lo cortan. Filtro de eco para
+- **Interrupción por voz**: mientras VISTAN habla, «para», «calla» o «VISTAN, …» lo cortan. Filtro de eco para
   que no se interrumpa a sí mismo con su propia voz.
 - **Conversación continua**: si preguntas por voz, responde en voz y vuelve a escuchar; si te callas, lo deja.
 - **Órdenes locales** (sin IA): «repite», «más despacio», «más rápido», «eso es todo».
 - Privacidad explicada en la interfaz: el reconocimiento lo hace el navegador (Chrome → Google,
   Safari → Apple). Reconocimiento 100 % local (Whisper) queda como mejora futura.
 
-## ATLAS 4.0 — sistema operativo personal
-- **ATLAS CORE + 9 agentes** (Research, Finance, Fitness, Trading, Business, Coding, Memory, Planning, Security):
+## VISTAN 4.0 — sistema operativo personal
+- **VISTAN CORE + 9 agentes** (Research, Finance, Fitness, Trading, Business, Coding, Memory, Planning, Security):
   cada mensaje pasa por CORE, que elige hasta 3 agentes (colaboran compartiendo herramientas), ejecuta sus
   herramientas reales sobre tus datos (registradas con nivel READ/WRITE/EXECUTE/ADMIN) y entrega el contexto
   al modelo. Traza visible en el chat y en Agentes › Ejecuciones. Sin modelo de IA, resume los datos reunidos.
@@ -199,6 +199,33 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - **Proactividad** configurable (atrasos, fechas, proyectos estancados, objetivos sin progreso, gastos inusuales,
   pausa en el entreno) con qué/por qué/datos/recomendación. **Command Center**, **Analytics**, **paleta ⌘K**,
   notificaciones, núcleo 3D con estados reales (escuchando, razonando, ejecutando, investigando, hablando, error),
-  consola minimizable, «Hola ATLAS» y activación por dos palmadas (local, experimental).
+  consola minimizable, «Hola VISTAN» y activación por dos palmadas (local, experimental).
 - Pendiente / no posible aún: app nativa de macOS con atajos globales (hoy: arranque automático en segundo plano con
   LaunchAgent + PWA); reconocimiento de voz 100 % local (Whisper); datos de mercado en vivo para el Trading Agent.
+
+## VISTAN — rediseño evolutivo
+- **Identidad**: ATLAS pasa a llamarse **VISTAN** en toda la interfaz, voz, respuestas, logotipo, iconos de la app y
+  documentación. Por compatibilidad se mantienen los identificadores internos (carpeta `atlas/`, variables
+  `ATLAS_*`, nombre del Llavero, LaunchAgent): así no se pierden claves guardadas ni el arranque automático.
+  La palabra de activación es «Hola VISTAN» (también entiende «bistan», «vistán»…; «ATLAS» sigue funcionando).
+- **Sistema solar**: VISTAN CORE en el centro y 12 planetas (Intelligence, Memory, Agents, Research, Projects,
+  Tasks, Calendar, Automations, Fitness, Nutrition, Finance, Trading) en 4 órbitas coplanarias con distinta
+  distancia y velocidad, disco orbital, enlaces reales entre módulos con partículas y conexiones al núcleo.
+  Cámara: rueda = zoom, arrastrar = girar, clic = acercarse al planeta y ver su contexto (también en el panel
+  derecho), doble clic o «Abrir» = ir al módulo, Esc / ⌖ = vista general. Los planetas nunca se solapan:
+  relajación a lo largo de su órbita (probada en un ciclo orbital completo y 12 tamaños de pantalla) y etiquetas
+  que buscan hueco (derecha, izquierda, abajo, arriba) o se ocultan hasta pasar el ratón.
+- **Navegación** agrupada: Sistema, Inteligencia, Organización, Personal, Finanzas, Configuración.
+- **Fitness › Físico**: fotos privadas (JPG/PNG/WEBP/HEIC → WEBP sin EXIF en `data/private/photos`, permisos 600,
+  servidas solo por la API sin caché), fecha, pose, comentario, historial, comparador antes/después y análisis
+  con IA bajo demanda (1 foto o comparación de 2) que valora la fiabilidad de la comparación, usa tu historial de
+  entrenamiento y objetivos, y filtra cualquier cifra corporal (% de grasa, cm, kg) o comentario médico.
+- **Nutrición › Fotos y asesor**: comidas con foto, descripción, fecha/hora y tipo; estimación por alimento (tabla
+  de alimentos cuando se reconoce, «estimación del modelo» si no), calidad, preguntas cuando falta información,
+  gramos editables y confirmación antes de registrar; editar/borrar. Asesor que analiza 14 días frente a tus
+  objetivos y entrenamiento (con IA o, sin ella, con un análisis directo de los datos).
+- **Progress**: peso, entreno, nutrición, objetivos y fotos con tendencias reales (regresión con mínimo de puntos y
+  días, comparada con el ruido entre registros) y resumen generado por IA o determinista.
+- **Privacidad de imágenes**: análisis local por defecto (Ollama). Solo si eliges un proveedor en la nube para
+  «Imágenes» se envían fotos, y cada vez se pide consentimiento indicando proveedor y modelo.
+- **VISTAN CORE**: el Fitness Agent consulta Progress, los análisis de físico y las comidas fotografiadas.

@@ -1,4 +1,4 @@
-# ATLAS — Personal Intelligence System
+# VISTAN — Personal Intelligence System
 
 > Your life. Your data. Your intelligence.
 
@@ -18,7 +18,7 @@ se guardan **solo en tu ordenador** (`atlas/data/`).
 | [uv](https://docs.astral.sh/uv/) | opcional | Instalación de Python más rápida |
 | [Ollama](https://ollama.com) | opcional, Fase 2 | Modelos de IA locales |
 
-## Arrancar ATLAS
+## Arrancar VISTAN
 
 **Windows (PowerShell):**
 
@@ -64,22 +64,22 @@ Interfaz en http://127.0.0.1:5173 (redirige `/api` al backend).
    ```
 
    (≈4,7 GB, necesita unos 8 GB de RAM libres. Para equipos modestos: `qwen2.5:3b`.)
-3. Arranca ATLAS. En **Inteligencia artificial** verás «Conectado» y podrás elegir el modelo.
+3. Arranca VISTAN. En **Inteligencia artificial** verás «Conectado» y podrás elegir el modelo.
 
-Sin Ollama, ATLAS sigue funcionando en «modo local» (responde preguntas fijas sobre tus datos).
+Sin Ollama, VISTAN sigue funcionando en «modo local» (responde preguntas fijas sobre tus datos).
 La primera respuesta tarda más: el modelo se carga en memoria.
 
-## ATLAS en el móvil (iPhone / Android)
+## VISTAN en el móvil (iPhone / Android)
 
-ATLAS vive en tu ordenador; el móvil se conecta a él. La forma segura y recomendada es **Tailscale**
+VISTAN vive en tu ordenador; el móvil se conecta a él. La forma segura y recomendada es **Tailscale**
 (gratis): crea una red privada entre tus dispositivos, funciona en casa y fuera, y da **HTTPS**
-(imprescindible para usar el micrófono en el iPhone). ATLAS nunca queda expuesto a Internet.
+(imprescindible para usar el micrófono en el iPhone). VISTAN nunca queda expuesto a Internet.
 
 1. Instala Tailscale en el ordenador (https://tailscale.com/download) y en el móvil (App Store /
    Google Play) e inicia sesión **con la misma cuenta** en ambos.
 2. En la consola de Tailscale (https://login.tailscale.com/admin/dns) activa **MagicDNS** y
    **HTTPS Certificates**.
-3. En la Terminal del ordenador, con ATLAS arrancado (usa el puerto que te muestra, p. ej. 8001):
+3. En la Terminal del ordenador, con VISTAN arrancado (usa el puerto que te muestra, p. ej. 8001):
 
    ```bash
    tailscale serve --bg 8001
@@ -89,29 +89,29 @@ ATLAS vive en tu ordenador; el móvil se conecta a él. La forma segura y recome
    `/Applications/Tailscale.app/Contents/MacOS/Tailscale serve --bg 8001`.
    Te mostrará una dirección `https://tu-mac.tu-red.ts.net`.
 4. En el móvil (con Tailscale conectado) abre esa dirección en Safari → botón Compartir →
-   **Añadir a pantalla de inicio**. ATLAS aparecerá como una app.
+   **Añadir a pantalla de inicio**. VISTAN aparecerá como una app.
 
-### Novedades de ATLAS 4.0
+### Novedades de VISTAN 4.0
 
 - **⌘K / Ctrl+K**: paleta de comandos (abrir módulos, crear tareas, investigar, buscar en todo).
-- **Conocimiento**: importa PDF, Word, Excel, CSV, Markdown, webs e imágenes; ATLAS los cita como [1], [2]…
+- **Conocimiento**: importa PDF, Word, Excel, CSV, Markdown, webs e imágenes; VISTAN los cita como [1], [2]…
   Para búsqueda semántica (opcional): `ollama pull nomic-embed-text`. Para leer imágenes: `ollama pull qwen2.5vl:7b`.
 - **Investigación**: escribe «investiga …» en el chat o usa la página Investigación (necesita internet).
 - **Modelos en la nube (opcional)**: Configuración › Modelos de IA → pega tu API key de OpenAI, Anthropic o Gemini
   (se guarda en el Llavero), pulsa «Probar» y elige qué tareas usan cada modelo. Por defecto todo es local.
 
-### Que ATLAS arranque solo (Mac, sin Terminal abierta)
+### Que VISTAN arranque solo (Mac, sin Terminal abierta)
 
 ```bash
 cd ~/Documents/open-higgsfield && ./atlas/scripts/autostart.sh install
 ```
 
-ATLAS queda funcionando en segundo plano, arranca solo al encender el Mac y se reinicia si falla.
+VISTAN queda funcionando en segundo plano, arranca solo al encender el Mac y se reinicia si falla.
 Otros comandos: `autostart.sh status`, `autostart.sh logs`, `autostart.sh restart` (tras `git pull`)
 y `autostart.sh uninstall` para desactivarlo. El Mac tiene que estar encendido y despierto: con la
 tapa cerrada se duerme y el móvil no llega.
 
-Para que funcione, el ordenador debe estar encendido con ATLAS y Ollama abiertos
+Para que funcione, el ordenador debe estar encendido con VISTAN y Ollama abiertos
 (en Mac: Ajustes → Batería → Opciones → evitar el reposo automático con el adaptador conectado).
 Consejo: fija el puerto en `backend/.env` (`ATLAS_PORT=8001`) para que la dirección no cambie.
 
@@ -129,7 +129,7 @@ de BD, migraciones sincronizadas con los modelos). Frontend: typecheck + Vitest
 
 Copia `backend/.env.example` a `backend/.env` (el script de arranque lo hace
 por ti). Las claves de API **solo** van en ese archivo, que git ignora.
-Por defecto ATLAS escucha únicamente en `127.0.0.1` (no accesible desde la red).
+Por defecto VISTAN escucha únicamente en `127.0.0.1` (no accesible desde la red).
 
 ## Estructura
 

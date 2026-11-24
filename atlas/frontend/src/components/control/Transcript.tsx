@@ -121,7 +121,7 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMon
 }) {
   if (items.length === 0) return null;
   return (
-    <section className="transcript" aria-label="Conversación con ATLAS" aria-live="polite">
+    <section className="transcript" aria-label="Conversación con VISTAN" aria-live="polite">
       <header>
         <span>Transmisión</span>
         <button type="button" className="link-btn" onClick={onNew} title="Empezar una conversación nueva (la actual queda guardada)">
@@ -151,8 +151,8 @@ export function Transcript({ items, onNew, onForget, onSuggestion, onTask, onMon
             {x.meal && x.meal.count > 0 && <p className="mem-note">🍽️ Comida registrada · <Link to="/nutrition">Ver nutrición</Link></p>}
             {x.gym && <p className="mem-note">🏋️ Sesión de hoy: {x.gym.sets} series · <Link to="/gym">Ver entreno</Link></p>}
             {x.suggestions?.some((s) => s.state !== "dismissed") && (
-              <div className="suggest" role="group" aria-label="ATLAS propone recordar">
-                <span className="suggest-title">ATLAS propone recordar</span>
+              <div className="suggest" role="group" aria-label="VISTAN propone recordar">
+                <span className="suggest-title">VISTAN propone recordar</span>
                 {x.suggestions.map((s, i) => s.state === "dismissed" ? null : (
                   <div key={i} className="suggest-item">
                     <span>{s.content} <em>· {KIND_LABEL[s.kind]}</em></span>

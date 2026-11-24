@@ -17,7 +17,7 @@ export function Tasks() {
       <header className="page-head">
         <p className="eyebrow">Fase 4 · activo</p>
         <h1><Icon name="tasks" size={26} /> Tareas y objetivos</h1>
-        <p className="lead">Escribe como hablas: «llamar al gestor el viernes a las 10, urgente». ATLAS entiende la fecha, la hora y la prioridad.</p>
+        <p className="lead">Escribe como hablas: «llamar al gestor el viernes a las 10, urgente». VISTAN entiende la fecha, la hora y la prioridad.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones">
         {([["tasks", "Tareas"], ["week", "Semana"], ["goals", "Objetivos"]] as const).map(([k, label]) => (
@@ -109,7 +109,7 @@ function TasksTab() {
         {msg && <p role="status" className={`small ${msg.tone}`}>{msg.text}</p>}
         {open.error && <p className="neg small">{open.error.message}</p>}
         {open.data && open.data.items.length === 0 ? (
-          <Empty>{q || category ? "No hay tareas que coincidan." : "No tienes tareas pendientes. Añade una arriba o díselo a ATLAS: «apúntame…»."}</Empty>
+          <Empty>{q || category ? "No hay tareas que coincidan." : "No tienes tareas pendientes. Añade una arriba o díselo a VISTAN: «apúntame…»."}</Empty>
         ) : (
           <>
             <TaskGroup title="Atrasadas" tone="neg" items={b.overdue} row={row} />
@@ -304,7 +304,7 @@ function WeekTab() {
           <button className="mini-btn" onClick={() => void apply()} disabled={!unpinned.length}>Aplicar plan ({unpinned.length})</button>
         </span>
       }>
-        <p className="muted small">ATLAS coloca primero lo atrasado y lo que tiene fecha (📌), y reparte el resto por prioridad. Las tareas sin fecha solo se programan si pulsas «Aplicar plan».</p>
+        <p className="muted small">VISTAN coloca primero lo atrasado y lo que tiene fecha (📌), y reparte el resto por prioridad. Las tareas sin fecha solo se programan si pulsas «Aplicar plan».</p>
         {msg && <p role="status" className="small pos">{msg}</p>}
         {!plan.data ? <p className="muted">Calculando…</p> : (
           <div className="week-grid">
@@ -357,7 +357,7 @@ function GoalsTab() {
       <Panel title="Objetivos" aside={<label className="check"><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} /> Ver todos</label>}>
         {msg && <p role="status" className={`small ${msg.tone}`}>{msg.text}</p>}
         {!goals.data ? <p className="muted">Cargando…</p> : goals.data.items.length === 0 ? (
-          <Empty>Aún no tienes objetivos medibles. Crea uno y ATLAS calculará tu ritmo, lo que necesitas por semana y cuándo lo conseguirás.</Empty>
+          <Empty>Aún no tienes objetivos medibles. Crea uno y VISTAN calculará tu ritmo, lo que necesitas por semana y cuándo lo conseguirás.</Empty>
         ) : (
           <ul className="goal-items">
             {goals.data.items.map((g) => <GoalCard key={g.id} g={g} onChange={(t, tone) => void refresh(t, tone)} />)}
@@ -426,7 +426,7 @@ function GoalCard({ g, onChange }: { g: GoalItem; onChange: (msg: string, tone?:
             <li>Tu ritmo real: <strong>{fmtNum(Math.abs(m.rate_per_week), g.kind === "numeric" ? unit : "tareas")}</strong> por semana.</li>
           )}
           {m.projected_date && <li>A este ritmo lo conseguirás el <strong>{formatDayLabel(m.projected_date)}</strong>.</li>}
-          {!m.rate_per_week && m.pace !== "achieved" && <li className="muted">Registra tu progreso para que ATLAS calcule tu ritmo real.</li>}
+          {!m.rate_per_week && m.pace !== "achieved" && <li className="muted">Registra tu progreso para que VISTAN calcule tu ritmo real.</li>}
         </ul>
       )}
       <div className="goal-actions">

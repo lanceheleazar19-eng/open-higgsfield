@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import type { TaskItem } from "../api/types";
 
-/** Comprueba cada 30 s si hay recordatorios vencidos. Funciona mientras ATLAS esté abierto. */
+/** Comprueba cada 30 s si hay recordatorios vencidos. Funciona mientras VISTAN esté abierto. */
 export function useReminders(intervalMs = 30_000) {
   const [items, setItems] = useState<TaskItem[]>([]);
 
@@ -14,7 +14,7 @@ export function useReminders(intervalMs = 30_000) {
         if (!alive || !due.length) return;
         setItems((prev) => [...prev, ...due.filter((d) => !prev.some((p) => p.id === d.id))]);
         if (typeof Notification !== "undefined" && Notification.permission === "granted") {
-          for (const t of due) new Notification("ATLAS · Recordatorio", { body: t.title, tag: `atlas-task-${t.id}` });
+          for (const t of due) new Notification("VISTAN · Recordatorio", { body: t.title, tag: `atlas-task-${t.id}` });
         }
       } catch { /* núcleo sin conexión: se reintenta */ }
     };

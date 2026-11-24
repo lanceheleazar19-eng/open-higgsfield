@@ -34,7 +34,7 @@ export function Brain() {
       <header className="page-head">
         <p className="eyebrow">Fase 2 · activo</p>
         <h1><Icon name="ai" size={26} /> Inteligencia artificial</h1>
-        <p className="lead">El cerebro de ATLAS. Funciona con modelos locales de Ollama: tus datos no salen de tu ordenador.</p>
+        <p className="lead">El cerebro de VISTAN. Funciona con modelos locales de Ollama: tus datos no salen de tu ordenador.</p>
       </header>
       <div className="grid grid-2">
         <Panel title="Estado del cerebro" aside={
@@ -65,7 +65,7 @@ export function Brain() {
           {st && st.models.length > 0 ? (
             <div className="form">
               <label>
-                <span>Modelo que usa ATLAS</span>
+                <span>Modelo que usa VISTAN</span>
                 <select value={prefs?.ai_model ?? ""} disabled={saving} onChange={(e) => void choose(e.target.value)}>
                   <option value="">Automático{st.model && !prefs?.ai_model ? ` (${st.model})` : ""}</option>
                   {st.models.map((m) => (
@@ -93,7 +93,7 @@ export function Brain() {
             <li>Recordar el hilo de la conversación actual.</li>
           </ul>
           <p className="muted small">Aún no: crear o modificar datos (llega con cada módulo), memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
-            Habla con ATLAS desde el <Link to="/">centro de control</Link>.</p>
+            Habla con VISTAN desde el <Link to="/">centro de control</Link>.</p>
         </Panel>
       </div>
     </div>

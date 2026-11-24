@@ -162,7 +162,34 @@ def _system(c: Ctx) -> dict:
             "errores_recientes": errors}
 
 
+def _progress(c: Ctx) -> dict:
+    from atlas.progress.service import facts, gather
+    g = gather(c.db, c.today, c.prefs)
+    return {"hechos": facts(g), "tendencia_peso": g["weight_trend"], "tendencia_volumen": g["tonnage_trend"],
+            "tendencia_frecuencia": g["sessions_trend"], "fotos": len(g["photos"]),
+            "nota": "tendencias calculadas con todos los registros; una variación de un día no es tendencia"}
+
+
+def _physique(c: Ctx) -> list:
+    from atlas.models import Analysis
+    return [{"fecha": a.created_at.date().isoformat(), "tipo": a.kind, "fiabilidad": a.result.get("fiabilidad"),
+             "observaciones": a.result.get("observaciones"), "a_trabajar": a.result.get("a_trabajar"),
+             "cambios": a.result.get("cambios"), "aviso": "observaciones visuales, no medidas"}
+            for a in c.db.scalars(select(Analysis).where(Analysis.kind.in_(("physique", "compare"))).order_by(Analysis.id.desc()).limit(2))]
+
+
+def _meal_photos(c: Ctx) -> list:
+    from atlas.models import MealPhoto
+    since = datetime.utcnow() - timedelta(days=7)
+    return [{"fecha": m.eaten_at.isoformat(timespec="minutes"), "comida": m.meal, "descripcion": m.description,
+             "estado": m.status, "totales_estimados": (m.analysis or {}).get("totals"), "calidad": (m.analysis or {}).get("quality")}
+            for m in c.db.scalars(select(MealPhoto).where(MealPhoto.eaten_at >= since).order_by(MealPhoto.eaten_at.desc()).limit(10))]
+
+
 TOOLS: dict[str, Tool] = {t.name: t for t in [
+    Tool("progress.trends", "READ", "Progreso: tendencias reales de peso, entreno y nutrición", _progress),
+    Tool("physique.latest", "READ", "Últimos análisis de tus fotos de físico", _physique),
+    Tool("meals.photos", "READ", "Comidas fotografiadas de los últimos 7 días", _meal_photos),
     Tool("finance.summary", "READ", "Resumen del mes, presupuestos y evolución (dinero real)", _finance),
     Tool("finance.recent", "READ", "Últimos movimientos registrados", _finance_recent),
     Tool("gym.snapshot", "READ", "Entrenamiento: rutina de hoy, volumen, progresión y estancamientos", _gym),
@@ -179,7 +206,7 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("research.recent", "READ", "Investigaciones recientes y sus conclusiones", _research_recent),
     Tool("projects.list", "READ", "Proyectos activos con su avance", _projects),
     Tool("security.status", "READ", "Permisos, aprobaciones, credenciales (solo nombres) y copias", _security),
-    Tool("system.diagnose", "READ", "Estado técnico de ATLAS y errores recientes", _system),
+    Tool("system.diagnose", "READ", "Estado técnico de VISTAN y errores recientes", _system),
 ]}
 
 # Acciones de escritura/ejecución (se invocan desde órdenes explícitas o workflows; pasan por la política)
@@ -190,7 +217,7 @@ ACTIONS = {
     "gym.log": ("WRITE", "Registrar series de entrenamiento"),
     "meal.log": ("WRITE", "Registrar una comida"),
     "research.start": ("EXECUTE", "Investigar en internet (busca y lee webs públicas)"),
-    "notify": ("WRITE", "Crear una notificación en ATLAS"),
+    "notify": ("WRITE", "Crear una notificación en VISTAN"),
     "backup.create": ("EXECUTE", "Hacer una copia de seguridad de la base de datos"),
     "settings.change": ("ADMIN", "Cambiar configuraciones críticas (modelos, permisos, credenciales)"),
 }

@@ -21,14 +21,14 @@ WD_RX = rf"lunes|martes|mi{E}rcoles|jueves|viernes|s{A}bado|domingo"
 
 I = "[ií]"
 TASK_TRIGGER = re.compile(
-    rf"^(?:oye\s+)?(?:atlas[,:\s]+)?(?:por favor[,\s]+)?"
+    rf"^(?:oye\s+)?(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:por favor[,\s]+)?"
     rf"(?P<trig>ap[uú]ntame|an[oó]tame|apunta (?:una )?tarea|a{N}ade (?:una )?tarea|a{N}ade|crea (?:una )?tarea|"
     rf"nueva tarea|recu{E}rdame|av{I}same|ponme (?:una tarea|un recordatorio)|pon (?:una tarea|un recordatorio))"
     rf"(?:\s+(?:de|para|que|a|:))?[\s:,]+(?P<body>.{{2,}})$",
     re.IGNORECASE | re.DOTALL,
 )
 COMPLETE_TRIGGER = re.compile(
-    rf"^(?:atlas[,:\s]+)?(?:ya\s+)?(?:he terminado|he acabado|he hecho|ya est{A}|marca como hecha|marca como completada|"
+    rf"^(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:ya\s+)?(?:he terminado|he acabado|he hecho|ya est{A}|marca como hecha|marca como completada|"
     rf"completa|termina|tacha)(?:\s+la tarea)?(?:\s+de)?[\s:,]+(?P<body>.{{2,}})$",
     re.IGNORECASE | re.DOTALL,
 )

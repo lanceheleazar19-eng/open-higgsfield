@@ -11,7 +11,8 @@ from atlas.brain.base import LLMProvider, ProviderError
 from atlas.brain.providers import CLOUD
 from atlas.integrations.secrets import get_secret
 
-TASKS = {"chat": "Conversación", "agents": "Agentes", "research": "Investigación", "json": "Tareas internas (JSON)"}
+TASKS = {"chat": "Conversación", "agents": "Agentes", "research": "Investigación", "json": "Tareas internas (JSON)",
+         "vision": "Imágenes (físico y comidas)"}
 PRIVACY = {
     "local_only": "Solo local (Ollama): nada sale de tu ordenador",
     "local_first": "Local primero; la nube solo si la eliges para una tarea",
@@ -60,7 +61,7 @@ def cloud_choice(task: str, prefs: dict) -> tuple[str, str] | None:
         return (prov, model) if model and has_key(prov) else None
     if prov == "ollama":
         return None
-    if c["privacy"] == "best_quality":
+    if c["privacy"] == "best_quality" and task != "vision":  # las fotos solo salen si eliges proveedor expresamente
         for p in CLOUD:
             if c["providers"][p]["model"] and has_key(p):
                 return p, c["providers"][p]["model"]

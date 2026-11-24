@@ -1,4 +1,4 @@
-"""ATLAS 4.0: base de conocimiento (RAG), grafo, investigación, agentes, workflows, aprobaciones,
+"""VISTAN 4.0: base de conocimiento (RAG), grafo, investigación, agentes, workflows, aprobaciones,
 notificaciones y uso de modelos. Todo persistente en la base de datos local."""
 
 from datetime import datetime
@@ -86,7 +86,7 @@ class Research(Base):
 
 
 class AgentRun(Base):
-    """Ejecución de ATLAS CORE: agentes elegidos, herramientas usadas (con nivel) y resultado."""
+    """Ejecución de VISTAN CORE: agentes elegidos, herramientas usadas (con nivel) y resultado."""
 
     __tablename__ = "agent_runs"
 

@@ -1,4 +1,4 @@
-"""Finanzas: DINERO REAL. Solo registro y análisis. ATLAS nunca hace transferencias ni pagos."""
+"""Finanzas: DINERO REAL. Solo registro y análisis. VISTAN nunca hace transferencias ni pagos."""
 
 from datetime import date, datetime
 from zoneinfo import ZoneInfo

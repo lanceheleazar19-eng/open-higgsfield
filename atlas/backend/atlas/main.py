@@ -1,4 +1,4 @@
-"""Aplicación FastAPI de ATLAS."""
+"""Aplicación FastAPI de VISTAN."""
 
 import mimetypes
 from contextlib import asynccontextmanager
@@ -10,14 +10,14 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import (agents, ai, assistant, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
+from atlas.api import (agents, ai, assistant, body, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
                        models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, workflows)
 from atlas.config import get_settings
 from atlas.db import init_db
 
 
 async def _periodic_sync() -> None:
-    """Sincroniza Gmail e iCloud cada 30 min mientras ATLAS está abierto."""
+    """Sincroniza Gmail e iCloud cada 30 min mientras VISTAN está abierto."""
     import asyncio
 
     from atlas.api.integrations import sync_all
@@ -68,7 +68,7 @@ async def lifespan(_app: FastAPI):
 
 def create_app() -> FastAPI:
     s = get_settings()
-    app = FastAPI(title="ATLAS — Personal Intelligence System", version=__version__, lifespan=lifespan)
+    app = FastAPI(title="VISTAN — Personal Intelligence System", version=__version__, lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=s.cors_origins,
@@ -77,7 +77,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router):
+              projects.router, center.router, body.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

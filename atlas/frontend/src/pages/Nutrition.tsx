@@ -5,10 +5,11 @@ import { useAsync } from "../api/useAsync";
 import { Icon } from "../components/Icon";
 import { Empty, Panel } from "../components/Panel";
 import { formatDayLabel } from "../lib/tasks";
+import { MealPhotos } from "../components/MealPhotos";
 
 const MEALS = ["desayuno", "comida", "merienda", "cena", "snack"] as const;
 const n0 = (v: number) => new Intl.NumberFormat("es-ES", { maximumFractionDigits: 0 }).format(v);
-type Tab = "today" | "week" | "profile" | "foods";
+type Tab = "today" | "photos" | "week" | "profile" | "foods";
 
 export function Nutrition() {
   const [tab, setTab] = useState<Tab>("today");
@@ -20,11 +21,12 @@ export function Nutrition() {
         <p className="lead">Escribe lo que comes («2 huevos y una tostada») o haz una foto del plato. Las calorías salen de la base de alimentos; la foto se analiza en tu ordenador y no se guarda.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones de nutrición">
-        {([["today", "Hoy"], ["week", "Semana"], ["profile", "Perfil y objetivos"], ["foods", "Alimentos"]] as const).map(([k, l]) => (
+        {([["today", "Hoy"], ["photos", "Fotos y asesor"], ["week", "Semana"], ["profile", "Perfil y objetivos"], ["foods", "Alimentos"]] as const).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
       {tab === "today" && <Today />}
+      {tab === "photos" && <MealPhotos />}
       {tab === "week" && <Week />}
       {tab === "profile" && <ProfileTab />}
       {tab === "foods" && <Foods />}
@@ -229,7 +231,7 @@ function ProfileTab() {
           <label className="field"><span>Objetivo</span><select value={f.goal} onChange={(e) => setF({ ...f, goal: e.target.value as NutritionProfile["goal"] })}>
             <option value="bulk">Ganar músculo / volumen (+300 kcal)</option><option value="maintain">Mantener</option><option value="cut">Perder grasa (−400 kcal)</option></select></label>
           <div className="form-actions"><button className="btn" type="submit" disabled={!f.age || !f.height_cm}>Guardar y calcular</button>{msg && <span role="status" className="small pos">{msg}</span>}</div>
-          <p className="muted small">Si registras tu peso en Gimnasio › Cuerpo, ATLAS usa el último automáticamente.</p>
+          <p className="muted small">Si registras tu peso en Gimnasio › Cuerpo, VISTAN usa el último automáticamente.</p>
         </form>
       </Panel>
       <Panel title="Tus objetivos diarios">

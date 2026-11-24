@@ -16,7 +16,7 @@ LEVELS = {
     "ADMIN": "Cambiar configuraciones críticas",
 }
 DEFAULT_POLICY = {"READ": "auto", "WRITE": "auto", "EXECUTE": "confirm", "ADMIN": "confirm"}
-# Lo que ATLAS nunca hace, se pida como se pida
+# Lo que VISTAN nunca hace, se pida como se pida
 NEVER = [
     "Ejecutar operaciones financieras reales (pagos, transferencias, órdenes de bolsa).",
     "Borrar información importante sin tu confirmación.",

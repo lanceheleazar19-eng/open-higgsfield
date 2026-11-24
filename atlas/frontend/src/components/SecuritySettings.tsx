@@ -27,7 +27,7 @@ export function SecuritySettings() {
             </td></tr>
           ))}</tbody>
         </table></div>
-        <h3 className="h-sm">ATLAS nunca</h3>
+        <h3 className="h-sm">VISTAN nunca</h3>
         <ul className="steps">{d.never.map((n) => <li key={n}>{n}</li>)}</ul>
         <h3 className="h-sm">Copias de seguridad</h3>
         <p className="muted small">Automáticas cada día y antes de cada actualización de la base de datos. Se guardan en {d.backups_dir}.</p>

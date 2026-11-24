@@ -1,3 +1,3 @@
-"""ATLAS — Personal Intelligence System."""
+"""VISTAN — Personal Intelligence System."""
 
 __version__ = "0.1.0"

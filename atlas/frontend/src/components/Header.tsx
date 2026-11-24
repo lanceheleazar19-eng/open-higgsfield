@@ -28,10 +28,10 @@ export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => 
       <button className="icon-btn hdr-menu" onClick={onMenu} aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen}>
         <Icon name={menuOpen ? "close" : "menu"} />
       </button>
-      <Link to="/" className="hdr-brand" aria-label="ATLAS, ir al centro de control">
+      <Link to="/" className="hdr-brand" aria-label="VISTAN, ir al centro de control">
         <Logo size={42} />
         <span>
-          <span className="hdr-title">ATLAS</span>
+          <span className="hdr-title">VISTAN</span>
           <span className="hdr-sub">Personal Intelligence System</span>
         </span>
       </Link>

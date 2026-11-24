@@ -1,10 +1,11 @@
-"""Modelos de datos de ATLAS. Importar todo aquí para que Alembic los vea."""
+"""Modelos de datos de VISTAN. Importar todo aquí para que Alembic los vea."""
 
 from atlas.models.base import Base
 from atlas.models.core import ActivityLog, Setting
 from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, WorkoutSet
 from atlas.models.email import EmailMessage
 from atlas.models.money import Budget, HealthDay, PaperTrade
+from atlas.models.body import Analysis, BodyPhoto, MealPhoto
 from atlas.models.intel import (AgentRun, Approval, DocChunk, Document, Entity, ModelCall, Notification, Relation,
                                 Research, Workflow, WorkflowRun)
 from atlas.models.nutrition import Food, MealEntry
@@ -34,7 +35,7 @@ __all__ = [
     "PaperTrade",
     "HealthDay",
     "Document", "DocChunk", "Entity", "Relation", "Research", "AgentRun", "Approval", "Workflow", "WorkflowRun",
-    "Notification", "ModelCall",
+    "Notification", "ModelCall", "BodyPhoto", "MealPhoto", "Analysis",
     "EmailMessage",
     "Food",
     "MealEntry",

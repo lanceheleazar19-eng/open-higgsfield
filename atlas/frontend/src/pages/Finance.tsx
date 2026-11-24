@@ -26,7 +26,7 @@ export function Finance() {
       <header className="page-head">
         <p className="eyebrow">Fase 6 · activo · dinero real</p>
         <h1><Icon name="finance" size={26} /> Finanzas</h1>
-        <p className="lead">Apunta ingresos y gastos aquí o en el chat («he gastado 12,50 en comida»). ATLAS solo registra y analiza: <strong>nunca hace pagos ni transferencias</strong>. El trading simulado va aparte.</p>
+        <p className="lead">Apunta ingresos y gastos aquí o en el chat («he gastado 12,50 en comida»). VISTAN solo registra y analiza: <strong>nunca hace pagos ni transferencias</strong>. El trading simulado va aparte.</p>
       </header>
       <div className="filters">
         <label className="field"><span>Mes</span>
@@ -153,7 +153,7 @@ function Budgets({ budgets, categories, money, onChange }: { budgets: BudgetItem
   }
   return (
     <Panel title="Presupuestos mensuales">
-      {budgets.length === 0 && <Empty>Sin presupuestos. Pon un límite a una categoría y ATLAS te avisará al llegar al 80 %.</Empty>}
+      {budgets.length === 0 && <Empty>Sin presupuestos. Pon un límite a una categoría y VISTAN te avisará al llegar al 80 %.</Empty>}
       {budgets.map((b) => (
         <div className="macro" key={b.category}>
           <div className="macro-head">

@@ -130,7 +130,7 @@ def active_goals(db: Session) -> list[Goal]:
 
 
 def snapshot(db: Session, today: date) -> list[dict]:
-    """Resumen compacto para el cerebro de ATLAS."""
+    """Resumen compacto para el cerebro de VISTAN."""
     out = []
     for g in active_goals(db):
         m = metrics(db, g, today)

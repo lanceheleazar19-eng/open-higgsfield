@@ -1,4 +1,4 @@
-"""Finanzas personales (DINERO REAL). ATLAS solo registra y analiza: nunca mueve dinero."""
+"""Finanzas personales (DINERO REAL). VISTAN solo registra y analiza: nunca mueve dinero."""
 
 import re
 import unicodedata

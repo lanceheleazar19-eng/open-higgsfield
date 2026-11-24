@@ -25,7 +25,7 @@ def main() -> None:
         raise SystemExit(f"✖ No hay puertos libres entre {s.port} y {s.port + 19}. Cierra otros programas o usa ATLAS_PORT=…")
     if port != s.port:
         print(f"▸ El puerto {s.port} está ocupado por otro programa; uso el {port}.")
-    print(f"\n  ✅ ATLAS listo → abre en el navegador: http://{s.host}:{port}\n", flush=True)
+    print(f"\n  ✅ VISTAN listo → abre en el navegador: http://{s.host}:{port}\n", flush=True)
     uvicorn.run("atlas.main:app", host=s.host, port=port, reload=False, log_level="warning")
 
 

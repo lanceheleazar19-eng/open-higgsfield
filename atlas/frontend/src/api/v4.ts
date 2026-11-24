@@ -1,4 +1,4 @@
-/** ATLAS 4.0 — tipos y llamadas a la API (agentes, conocimiento, investigación, workflows, modelos, seguridad…). */
+/** VISTAN 4.0 — tipos y llamadas a la API (agentes, conocimiento, investigación, workflows, modelos, seguridad…). */
 import { ApiError, request, requestEmpty } from "./client";
 import type { MemoryItem, TaskItem } from "./types";
 
@@ -105,7 +105,7 @@ async function upload<T>(path: string, files: File[], extra: Record<string, stri
   files.forEach((f) => fd.append("files", f));
   Object.entries(extra).forEach(([k, v]) => fd.append(k, v));
   let res: Response;
-  try { res = await fetch(path, { method: "POST", body: fd }); } catch { throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS"); }
+  try { res = await fetch(path, { method: "POST", body: fd }); } catch { throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN"); }
   if (!res.ok) { let d = res.statusText; try { d = (await res.json()).detail; } catch { /* */ } throw new ApiError(res.status, String(d)); }
   return res.json();
 }

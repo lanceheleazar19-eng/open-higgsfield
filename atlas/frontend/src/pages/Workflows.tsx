@@ -38,7 +38,7 @@ export function Workflows() {
       <header className="page-head">
         <p className="eyebrow">Workflow Engine</p>
         <h1><Icon name="workflows" size={26} /> Automatizaciones</h1>
-        <p className="lead">Secuencias que ATLAS ejecuta solo o cuando las lanzas. Los pasos de nivel EXECUTE (internet, copias) te piden autorización. Funcionan mientras ATLAS está encendido.</p>
+        <p className="lead">Secuencias que VISTAN ejecuta solo o cuando las lanzas. Los pasos de nivel EXECUTE (internet, copias) te piden autorización. Funcionan mientras VISTAN está encendido.</p>
       </header>
       {msg && <p role="status" className="callout">{msg}</p>}
       <div className="grid grid-tasks">
@@ -138,7 +138,7 @@ function Editor({ w, types, onClose, onSaved }: { w: WorkflowItem; types: Record
               </li>
             ))}
           </ol>
-          <button type="button" className="mini-btn" onClick={() => setSteps([...steps, { type: "notify", params: { title: name || "ATLAS" } }])}>+ Añadir paso</button>
+          <button type="button" className="mini-btn" onClick={() => setSteps([...steps, { type: "notify", params: { title: name || "VISTAN" } }])}>+ Añadir paso</button>
         </>}
         <div className="form-row">
           <label><span>Cuándo</span><select value={kind} onChange={(e) => setKind(e.target.value)}><option value="manual">Solo manual</option><option value="daily">Cada día</option><option value="weekly">Cada semana</option></select></label>

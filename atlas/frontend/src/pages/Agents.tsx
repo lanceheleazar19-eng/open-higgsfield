@@ -48,7 +48,7 @@ export function Agents() {
       <header className="page-head">
         <p className="eyebrow">Sistema multiagente</p>
         <h1><Icon name="agents" size={26} /> Agentes</h1>
-        <p className="lead">{cat.data?.core.role ?? "ATLAS CORE coordina agentes especializados."} Cada paso queda registrado con su nivel de permiso.</p>
+        <p className="lead">{cat.data?.core.role ?? "VISTAN CORE coordina agentes especializados."} Cada paso queda registrado con su nivel de permiso.</p>
       </header>
       <div className="tabs" role="tablist" aria-label="Secciones de agentes">
         {([["agents", "Agentes"], ["runs", "Ejecuciones"], ["approvals", `Aprobaciones${pend ? ` (${pend})` : ""}`], ["try", "Probar"]] as const).map(([k, l]) => (
@@ -123,7 +123,7 @@ export function Agents() {
                     onClick={() => setPick((p) => p.includes(a.id) ? p.filter((x) => x !== a.id) : [...p, a.id].slice(-3))}>{a.name.replace(" Agent", "")}</button>
                 ))}
               </div>
-              <p className="muted small">Si no eliges ninguno, ATLAS CORE decide quién interviene (máx. 3, colaborando entre sí).</p>
+              <p className="muted small">Si no eliges ninguno, VISTAN CORE decide quién interviene (máx. 3, colaborando entre sí).</p>
               <div className="form-actions"><button className="btn" disabled={busy || text.trim().length < 2}>{busy ? "Trabajando…" : "Ejecutar"}</button>{err && <span className="neg small">{err}</span>}</div>
             </form>
           </Panel>

@@ -1,4 +1,4 @@
-# Arranca ATLAS (Windows PowerShell). Uso: .\scripts\start.ps1 [-Rebuild]
+# Arranca VISTAN (Windows PowerShell). Uso: .\scripts\start.ps1 [-Rebuild]
 param([switch]$Rebuild)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
@@ -38,5 +38,5 @@ if ($needBuild) { Write-Host "> Compilando la interfaz..."; npm run build }
 
 # ---------- Arranque ----------
 Set-Location "$Root\backend"
-Write-Host "> Arrancando ATLAS... (Ctrl+C para detener)"
+Write-Host "> Arrancando VISTAN... (Ctrl+C para detener)"
 & $Py -m atlas

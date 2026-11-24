@@ -1,7 +1,7 @@
-/* ATLAS 2.0 — Centro de control holográfico
+/* VISTAN 2.0 — Centro de control holográfico
    Azul marino casi negro · azul eléctrico · cian luminoso · cristal. */
 :root {
-  /* ATLAS 4.0 — paleta oficial: negro profundo #080808 / #111111, carmesí #B51224, rojo intenso #E11D35,
+  /* VISTAN 4.0 — paleta oficial: negro profundo #080808 / #111111, carmesí #B51224, rojo intenso #E11D35,
      rojo oscuro #650B19, blanco suave #EAEAEA y gris #777777. Los nombres antiguos (--blue/--cyan) se
      conservan como alias de los acentos para no romper componentes. */
   --black: #080808;
@@ -741,7 +741,7 @@ input.full { width: 100%; margin-bottom: 12px; }
 
 
 /* =====================================================================
-   ATLAS 3.0 — composición de la referencia (cabecera, lateral, núcleo,
+   VISTAN 3.0 — composición de la referencia (cabecera, lateral, núcleo,
    columna derecha y consola). Estas reglas sustituyen a las de 2.0.
    ===================================================================== */
 body {
@@ -986,7 +986,7 @@ fieldset.field legend { padding: 0 6px; font-size: 12px; letter-spacing: .14em; 
 .command { min-width: 0; max-width: 100%; }
 .command > .bar, .command > .console-foot { min-width: 0; max-width: 100%; }
 
-/* =================== ATLAS 4.0 =================== */
+/* =================== VISTAN 4.0 =================== */
 kbd { font: 500 10.5px var(--font-mono); color: var(--text-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; background: var(--black-2); }
 .h-sm { margin: 16px 0 8px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); font-weight: 600; }
 .pre, pre.report { white-space: pre-wrap; }
@@ -1106,3 +1106,133 @@ pre.report, .doc-preview pre { font: 13px/1.55 var(--font-mono); color: var(--te
 .form label { grid-template-columns: minmax(0, 1fr); }
 .form label > select, .form label > input:not([type=checkbox]):not([type=range]), .form label > span { min-width: 0; max-width: 100%; }
 .form label > span { overflow-wrap: anywhere; }
+
+/* =================== VISTAN · sistema solar =================== */
+.core { touch-action: none; cursor: grab; }
+.core:active { cursor: grabbing; }
+.core-sub { font: 600 10px var(--font-mono); letter-spacing: .6em; padding-left: .6em; color: var(--crimson-hi); margin-top: -2px; }
+.planet { position: absolute; left: 0; top: 0; pointer-events: auto; display: flex; align-items: center; gap: 8px; background: none; border: 0;
+  padding: 0; cursor: pointer; color: var(--text); font: inherit; text-align: left; will-change: transform, opacity; transform: translate(-300px, -300px);
+  transition: opacity .35s ease; }
+.planet.is-inward { flex-direction: row-reverse; text-align: right; }
+.planet-body { position: relative; flex: none; width: var(--ps, 44px); height: var(--ps, 44px); border-radius: 50%; display: grid; place-items: center;
+  color: rgba(255, 255, 255, .9);
+  background: radial-gradient(circle at var(--lx, 35%) var(--ly, 35%), #ffd3d8 0%, color-mix(in srgb, var(--hue) 70%, #ffb3bb) 11%,
+    var(--hue) 32%, color-mix(in srgb, var(--hue) 35%, #120206) 64%, #070102 100%);
+  box-shadow: 0 0 calc(var(--ps, 44px) * .45) rgba(225, 29, 53, .28), inset 0 0 calc(var(--ps, 44px) * .18) rgba(0, 0, 0, .55);
+  transition: box-shadow .35s, transform .35s cubic-bezier(.2, .7, .2, 1); }
+.planet-body svg { width: calc(var(--ps, 44px) * .42); height: calc(var(--ps, 44px) * .42); filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .7)); }
+.planet-body::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 1px solid rgba(255, 110, 122, .22); }
+.planet.is-active .planet-body::before { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 1.5px solid rgba(225, 29, 53, .7);
+  animation: planet-pulse 2.4s ease-out infinite; }
+.planet.has-alert .planet-body { box-shadow: 0 0 calc(var(--ps, 44px) * .6) rgba(225, 29, 53, .55), inset 0 0 calc(var(--ps, 44px) * .18) rgba(0, 0, 0, .55); }
+@keyframes planet-pulse { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.6); opacity: 0; } }
+.planet:hover .planet-body, .planet:focus-visible .planet-body { transform: scale(1.12); box-shadow: 0 0 calc(var(--ps, 44px) * .8) rgba(225, 29, 53, .6), inset 0 0 calc(var(--ps, 44px) * .18) rgba(0, 0, 0, .5); }
+.planet.is-selected .planet-body { transform: scale(1.22); box-shadow: 0 0 0 2px rgba(234, 234, 234, .8), 0 0 calc(var(--ps, 44px)) rgba(225, 29, 53, .8); }
+.planet:focus-visible { outline: none; }
+.planet-label { display: grid; line-height: 1.2; text-shadow: 0 1px 8px rgba(8, 8, 8, .95), 0 0 2px #080808; transition: opacity .3s; }
+.planet .node-label { font: 600 13.5px var(--font); color: var(--text); letter-spacing: .01em; }
+.planet .node-metric { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-2); white-space: nowrap; }
+.planet.label-hidden .planet-label { opacity: 0; }
+.planet.is-back .node-metric { opacity: .55; }
+.node-dot.active { background: var(--crimson-hi); box-shadow: 0 0 8px var(--crimson-hi); animation: blink 1.4s infinite; }
+.core.has-selection .core-id { opacity: .25; transition: opacity .4s; }
+.core-ctrl { position: absolute; right: 12px; bottom: 12px; z-index: 300; display: grid; gap: 6px; }
+.core-ctrl button { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); background: rgba(17, 17, 17, .7); color: var(--text-2);
+  font: 600 16px var(--font); cursor: pointer; backdrop-filter: blur(8px); }
+.core-ctrl button:hover { color: var(--text); border-color: var(--line-2); }
+.core-card { position: absolute; right: 14px; top: 14px; z-index: 320; width: min(320px, calc(100% - 28px)); padding: 14px 16px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(17, 17, 17, .86), rgba(8, 8, 8, .92)); border: 1px solid var(--line-2); backdrop-filter: blur(14px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55); animation: card-in .35s cubic-bezier(.2, .7, .2, 1); cursor: default; }
+.core-card header { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.core-card ul { margin: 8px 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--text-2); }
+.core-card-metric { margin: 8px 0 4px; font-size: 18px; font-weight: 700; }
+.planet-mini { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 35%, #ffd3d8, var(--crimson-hi) 30%, #3a0610 75%); }
+@keyframes card-in { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+@media (max-width: 760px) {
+  .core-card { top: auto; bottom: 10px; right: 10px; left: 10px; width: auto; }
+  .planet .node-label { font-size: 11.5px; }
+  .planet .node-metric { font-size: 10px; }
+  .core-ctrl { right: 8px; bottom: auto; top: 8px; }
+}
+/* el sistema solar ocupa todo el espacio central; el saludo flota encima */
+.stage { grid-template-rows: minmax(0, 1fr) auto; }
+.stage-head { position: absolute; top: 6px; left: 0; right: 0; z-index: 6; pointer-events: none; }
+.stage-head a { pointer-events: auto; }
+.core { min-height: 460px; }
+.transcript ol { max-height: 26vh; overflow-y: auto; }
+@media (max-width: 1100px) { .core { height: min(118vw, 720px); min-height: 420px; } }
+.module-ctx { border-color: var(--line-2) !important; animation: card-in .35s cubic-bezier(.2, .7, .2, 1); }
+.module-ctx-head { display: flex; align-items: center; gap: 10px; font-size: 16px; }
+.module-ctx-head .link-btn { margin-left: auto; font-size: 18px; }
+.module-ctx-list { margin: 6px 0 12px; padding-left: 16px; display: grid; gap: 4px; font-size: 13px; color: var(--text-2); }
+@media (min-width: 1101px) { .core-card { display: none; } } /* en escritorio el contexto va en el panel derecho */
+@media (max-width: 1100px) {
+  .intel { order: 2; }
+  .dock { position: relative; bottom: auto; }
+  .stage-head { position: relative; top: 0; }
+  .stage { grid-template-rows: auto minmax(0, 1fr) auto; }
+}
+.core-name { font-size: clamp(18px, 2vw, 30px) !important; letter-spacing: .38em; padding-left: .38em; }
+.core.has-selection .core-id { opacity: .1; }
+.planet[data-label="below"], .planet[data-label="above"] { flex-direction: column; text-align: center; gap: 3px; }
+.planet[data-label="above"] { flex-direction: column-reverse; }
+.planet[data-label="below"] .planet-label, .planet[data-label="above"] .planet-label { position: absolute; left: 50%; transform: translateX(-50%); width: max-content; }
+.planet[data-label="below"] .planet-label { top: calc(100% + 2px); }
+.planet[data-label="above"] .planet-label { bottom: calc(100% + 2px); }
+.planet[data-label="below"] .node-metric, .planet[data-label="above"] .node-metric { justify-content: center; }
+@media (max-width: 640px) {
+  .core { height: min(112vw, 520px) !important; min-height: 380px; }
+  .core-name { font-size: 15px !important; }
+  .core-state { font-size: 8.5px; }
+}
+@media (max-width: 640px) {
+  .core { height: min(100vw, 460px) !important; min-height: 340px; }
+  .planet-body::after { inset: -3px; }
+}
+/* navegación agrupada */
+.nav-group + .nav-group { margin-top: 10px; }
+.nav-group-title { margin: 0 0 4px; padding: 0 14px; font: 600 9.5px var(--font-mono); letter-spacing: .22em; text-transform: uppercase; color: var(--text-3); opacity: .8; }
+.nav-link.is-active { box-shadow: inset 2px 0 0 var(--crimson-hi); }
+
+/* VISTAN · fotos, comidas y progress */
+.photo-preview { max-width: 100%; max-height: 260px; border-radius: 12px; object-fit: contain; }
+.photo-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 12px; }
+.photo-grid li { display: grid; gap: 4px; min-width: 0; }
+.photo-btn { padding: 0; border: 2px solid transparent; border-radius: 12px; overflow: hidden; background: var(--black-2); cursor: pointer; aspect-ratio: 3 / 4; }
+.photo-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-grid li.on .photo-btn { border-color: var(--crimson-hi); box-shadow: 0 0 18px rgba(225, 29, 53, .45); }
+.photo-note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.compare { display: grid; gap: 8px; margin: 10px 0; }
+.compare-stage { position: relative; border-radius: 14px; overflow: hidden; background: var(--black); aspect-ratio: 3 / 4; max-height: 560px; }
+.compare-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; }
+.compare-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--crimson-hi); box-shadow: 0 0 12px var(--crimson-hi); transform: translateX(-1px); }
+.compare-tag { position: absolute; top: 10px; padding: 2px 8px; border-radius: 99px; background: rgba(8, 8, 8, .7); font-size: 12px; }
+.compare-tag.left { left: 10px; } .compare-tag.right { right: 10px; }
+.compare input[type=range] { width: 100%; accent-color: var(--crimson-hi); }
+.analysis { margin-top: 10px; }
+.analysis-item { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.analysis-item summary { cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.meal-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 14px; }
+.meal-card { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; }
+.meal-card > img { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; }
+.meal-body { min-width: 0; display: grid; gap: 6px; }
+.meal-body p { margin: 0; }
+.cap { text-transform: capitalize; }
+input.grams { width: 64px; font: 13px var(--font); color: var(--text); background: rgba(12, 12, 12, .7); border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 6px; }
+.meal-q { padding: 8px 10px; border-radius: 10px; background: rgba(181, 18, 36, .08); border: 1px solid var(--line-2); }
+.photo-strip { list-style: none; margin: 10px 0 0; padding: 0; display: flex; gap: 8px; overflow-x: auto; }
+.photo-strip li { flex: none; display: grid; gap: 2px; justify-items: center; }
+.photo-strip img { width: 64px; height: 84px; object-fit: cover; border-radius: 8px; }
+.trend-subiendo, .trend-bajando { color: var(--text); border-color: var(--line-2); }
+@media (max-width: 640px) { .meal-card { grid-template-columns: 1fr; } .meal-card > img { width: 100%; height: 180px; } }
+/* El centro del botón = centro de la esfera (la etiqueta flota alrededor, fuera del flujo) */
+.planet { display: block; width: var(--ps, 44px); height: var(--ps, 44px); }
+.planet .planet-body { width: 100%; height: 100%; }
+.planet .planet-label { position: absolute; top: 50%; left: calc(100% + 8px); transform: translateY(-50%); width: max-content; max-width: 150px; }
+.planet[data-label="left"] .planet-label { left: auto; right: calc(100% + 8px); text-align: right; }
+.planet[data-label="left"] .node-metric { justify-content: flex-end; }
+.planet[data-label="below"] .planet-label { top: calc(100% + 4px); left: 50%; transform: translateX(-50%); text-align: center; }
+.planet[data-label="above"] .planet-label { top: auto; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); text-align: center; }
+.planet .node-metric { overflow: hidden; text-overflow: ellipsis; }

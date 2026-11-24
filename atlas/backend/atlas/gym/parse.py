@@ -142,7 +142,7 @@ def parse_workout(text: str, exercises: list[Exercise]) -> list[ParsedExercise]:
 
 
 LOG_TRIGGER = re.compile(
-    r"^(?:atlas[,:\s]+)?(?:hoy\s+)?(?:he\s+hecho|acabo\s+de\s+hacer|registra(?:r)?|apunta\s+(?:el\s+)?entreno|entreno\s*:|"
+    r"^(?:(?:atlas|vistan|bistan)[,:\s]+)?(?:hoy\s+)?(?:he\s+hecho|acabo\s+de\s+hacer|registra(?:r)?|apunta\s+(?:el\s+)?entreno|entreno\s*:|"
     r"he\s+entrenado|hice)\b", re.IGNORECASE)
 
 

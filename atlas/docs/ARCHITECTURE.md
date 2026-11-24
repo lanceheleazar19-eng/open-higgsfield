@@ -1,4 +1,4 @@
-# Arquitectura de ATLAS
+# Arquitectura de VISTAN
 
 ## Principios
 
@@ -10,7 +10,7 @@
    no obliga a tocar los demás.
 4. **Crecer sin reconstruir.** El esquema evoluciona con migraciones Alembic;
    una prueba falla si un modelo cambia sin su migración.
-5. **Acciones sensibles con autorización.** ATLAS nunca mueve dinero, ejecuta
+5. **Acciones sensibles con autorización.** VISTAN nunca mueve dinero, ejecuta
    operaciones de trading reales ni comandos del sistema por su cuenta.
 
 ## Tecnologías elegidas
@@ -20,7 +20,7 @@
 | Backend | **Python 3.11+ / FastAPI** | El ecosistema de IA (Ollama, SDKs de Anthropic/OpenAI, lectura de PDF/Excel, pandas para análisis) es Python. FastAPI: tipado, validación con Pydantic, async para streaming del chat. |
 | Base de datos | **SQLite (WAL)** → PostgreSQL | Cero instalación, un solo archivo fácil de respaldar. SQLAlchemy 2 permite pasar a PostgreSQL cambiando `ATLAS_DATABASE_URL`. |
 | Migraciones | **Alembic** | Cada fase amplía tablas sin perder tus datos. |
-| Frontend | **React 19 + TypeScript + Vite** | SPA rápida, tipada. Vite en lugar de Next.js: ATLAS es una app local de un usuario, no necesita SSR ni servidor Node en producción; FastAPI sirve el build estático → un solo proceso. |
+| Frontend | **React 19 + TypeScript + Vite** | SPA rápida, tipada. Vite en lugar de Next.js: VISTAN es una app local de un usuario, no necesita SSR ni servidor Node en producción; FastAPI sirve el build estático → un solo proceso. |
 | Estilos | CSS propio con variables | Control total del look holográfico, sin dependencias pesadas. Fuentes empaquetadas (funciona sin Internet). |
 | 3D | **three.js** (sin React Three Fiber) | Una sola dependencia, cargada en un chunk aparte solo si hay WebGL. Los nodos son HTML proyectado con la misma matemática que la escena: texto nítido, accesibles y pulsables. |
 | Voz | Web Speech API del navegador | Sin dependencias ni claves; Chrome/Edge. Whisper/TTS locales en la Fase 9. |

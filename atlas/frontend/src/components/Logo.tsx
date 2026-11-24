@@ -1,14 +1,15 @@
-/** Emblema de ATLAS: triángulo carmesí con brillo. */
+/** Emblema de VISTAN: una «V» carmesí atravesada por una órbita (el núcleo y su sistema). */
 export function Logo({ size = 40 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" className="logo">
       <defs>
-        <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#ff6b78" /><stop offset="1" stopColor="#b51224" />
+        <linearGradient id="vlg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ff5a6a" /><stop offset="1" stopColor="#b51224" />
         </linearGradient>
       </defs>
-      <path d="M32 6 58 56H45L32 30 19 56H6z" fill="url(#lg)" />
-      <path d="M32 38 38 50H26z" fill="#e11d35" opacity=".85" />
+      <ellipse cx="32" cy="33" rx="29" ry="10" fill="none" stroke="#e11d35" strokeOpacity=".45" strokeWidth="1.6" transform="rotate(-16 32 33)" />
+      <path d="M8 10h12l12 30 12-30h12L37 56H27z" fill="url(#vlg)" />
+      <circle cx="55" cy="25" r="2.6" fill="#eaeaea" />
     </svg>
   );
 }

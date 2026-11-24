@@ -37,7 +37,7 @@ export interface Voice {
   /** Manos libres (Fase 9) */
   handsFree: HandsFree;
   setHandsFree: (p: Partial<HandsFree>) => void;
-  /** Escuchando en segundo plano la palabra «ATLAS». */
+  /** Escuchando en segundo plano la palabra «VISTAN». */
   wakeActive: boolean;
   /** La conversación actual empezó por voz: las respuestas se leen y se sigue escuchando. */
   conversing: boolean;
@@ -66,7 +66,7 @@ function beep() {
 }
 
 /** Reconocimiento (micrófono → texto), síntesis (texto → voz) y modo manos libres del navegador.
- *  `busy`: ATLAS está generando una respuesta (no se reabre el micrófono hasta que termine). */
+ *  `busy`: VISTAN está generando una respuesta (no se reabre el micrófono hasta que termine). */
 export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const Ctor = typeof window !== "undefined" ? getRecognition() : null;
   const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
@@ -84,7 +84,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const [bgTick, setBgTick] = useState(0);
   const conversingRef = useRef(false);
   const replyPending = useRef(false);
-  const spokenRef = useRef(""); // lo que ATLAS ha dicho en esta respuesta (para «repite» y el filtro de eco)
+  const spokenRef = useRef(""); // lo que VISTAN ha dicho en esta respuesta (para «repite» y el filtro de eco)
   const speakingRef = useRef(false);
   speakingRef.current = speaking;
   const denied = useRef(false);
@@ -130,7 +130,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     });
   }, [canSpeak]);
 
-  /** Lo que el usuario dijo por voz: órdenes locales o pregunta para ATLAS. */
+  /** Lo que el usuario dijo por voz: órdenes locales o pregunta para VISTAN. */
   const handleUtterance = useCallback((raw: string) => {
     const text = raw.trim();
     if (!text) return;
@@ -165,7 +165,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
   const listen = useCallback((followUp = false) => {
     if (!Ctor || recRef.current) return;
     stopBg(); // solo puede haber un reconocedor activo
-    stopSpeaking(); // interrumpe a ATLAS si estaba hablando
+    stopSpeaking(); // interrumpe a VISTAN si estaba hablando
     const rec = make(false)!;
     let finalText = "";
     rec.onresult = (e) => {
@@ -186,11 +186,11 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
       setListening(false);
       setInterim("");
       recRef.current = null;
-      // «ATLAS, …» al principio de lo dictado: se quita la palabra de activación
-      const lead = /^\W*(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\W+)?h?[aá]t\s?l[aá]s(?![a-zñ])/i.test(finalText);
+      // «VISTAN, …» al principio de lo dictado: se quita la palabra de activación
+      const lead = /^\W*(?:(?:hola|oye|hey|ey|eh|ok|okay|vale)\W+)?(?:[vb]i[sz]\s?t[aá]n|h?[aá]t\s?l[aá]s)(?![a-zñ])/i.test(finalText);
       const said = (lead ? afterWake(finalText) ?? "" : finalText).trim();
       if (said) handleUtterance(said);
-      else if (followUp) setConv(false); // silencio tras la respuesta → vuelve a esperar «ATLAS»
+      else if (followUp) setConv(false); // silencio tras la respuesta → vuelve a esperar «VISTAN»
       setBgTick((t) => t + 1);
     };
     recRef.current = rec;
@@ -209,7 +209,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     if (p.wake) denied.current = false;
   }, []);
 
-  // Conversación continua: al terminar de hablar ATLAS, vuelve a escuchar sin pulsar nada
+  // Conversación continua: al terminar de hablar VISTAN, vuelve a escuchar sin pulsar nada
   useEffect(() => {
     if (!handsFree.continuous || !conversing || busy || speaking || listening || !replyPending.current) return;
     const t = setTimeout(() => {
@@ -220,7 +220,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     return () => clearTimeout(t);
   }, [handsFree.continuous, conversing, busy, speaking, listening, listen]);
 
-  // Escucha en segundo plano: palabra de activación y poder interrumpir a ATLAS hablando
+  // Escucha en segundo plano: palabra de activación y poder interrumpir a VISTAN hablando
   const bgWanted = !!Ctor && !denied.current && !listening && (handsFree.wake || (speaking && conversing));
   useEffect(() => {
     if (!bgWanted) { stopBg(); return; }
@@ -239,17 +239,17 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
         const heard = r[0].transcript;
-        if (speakingRef.current && isEcho(heard, spokenRef.current)) continue; // es la voz de ATLAS
+        if (speakingRef.current && isEcho(heard, spokenRef.current)) continue; // es la voz de VISTAN
         const w = handsFree.wake || speakingRef.current ? matchWake(heard) : null;
         const stopWord = speakingRef.current && voiceIntent(heard) === "stop";
         const words = w ? w.rest.split(" ").filter(Boolean).length : 0;
-        if (speakingRef.current && (w || stopWord)) { // interrumpir a ATLAS mientras habla
+        if (speakingRef.current && (w || stopWord)) { // interrumpir a VISTAN mientras habla
           handled = true;
           stopSpeaking();
           stopBg();
           if (stopWord) { setConv(false); replyPending.current = false; setBgTick((t) => t + 1); }
           else if (r.isFinal && words >= 2) handleUtterance(afterWake(heard) || w!.rest);
-          else { setConv(true); listen(); } // sigue escuchando lo que dices después de «ATLAS»
+          else { setConv(true); listen(); } // sigue escuchando lo que dices después de «VISTAN»
           return;
         }
         if (!w || !r.isFinal) continue; // espera al final de la frase
@@ -263,7 +263,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     rec.onerror = (e) => {
       if (e.error === "not-allowed" || e.error === "service-not-allowed") {
         denied.current = true;
-        setError("Permiso de micrófono denegado: «Oye ATLAS» no puede escuchar");
+        setError("Permiso de micrófono denegado: «Oye VISTAN» no puede escuchar");
       }
     };
     rec.onend = () => { if (bgRef.current === rec) { bgRef.current = null; setWakeActive(false); setTimeout(() => setBgTick((t) => t + 1), 300); } };
@@ -271,7 +271,7 @@ export function useVoice(onFinal: (text: string) => void, busy = false): Voice {
     try { rec.start(); setWakeActive(handsFree.wake); } catch { bgRef.current = null; }
   }, [bgWanted, bgTick, handsFree.wake, make, stopBg, stopSpeaking, handleUtterance, listen]);
 
-  // Dos palmadas → ATLAS escucha (opcional, detección local de volumen; no se graba nada)
+  // Dos palmadas → VISTAN escucha (opcional, detección local de volumen; no se graba nada)
   const listenRef = useRef(listen);
   listenRef.current = listen;
   useEffect(() => {

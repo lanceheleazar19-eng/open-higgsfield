@@ -29,7 +29,7 @@ def catalog(db: DB) -> dict:
                 stats[a]["runs"] += 1
                 stats[a]["last"] = stats[a]["last"] or r.created_at.isoformat()
     return {
-        "core": {"name": "ATLAS CORE", "role": "Recibe cada petición, elige agentes y herramientas, consulta la memoria, "
+        "core": {"name": "VISTAN CORE", "role": "Recibe cada petición, elige agentes y herramientas, consulta la memoria, "
                                                "ejecuta lo autorizado y redacta la respuesta."},
         "agents": [{"id": a.id, "name": a.name, "role": a.role, "limits": a.limits,
                     "tools": [{"name": t, "level": TOOLS[t].level, "description": TOOLS[t].description} for t in a.tools],

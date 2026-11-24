@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15 ATLAS/4.0"
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15 VISTAN/4.0"
 MAX_BYTES = 2_500_000
 
 

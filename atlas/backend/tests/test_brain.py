@@ -24,7 +24,7 @@ def test_without_ollama_falls_back_to_local(client):
     assert "Ollama no detectado" in st["note"]
     ev = _events(client.post("/api/assistant/chat", json={"text": "¿Qué tengo pendiente hoy?"}))
     assert ev[0]["type"] == "meta" and ev[0]["conversation_id"] > 0
-    agents = next(e for e in ev if e["type"] == "agents")["run"]  # ATLAS CORE eligió el agente de planificación
+    agents = next(e for e in ev if e["type"] == "agents")["run"]  # VISTAN CORE eligió el agente de planificación
     assert agents["agents"] == ["planning"] and all(s["level"] == "READ" for s in agents["steps"])
     ev = [e for e in ev if e["type"] not in ("agents", "sources")]
     assert ev[1] == {"type": "delta", "text": "No tienes tareas pendientes registradas."}
@@ -63,7 +63,7 @@ def test_chat_streams_and_grounds_model_in_real_data(ollama, client, session):
     roles = [m["role"] for m in req["messages"]]
     assert roles == ["system", "user", "assistant", "user"]
     system = req["messages"][0]["content"]
-    assert "Eres ATLAS" in system and "Lance" in system
+    assert "Eres VISTAN" in system and "Lance" in system
     assert "Pagar seguro" in system and "45,50 €" in system  # datos reales, importes ya formateados
     assert "Nunca inventes cifras" in system
     assert "máximo potencial" in system

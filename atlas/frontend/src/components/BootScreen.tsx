@@ -13,7 +13,7 @@ export function alreadyBooted(): boolean {
 }
 
 /** Pantalla de arranque. Los navegadores no permiten hablar sin que el usuario pulse algo:
- *  el botón «Iniciar» es esa interacción, y a la vez la entrada cinematográfica a ATLAS. */
+ *  el botón «Iniciar» es esa interacción, y a la vez la entrada cinematográfica a VISTAN. */
 export function BootScreen({ health, onStart }: { health: Health | null; onStart: (withVoice: boolean) => void }) {
   const [step, setStep] = useState(0);
   useEffect(() => {
@@ -31,11 +31,11 @@ export function BootScreen({ health, onStart }: { health: Health | null; onStart
     ["Voz", typeof window !== "undefined" && "speechSynthesis" in window ? "lista" : "no disponible", true],
   ];
   return (
-    <div className="boot" role="dialog" aria-modal="true" aria-label="Inicio de ATLAS">
+    <div className="boot" role="dialog" aria-modal="true" aria-label="Inicio de VISTAN">
       <div className="boot-inner">
         <div className="boot-ring" aria-hidden="true"><span /><span /><span /></div>
         <p className="eyebrow">Personal Intelligence System</p>
-        <h1 className="boot-title">ATLAS</h1>
+        <h1 className="boot-title">VISTAN</h1>
         <ul className="boot-lines">
           {lines.map(([k, v, ok], i) => (
             <li key={k} className={i < step ? "on" : ""}>
@@ -43,7 +43,7 @@ export function BootScreen({ health, onStart }: { health: Health | null; onStart
             </li>
           ))}
         </ul>
-        <button className="btn boot-btn" onClick={() => start(true)} autoFocus>Iniciar ATLAS</button>
+        <button className="btn boot-btn" onClick={() => start(true)} autoFocus>Iniciar VISTAN</button>
         <button className="link-btn" onClick={() => start(false)}>Entrar en silencio</button>
       </div>
     </div>

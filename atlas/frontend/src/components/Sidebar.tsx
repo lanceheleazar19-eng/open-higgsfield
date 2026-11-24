@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useAtlas } from "./AtlasContext";
 import { Icon } from "./Icon";
-import { NAV } from "./nav";
+import { NAV, NAV_GROUPS } from "./nav";
 import { SystemStatus } from "./SystemStatus";
 
 export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate: () => void }) {
@@ -11,8 +11,11 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate: () =>
   return (
     <aside className={`sidebar ${open ? "is-open" : ""}`} aria-label="Navegación principal">
       <nav>
+        {NAV_GROUPS.map((g) => (
+        <div className="nav-group" key={g}>
+        {g !== "Configuración" && <p className="nav-group-title">{g}</p>}
         <ul>
-          {NAV.map((item) => {
+          {NAV.filter((x) => x.group === g).map((item) => {
             const m = byId.get(item.id);
             const planned = m?.status === "planned";
             return (
@@ -31,6 +34,8 @@ export function Sidebar({ open, onNavigate }: { open: boolean; onNavigate: () =>
             );
           })}
         </ul>
+        </div>
+        ))}
       </nav>
       <SystemStatus />
     </aside>

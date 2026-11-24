@@ -32,7 +32,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
     });
   } catch {
-    throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+    throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN");
   }
   if (!res.ok) {
     let detail = res.statusText;
@@ -52,7 +52,7 @@ export async function requestEmpty(path: string, init?: RequestInit): Promise<vo
   try {
     res = await fetch(path, init);
   } catch {
-    throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+    throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN");
   }
   if (!res.ok) throw new ApiError(res.status, `Error ${res.status}`);
 }
@@ -120,7 +120,7 @@ export const api = {
     fd.append("file", blob, "avatar.webp");
     let res: Response;
     try { res = await fetch("/api/profile/avatar", { method: "POST", body: fd }); } catch {
-      throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+      throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN");
     }
     if (!res.ok) {
       let detail = res.statusText;
@@ -157,7 +157,7 @@ export const api = {
     const fd = new FormData();
     fd.append("file", file);
     let res: Response;
-    try { res = await fetch("/api/nutrition/photo", { method: "POST", body: fd }); } catch { throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS"); }
+    try { res = await fetch("/api/nutrition/photo", { method: "POST", body: fd }); } catch { throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN"); }
     if (!res.ok) { let d = res.statusText; try { d = (await res.json()).detail; } catch { /* */ } throw new ApiError(res.status, d); }
     return res.json();
   },
@@ -222,7 +222,7 @@ async function chatStream(text: string, conversationId: number | null, onEvent: 
     });
   } catch (e) {
     if ((e as Error).name === "AbortError") throw e;
-    throw new ApiError(0, "No se puede conectar con el núcleo de ATLAS");
+    throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN");
   }
   if (!res.ok || !res.body) throw new ApiError(res.status, `Error ${res.status} del núcleo`);
   const reader = res.body.getReader();

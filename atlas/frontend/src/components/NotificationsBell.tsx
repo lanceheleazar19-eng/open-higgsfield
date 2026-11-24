@@ -5,7 +5,7 @@ import { useAsync } from "../api/useAsync";
 import { relativeTime } from "../lib/format";
 import { Icon } from "./Icon";
 
-/** Notificaciones reales de ATLAS (workflows, investigaciones, aprobaciones). Si diste permiso, también
+/** Notificaciones reales de VISTAN (workflows, investigaciones, aprobaciones). Si diste permiso, también
  *  aparecen como notificación del sistema. */
 export function NotificationsBell() {
   const n = useAsync(v4.notifications, 30000);

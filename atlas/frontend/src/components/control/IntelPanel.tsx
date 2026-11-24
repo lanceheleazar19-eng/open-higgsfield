@@ -5,6 +5,9 @@ import { api } from "../../api/client";
 import type { Dashboard } from "../../api/types";
 import { formatMoney, relativeTime } from "../../lib/format";
 import { PACE_LABEL, formatDue } from "../../lib/tasks";
+import type { NodeInfo } from "../core/AtlasCore";
+import { NODE_DEFS } from "../core/nodes";
+import { Icon } from "../Icon";
 
 const LEVEL_LABEL = { critical: "Crítico", warning: "Aviso", info: "Info" } as const;
 const MODULE_ROUTE: Record<string, string> = { tasks: "/tasks", calendar: "/calendar", finance: "/finance", gym: "/gym", goals: "/tasks?tab=goals" };
@@ -36,7 +39,10 @@ function FinanceChart({ series }: { series: { date: string; net_cents: number }[
 }
 
 /** Columna derecha: tareas, eventos, objetivos, finanzas y actividad (todo con datos reales). */
-export function IntelPanel({ data, onChanged }: { data: Dashboard | null; onChanged: () => void }) {
+export function IntelPanel({ data, onChanged, module, onOpen, onClose }: {
+  data: Dashboard | null; onChanged: () => void;
+  module?: { id: string; info?: NodeInfo } | null; onOpen?: (route: string) => void; onClose?: () => void;
+}) {
   const [done, setDone] = useState<Set<number>>(new Set());
   const mail = useAsync(api.importantMail, 300_000);
   if (!data) return <aside className="intel" aria-label="Información en tiempo real" />;
@@ -50,6 +56,21 @@ export function IntelPanel({ data, onChanged }: { data: Dashboard | null; onChan
 
   return (
     <aside className="intel" aria-label="Información en tiempo real">
+      {module && (() => {
+        const def = NODE_DEFS.find((n) => n.id === module.id);
+        if (!def) return null;
+        return (
+          <section className="icard module-ctx" aria-label={`Contexto de ${def.label}`}>
+            <header className="module-ctx-head"><span className="planet-mini"><Icon name={def.icon} size={15} /></span>
+              <strong>{def.label}</strong>{module.info?.active && <span className="badge live">activo</span>}
+              <button type="button" className="link-btn" onClick={onClose} aria-label="Cerrar contexto">×</button></header>
+            <p className="small muted">{def.description}</p>
+            <p className="core-card-metric">{module.info?.metric ?? "—"}</p>
+            {module.info?.details && module.info.details.length > 0 && <ul className="module-ctx-list">{module.info.details.map((x, i) => <li key={i}>{x}</li>)}</ul>}
+            <button type="button" className="btn" onClick={() => onOpen?.(def.route)}>Abrir {def.label}</button>
+          </section>
+        );
+      })()}
       {data.alerts.length > 0 && (
         <Card title={`Alertas (${data.alerts.length})`}>
           <ul className="alerts">

@@ -25,7 +25,7 @@ function TasksPanel({ t, tz }: { t: D["tasks"]; tz: string }) {
   return (
     <Panel title="Tareas pendientes" icon={<Icon name="tasks" />} aside={<span className="badge">{t.due_today} hoy</span>}>
       {t.items.length === 0 ? (
-        <Empty>No hay tareas registradas. Añádelas en Tareas o dile a ATLAS «apúntame…».</Empty>
+        <Empty>No hay tareas registradas. Añádelas en Tareas o dile a VISTAN «apúntame…».</Empty>
       ) : (
         <ul className="list">
           {t.items.map((i) => (
@@ -154,7 +154,7 @@ function ActivityPanel({ a }: { a: D["activity"] }) {
   return (
     <Panel title="Actividad reciente" icon={<Icon name="reports" />}>
       {a.items.length === 0 ? (
-        <Empty>Todavía no hay actividad. Todo lo que hagas en ATLAS quedará registrado aquí.</Empty>
+        <Empty>Todavía no hay actividad. Todo lo que hagas en VISTAN quedará registrado aquí.</Empty>
       ) : (
         <ol className="timeline">
           {a.items.map((i) => (
