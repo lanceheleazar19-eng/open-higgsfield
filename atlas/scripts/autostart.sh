@@ -54,8 +54,22 @@ case "${1:-}" in
   <key>StandardErrorPath</key><string>$(esc "$LOG")</string>
 </dict></plist>
 PL
+    # bootout es asíncrono: si se hace bootstrap antes de que macOS lo libere da «Bootstrap failed: 5».
     launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
-    launchctl bootstrap "$DOMAIN" "$PLIST"
+    for _ in $(seq 1 20); do launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1 || break; sleep 0.5; done
+    launchctl enable "$DOMAIN/$LABEL" 2>/dev/null || true
+    ok=0
+    for i in 1 2 3 4 5; do
+      if launchctl bootstrap "$DOMAIN" "$PLIST" 2>/dev/null; then ok=1; break; fi
+      # Puede que ya esté cargado: en ese caso basta con reiniciarlo
+      if launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1; then launchctl kickstart -k "$DOMAIN/$LABEL" && ok=1 && break; fi
+      sleep "$i"
+    done
+    if [ "$ok" != 1 ]; then
+      echo "✖ macOS no ha aceptado el servicio en segundo plano."
+      echo "  Arráncalo de momento en esta Terminal con: ./atlas/scripts/start.sh"
+      exit 1
+    fi
     echo "▸ Arrancando en segundo plano…"
     for _ in $(seq 1 30); do
       if curl -fsS "http://127.0.0.1:$PORT/api/system/health" >/dev/null 2>&1; then
