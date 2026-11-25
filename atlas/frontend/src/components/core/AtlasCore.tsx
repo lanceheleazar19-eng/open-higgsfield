@@ -148,7 +148,7 @@ export function AtlasCore({ info, state, rippleKey, onOpen, selected, onSelect }
       cam.ry += (cam.try - cam.ry) * k;
       cam.zoom += (cam.tzoom - cam.zoom) * k;
       const camZ = baseZ * cam.zoom;
-      const laid = separate(NODE_DEFS, orbitTime, offsets, { pitch: cam.rx, yaw: cam.ry, camZ, w, h, target: cam.target }, w < 640 ? 16 : 10, 30);
+      const laid = separate(NODE_DEFS, orbitTime, offsets, { pitch: cam.rx, yaw: cam.ry, camZ, w, h, target: cam.target }, w < 640 ? 16 : 10, 80);
       local = laid.local;
       const want: Vec3 = si >= 0 ? rotateView(local[si], cam.rx, cam.ry).map((v) => v * 0.82) as Vec3 : [0, 0, 0];
       cam.target = cam.target.map((v, j) => v + (want[j] - v) * k) as Vec3;

@@ -12,6 +12,7 @@ import { Calendar } from "./pages/Calendar";
 import { Finance } from "./pages/Finance";
 import { Trading } from "./pages/Trading";
 import { TradingDesk } from "./pages/TradingDesk";
+import { Betting } from "./pages/Betting";
 import { Agents } from "./pages/Agents";
 import { Analytics } from "./pages/Analytics";
 import { CommandCenter } from "./pages/CommandCenter";
@@ -23,7 +24,7 @@ import { Progress } from "./pages/Progress";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
-const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
+const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "betting", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
 
 export function App() {
   return (
@@ -41,6 +42,7 @@ export function App() {
           <Route path="finance" element={<Finance />} />
           <Route path="trading" element={<TradingDesk />} />
           <Route path="trading/legacy" element={<Trading />} />
+          <Route path="betting" element={<Betting />} />
           <Route path="agents" element={<Agents />} />
           <Route path="reports" element={<Analytics />} />
           <Route path="command" element={<CommandCenter />} />

@@ -281,3 +281,25 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Portfolio, Analytics (win rate, profit factor, expectancy, DD máx., por activo/estrategia/temporalidad), Diario con
   capturas del gráfico y detección de patrones, Tutor IA (Trading Agent) con tus datos reales, Noticias y macro,
   Backtesting sobre histórico real, e integración con Memory, Research, Notifications y el agente de VISTAN.
+
+## VISTAN PAPER BETTING · laboratorio de pronósticos (dinero ficticio)
+- `/betting` (planeta «Betting Lab» y menú Finanzas). Simulación educativa: bankroll ficticio (10.000 € por defecto,
+  configurable), sin depósitos, retiradas ni conexión para apostar. Tablas `bt_*` separadas de la Trading Desk (`td_*`).
+- **Simulador** (`atlas/bets/engine.py`): simples y combinadas, importe ficticio, cuota y retorno, fecha, razonamiento,
+  estrategia y tu propia probabilidad; solo antes del inicio del evento; liquidación automática con resultados reales
+  (football-data.org, Jolpica F1, TheSportsDB, The Odds API) o manual; nulos devuelven el importe (cuota 1 en combinadas).
+- **Mercados** (`atlas/bets/markets.py`): 1X2, doble oportunidad, ganador, más/menos, ambos marcan, hándicap, resultado
+  exacto, sets (tenis), ganador/podio/duelo (F1) y estadísticas individuales.
+- **Prediction Engine** (`atlas/bets/models.py`): Poisson con fuerzas y bootstrap (intervalos del 80 %), normal para
+  baloncesto, Plackett-Luce para F1; forma, local/visitante, cara a cara y descanso calculados con datos anteriores al
+  evento; lista explícita de lo que falta (lesiones, clima…). La IA solo explica: nunca crea cifras.
+- **Odds Analyzer**: probabilidad implícita, margen, probabilidades justas, diferencia con el modelo, EV y Kelly.
+- **Combinadas**: las selecciones del mismo partido no se multiplican: probabilidad conjunta exacta con la matriz de
+  marcadores; incompatibles → rechazo; correlacionadas → aviso.
+- **Analytics**: aciertos, fallos, pendientes, % acierto, ROI, beneficio, por deporte/mercado/tipo/estrategia, curva del
+  bankroll, drawdown y calibración (Brier, log loss, tabla de calibración) del modelo, tuya y del mercado.
+- **Backtesting** cronológico con resultados y cuotas históricas (football-data.co.uk), comparación de estrategias,
+  ROI por mitades y avisos de sesgo/sobreajuste.
+- **Betting Agent** (en VISTAN y en el módulo): analiza, enseña probabilidad, detecta falta de datos y errores; nunca
+  promete ganancias ni recomienda perseguir pérdidas.
+- Sistema solar: 13 planetas en 4 órbitas (2/3/4/4) sin solapes en ningún tamaño de pantalla.

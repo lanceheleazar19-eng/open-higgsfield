@@ -26,5 +26,6 @@ export const NAV: NavItem[] = [
   { id: "nutrition", path: "/nutrition", label: "Nutrición", group: "Personal" },
   { id: "finance", path: "/finance", label: "Finanzas", group: "Finanzas" },
   { id: "trading", path: "/trading", label: "Trading", group: "Finanzas" },
+  { id: "betting", path: "/betting", label: "Paper Betting", group: "Finanzas" },
   { id: "settings", path: "/settings", label: "Configuración", group: "Configuración" },
 ];

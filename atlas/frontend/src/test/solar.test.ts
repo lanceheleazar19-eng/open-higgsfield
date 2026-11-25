@@ -12,8 +12,8 @@ test("planetas: nunca se solapan en ningún tamaño de pantalla", () => {
       const off = NODE_DEFS.map(() => 0);
       const period = (Math.PI * 2) / Math.min(...ORBITS.map((o) => o.speed));
       for (let s = 0; s < 1500; s++) { const t = (s / 1500) * period;
-        const P = separate(NODE_DEFS, t, off, { pitch, yaw, camZ, w, h, target: [0, 0, 0] }, m, 30).placed;
-        for (let i = 0; i < 12; i++) for (let j = i + 1; j < 12; j++) worst = Math.min(worst, Math.hypot(P[i].x - P[j].x, P[i].y - P[j].y) - P[i].r - P[j].r); }
+        const P = separate(NODE_DEFS, t, off, { pitch, yaw, camZ, w, h, target: [0, 0, 0] }, m, 80).placed;
+        for (let i = 0; i < NODE_DEFS.length; i++) for (let j = i + 1; j < NODE_DEFS.length; j++) worst = Math.min(worst, Math.hypot(P[i].x - P[j].x, P[i].y - P[j].y) - P[i].r - P[j].r); }
     }
     if (worst < m - 4) out.push(`${w}x${h} m=${m} worst=${worst.toFixed(1)}`);
   }
