@@ -11,10 +11,11 @@ export interface NodeDef {
 }
 
 const Q = Math.PI / 2;
-/** Los 14 planetas de VISTAN en 4 órbitas: 2 opuestos (180°) en la interior y 4 a 90° en las otras tres. */
+/** Los 15 planetas de VISTAN en 4 órbitas: 3 a 120° en la interior y 4 a 90° en las otras tres. */
 export const NODE_DEFS: NodeDef[] = [
   { id: "ai", label: "Intelligence", icon: "ai", route: "/ai", orbit: 0, phase: 0.3, size: 1.0, hue: "#e11d35", description: "Cerebro conversacional, modelos y razonamiento." },
-  { id: "memory", label: "Memory", icon: "memory", route: "/memory", orbit: 0, phase: 0.3 + Math.PI, size: 0.95, hue: "#c2142a", description: "Lo que VISTAN sabe de ti: preferencias, objetivos y decisiones." },
+  { id: "lab", label: "Innovation Lab", icon: "lab", route: "/lab", orbit: 0, phase: 0.3 + (4 * Math.PI) / 3, size: 0.95, hue: "#e11d35", description: "Laboratorio privado: radar tecnológico, investigación, experimentos y prototipos." },
+  { id: "memory", label: "Memory", icon: "memory", route: "/memory", orbit: 0, phase: 0.3 + (2 * Math.PI) / 3, size: 0.95, hue: "#c2142a", description: "Lo que VISTAN sabe de ti: preferencias, objetivos y decisiones." },
   { id: "agents", label: "Agents", icon: "agents", route: "/agents", orbit: 2, phase: 1.75 + 3 * Q, size: 1, hue: "#b51224", description: "Agentes especializados coordinados por VISTAN CORE." },
   { id: "life", label: "Life OS", icon: "life", route: "/life", orbit: 1, phase: 1.05 + 3 * Q, size: 1, hue: "#e11d35", description: "Desarrollo personal y empresarial: negocios, aprendizaje, disciplina, decisiones." },
   { id: "research", label: "Research", icon: "research", route: "/research", orbit: 1, phase: 1.05, size: 1, hue: "#d01a31", description: "Investigaciones con fuentes, contradicciones y confianza." },
@@ -31,6 +32,6 @@ export const NODE_DEFS: NodeDef[] = [
 
 /** Relaciones reales entre módulos (comparten datos o contexto): por ellas viajan partículas. */
 export const LINKS: [string, string][] = [
-  ["ai", "agents"], ["memory", "research"], ["memory", "projects"], ["projects", "tasks"], ["life", "memory"], ["tasks", "calendar"],
+  ["ai", "agents"], ["memory", "research"], ["memory", "projects"], ["projects", "tasks"], ["life", "memory"], ["lab", "research"], ["tasks", "calendar"],
   ["workflows", "agents"], ["gym", "nutrition"], ["finance", "trading"], ["trading", "betting"],
 ];

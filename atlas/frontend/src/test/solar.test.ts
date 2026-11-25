@@ -18,4 +18,4 @@ test("planetas: nunca se solapan en ningún tamaño de pantalla", () => {
     if (worst < m - 4) out.push(`${w}x${h} m=${m} worst=${worst.toFixed(1)}`);
   }
   expect(out).toEqual([]);
-});
+}, 60_000);

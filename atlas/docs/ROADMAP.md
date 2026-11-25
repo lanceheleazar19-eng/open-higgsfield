@@ -325,3 +325,25 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   integrados en VISTAN CORE con herramientas reales `life.*`.
 - **Privacidad**: bloqueo opcional con PIN (hash PBKDF2 en el llavero, sesión HttpOnly de 12 h, freno de fuerza bruta),
   exportación, copias, registro de actividad y memoria editable; ningún agente envía, paga ni publica nada.
+
+## VISTAN INNOVATION LAB · explorar, experimentar, inventar
+- `/lab` (planeta «Innovation Lab», 15 planetas: órbita interior 3 a 120°; menú Inteligencia). Tablas nuevas `ix_*`
+  (migración 0014); reutiliza Research, Knowledge/RAG, Memoria, Proyectos, Tareas, Automatizaciones y el router de modelos.
+- **Command Center**: estado y procesos reales en vivo (investigaciones, experimentos, Arena), recuentos, recursos de 7 días
+  (llamadas, latencia, coste o N/D) y actividad del Innovation Agent.
+- **Technology Radar**: 16 categorías, tecnologías seguidas, descubrimientos con fuente, fecha, madurez y fiabilidad,
+  importación de publicaciones reales (arXiv / OpenAlex), radar visual, evolución por año y comparación de tecnologías.
+- **Research Lab**: motor de investigación de VISTAN + papers, etiquetas, historial, reanudar, conclusiones con fuentes,
+  contradicciones y lo no confirmado; a radar, proyecto o memoria.
+- **Experimentation Engine**: estados IDEA→ARCHIVED, pruebas con parámetros/métricas/evidencias, repetir, comparar,
+  diseño y evaluación con IA; un veredicto exige resultados observados y evidencias.
+- **AI Lab · Model Testing Arena**: baterías (exacta/contiene/regex/juez/RAG) contra los modelos realmente configurados;
+  precisión, latencia, tokens, tokens/s, coste y errores medidos.
+- **Prototype Studio**: versiones, archivos/capturas privados (descarga como octet-stream) y sandbox Python aislado
+  (proceso aparte, sin red, sin archivos fuera de su carpeta temporal, límites CPU/memoria/tiempo, con confirmación).
+- **Knowledge Base** (propio vs externo, indexar al RAG, conceptos), **Idea Generator** (ideas marcadas «sin validar»,
+  convertibles en experimento/prototipo/negocio/proyecto), **Future Simulator** (hechos solo con fuentes; hipótesis y
+  predicciones separadas), **Patents** (Espacenet vía EPO OPS con clave; Google Patents/OEPM como enlaces; aviso legal).
+- **Innovation Projects**, **Lab Workflows** (vigilancia tecnológica, Arena, revisión de experimentos, informe, patentes;
+  se instalan desactivadas), **Analytics** por periodo y categoría e **Innovation Agent** (colabora con Research, Coding,
+  Business, Planning y Memory).

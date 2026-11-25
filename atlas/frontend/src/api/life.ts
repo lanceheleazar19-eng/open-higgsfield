@@ -8,10 +8,10 @@ export class LockedError extends Error {
 type Json = Record<string, unknown>;
 export type Row = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-async function call<T = Row>(path: string, method = "GET", body?: unknown): Promise<T> {
+async function call<T = Row>(path: string, method = "GET", body?: unknown, prefix = "/api/life"): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`/api/life${path}`, { method, headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+    res = await fetch(`${prefix}${path}`, { method, headers: { "Content-Type": "application/json" }, credentials: "same-origin",
       body: body === undefined ? undefined : JSON.stringify(body) });
   } catch {
     throw new ApiError(0, "No se puede conectar con el núcleo de VISTAN");
@@ -29,10 +29,23 @@ async function call<T = Row>(path: string, method = "GET", body?: unknown): Prom
   return data as T;
 }
 
-export const life = {
-  get: <T = Row>(p: string) => call<T>(p),
-  post: <T = Row>(p: string, b?: unknown) => call<T>(p, "POST", b ?? {}),
-  put: <T = Row>(p: string, b: unknown) => call<T>(p, "PUT", b),
-  patch: <T = Row>(p: string, b: unknown) => call<T>(p, "PATCH", b),
-  del: <T = Row>(p: string, b?: unknown) => call<T>(p, "DELETE", b),
-};
+export interface Client {
+  get: <T = Row>(p: string) => Promise<T>;
+  post: <T = Row>(p: string, b?: unknown) => Promise<T>;
+  put: <T = Row>(p: string, b: unknown) => Promise<T>;
+  patch: <T = Row>(p: string, b: unknown) => Promise<T>;
+  del: <T = Row>(p: string, b?: unknown) => Promise<T>;
+}
+
+export function makeClient(prefix: string): Client {
+  return {
+    get: <T = Row>(p: string) => call<T>(p, "GET", undefined, prefix),
+    post: <T = Row>(p: string, b?: unknown) => call<T>(p, "POST", b ?? {}, prefix),
+    put: <T = Row>(p: string, b: unknown) => call<T>(p, "PUT", b, prefix),
+    patch: <T = Row>(p: string, b: unknown) => call<T>(p, "PATCH", b, prefix),
+    del: <T = Row>(p: string, b?: unknown) => call<T>(p, "DELETE", b, prefix),
+  };
+}
+
+export const life = makeClient("/api/life");
+export const lab = makeClient("/api/lab");

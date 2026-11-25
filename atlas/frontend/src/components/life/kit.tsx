@@ -1,21 +1,21 @@
 /** Piezas reutilizables de LIFE OS: formularios por esquema, lista con estados de carga/error/vacío y chat de agente. */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { life, LockedError, type Row } from "../../api/life";
+import { life, LockedError, type Client, type Row } from "../../api/life";
 
 export type Field = {
   k: string; label: string; type?: "text" | "textarea" | "number" | "date" | "select" | "checkbox" | "tags" | "time" | "lines";
   options?: [string, string][]; required?: boolean; placeholder?: string; wide?: boolean; min?: number; max?: number; step?: number;
 };
 
-export function useLoad<T>(path: string | null, deps: unknown[] = []): { data: T | null; error: string | null; loading: boolean; reload: () => void } {
+export function useLoad<T>(path: string | null, deps: unknown[] = [], api: Client = life): { data: T | null; error: string | null; loading: boolean; reload: () => void } {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const reload = useCallback(() => {
     if (!path) return;
     setLoading(true);
-    life.get<T>(path).then((d) => { setData(d); setError(null); }).catch((e: Error) => { if (!(e instanceof LockedError)) setError(e.message); }).finally(() => setLoading(false));
-  }, [path]);
+    api.get<T>(path).then((d) => { setData(d); setError(null); }).catch((e: Error) => { if (!(e instanceof LockedError)) setError(e.message); }).finally(() => setLoading(false));
+  }, [path]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(reload, [reload, ...deps]); // eslint-disable-line react-hooks/exhaustive-deps
   return { data, error, loading, reload };
 }
@@ -90,11 +90,11 @@ export function SchemaForm({ fields, initial, onSubmit, submitLabel = "Guardar",
 }
 
 /** Lista CRUD: crear, editar, borrar (con confirmación). */
-export function Crud({ title, path, listKey, fields, render, newDefaults, onChanged, actions, editPath }: {
+export function Crud({ title, path, listKey, fields, render, newDefaults, onChanged, actions, editPath, api = life }: {
   title: string; path: string; listKey?: string; fields: Field[]; render: (r: Row) => ReactNode; newDefaults?: Row;
-  onChanged?: () => void; actions?: (r: Row, reload: () => void) => ReactNode; editPath?: (r: Row) => string;
+  onChanged?: () => void; actions?: (r: Row, reload: () => void) => ReactNode; editPath?: (r: Row) => string; api?: Client;
 }) {
-  const { data, error, loading, reload } = useLoad<Row>(path);
+  const { data, error, loading, reload } = useLoad<Row>(path, [], api);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const items: Row[] = (listKey ? data?.[listKey] : data) ?? [];
   const done = () => { setEditing(null); reload(); onChanged?.(); };
@@ -103,20 +103,20 @@ export function Crud({ title, path, listKey, fields, render, newDefaults, onChan
       <header className="dpanel-head"><span>{title.toUpperCase()} · {items.length}</span>
         <button type="button" className="link-btn" onClick={() => setEditing(editing === "new" ? null : "new")}>{editing === "new" ? "cerrar" : "+ nuevo"}</button></header>
       {editing === "new" && <SchemaForm fields={fields} initial={newDefaults} onCancel={() => setEditing(null)} submitLabel="Crear"
-        onSubmit={(v) => life.post(path.split("?")[0], v).then(done)} />}
+        onSubmit={(v) => api.post(path.split("?")[0], v).then(done)} />}
       <State loading={loading && !data} error={error} empty={!items.length && editing !== "new" ? "Aún no hay registros." : false}>
         <ul className="life-list">{items.map((r) => (
           <li key={r.id}>
             {editing && editing !== "new" && editing.id === r.id ? (
               <SchemaForm fields={fields} initial={r} onCancel={() => setEditing(null)}
-                onSubmit={(v) => life.patch(editPath ? editPath(r) : `${path.split("?")[0]}/${r.id}`, v).then(done)} />
+                onSubmit={(v) => api.patch(editPath ? editPath(r) : `${path.split("?")[0]}/${r.id}`, v).then(done)} />
             ) : (
               <>
                 <div className="life-item">{render(r)}</div>
                 <div className="row-actions">
                   {actions?.(r, reload)}
                   <button type="button" className="mini-btn ghost" onClick={() => setEditing(r)}>Editar</button>
-                  <button type="button" className="mini-btn ghost" onClick={() => { if (window.confirm("¿Eliminar este registro? No se puede deshacer.")) void life.del(`${path.split("?")[0]}/${r.id}`).then(done); }}>Eliminar</button>
+                  <button type="button" className="mini-btn ghost" onClick={() => { if (window.confirm("¿Eliminar este registro? No se puede deshacer.")) void api.del(`${path.split("?")[0]}/${r.id}`).then(done); }}>Eliminar</button>
                 </div>
               </>
             )}

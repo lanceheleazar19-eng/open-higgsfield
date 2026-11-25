@@ -123,7 +123,7 @@ test("los nodos del núcleo muestran datos reales y abren su módulo", async () 
   renderAt("/");
   const node = await screen.findByRole("button", { name: /^Tasks: 3 pendientes\. Pulsa para ver detalles/ });
   expect(screen.getByRole("button", { name: /^Memory: 3 recuerdos/ })).toBeInTheDocument();
-  expect(screen.getAllByRole("button", { name: /Pulsa para ver detalles/ })).toHaveLength(14); // 14 planetas
+  expect(screen.getAllByRole("button", { name: /Pulsa para ver detalles/ })).toHaveLength(15); // 15 planetas
   fireEvent.click(node); // 1.er clic: selecciona el planeta y muestra su contexto
   expect((await screen.findAllByRole("button", { name: "Abrir Tasks" })).length).toBeGreaterThan(0); // tarjeta del planeta y panel derecho
   expect(node).toHaveAttribute("aria-pressed", "true");

@@ -2,12 +2,12 @@
 registro de modelos. La ejecución de código solo ocurre en el sandbox, con confirmación explícita y registro."""
 
 from datetime import date, datetime
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 from sqlalchemy import select
 
 from atlas.api.deps import DB
@@ -22,6 +22,9 @@ from atlas.models import (IxArenaRun, IxArenaSuite, IxDiscovery, IxExperiment, I
                           Research, Task)
 from atlas.services.activity import log_activity
 from atlas.services.preferences import get_prefs
+
+# Un campo numérico vacío del formulario llega como null: se guarda como 0 (horas/coste no registrados).
+Zero = Annotated[float, BeforeValidator(lambda v: 0 if v is None or v == "" else v)]
 
 router = APIRouter(prefix="/api/lab", tags=["innovation-lab"])
 CATS = "^(" + "|".join(sv.CATEGORIES) + ")$"
@@ -350,8 +353,8 @@ class ExpIn(BaseModel):
     verdict: str | None = Field(default=None, pattern="^(supported|refuted|inconclusive)$")
     started_on: date | None = None
     finished_on: date | None = None
-    hours: float = Field(default=0, ge=0, le=100000)
-    cost: float = Field(default=0, ge=0, le=1e9)
+    hours: Zero = Field(default=0, ge=0, le=100000)
+    cost: Zero = Field(default=0, ge=0, le=1e9)
 
 
 class ExpPatch(ExpIn):
@@ -552,8 +555,8 @@ class ProtoIn(BaseModel):
     tests: str | None = Field(default=None, max_length=8000)
     results: str | None = Field(default=None, max_length=8000)
     status: str = Field(default="concept", pattern="^(concept|building|testing|done|abandoned)$")
-    hours: float = Field(default=0, ge=0, le=100000)
-    cost: float = Field(default=0, ge=0, le=1e9)
+    hours: Zero = Field(default=0, ge=0, le=100000)
+    cost: Zero = Field(default=0, ge=0, le=1e9)
 
 
 class ProtoPatch(ProtoIn):
@@ -1003,7 +1006,7 @@ def to_project(body: ToProject, db: DB) -> dict:
         x.project_id = p.id
     else:
         r = _get(db, Research, body.id)
-        nxt = ((r.report or {}).get("open_questions") or (r.report or {}).get("unresolved") or [])[:6]
+        nxt = ((r.report or {}).get("unconfirmed") or [])[:6]
         p = _make_project(db, r.question[:120], (r.report or {}).get("summary"), "research", r.id, [f"Resolver: {q}" for q in nxt if isinstance(q, str)])
     log_activity(db, "projects", "create", f"Proyecto de innovación creado: {p.name}")
     db.commit()

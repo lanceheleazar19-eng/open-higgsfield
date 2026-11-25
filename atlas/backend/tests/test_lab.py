@@ -189,3 +189,13 @@ def test_projects_workflows_agent_and_command(client, ollama):
     assert cc["counts"]["experiments"] == 1 and cc["status"]["label"] in ("activo", "en espera")
     assert client.post("/api/lab/remember", json={"text": "Transformers dominan NLP", "ref": "biblioteca"}).status_code == 201
     json.dumps(cc)
+
+
+def test_campos_numericos_vacios_del_formulario(client):
+    """El formulario envía null en horas/coste vacíos: se aceptan como 0 (antes daba 422)."""
+    e = client.post("/api/lab/experiments", json={"name": "Latencia", "status": "IDEA", "hours": None, "cost": None})
+    assert e.status_code == 201, e.text
+    assert e.json()["hours"] == 0 and e.json()["cost"] == 0
+    p = client.post("/api/lab/prototypes", json={"name": "Traductor v0", "kind": "app", "status": "concept", "hours": None, "cost": None})
+    assert p.status_code == 201, p.text
+    assert client.post("/api/lab/experiments", json={"name": "X2", "hours": -1}).status_code == 422
