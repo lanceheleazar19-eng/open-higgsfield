@@ -92,6 +92,92 @@ def _betting(c: Ctx) -> dict:
             "aviso": "SIMULACIÓN con dinero ficticio. No prometer ganancias ni recomendar perseguir pérdidas."}
 
 
+# ───────── LIFE OS ─────────
+
+def _life_opps(c: Ctx) -> list:
+    from atlas.life import service as sv
+    from atlas.models import LfOpportunity
+    return [{"nombre": o.name, "estado": o.status, "problema": o.problem, "cliente": o.customer, "mercado": o.market,
+             "economia_estimada": sv.economics(o.economics or {}), "puntuacion": sv.opp_score(o.scores or {}),
+             "proximas_acciones": o.next_actions, "riesgos": o.risks, "informe_ia": (o.report or {}).get("resumen")}
+            for o in c.db.scalars(select(LfOpportunity).order_by(LfOpportunity.updated_at.desc()).limit(10))]
+
+
+def _life_wealth(c: Ctx) -> dict:
+    from atlas.life import service as sv
+    return {"patrimonio": sv.networth(c.db), "ahorro_real": sv.savings_stats(c.db, c.today, 6),
+            "aviso": "patrimonio: separa valores reales de estimados; el dinero virtual (trading/apuestas) no cuenta"}
+
+
+def _life_learning(c: Ctx) -> list:
+    from atlas.life import service as sv
+    from atlas.models import LfSubject
+    return [{"materia": s.name, **{k: v for k, v in sv.mastery(c.db, s.id).items() if k != "rule"}}
+            for s in sv.ensure_subjects(c.db) if isinstance(s, LfSubject)]
+
+
+def _life_sims(c: Ctx) -> list:
+    from atlas.models import LfSimulation
+    return [{"area": s.area, "escenario": s.title, "fecha": s.finished_at.date().isoformat() if s.finished_at else None,
+             "criterios": (s.debrief or {}).get("criterios"), "a_mejorar": (s.debrief or {}).get("a_mejorar")}
+            for s in c.db.scalars(select(LfSimulation).where(LfSimulation.status == "finished").order_by(LfSimulation.id.desc()).limit(8))]
+
+
+def _life_discipline(c: Ctx) -> dict:
+    from atlas.life import service as sv
+    r = sv.discipline_report(c.db, c.today)
+    return {"habitos": [{k: h[k] for k in ("name", "category", "compliance_30d", "streak", "best_streak", "done_today", "due_today")} for h in r["habits"]],
+            "compromisos_vencidos": r["overdue_commitments"], "cumplimiento_compromisos_90d": r["commitment_rate_90d"],
+            "hallazgos": r["findings"], "datos_automaticos": r["auto"]}
+
+
+def _life_contacts(c: Ctx) -> dict:
+    from atlas.models import LfContact
+    cs = list(c.db.scalars(select(LfContact)))
+    return {"total": len(cs), "seguimientos_pendientes": [{"nombre": x.name, "empresa": x.company, "fecha": x.next_followup.isoformat()}
+                                                           for x in cs if x.next_followup and x.next_followup <= c.today + timedelta(days=7)],
+            "aviso": "datos privados: no compartir fuera de VISTAN"}
+
+
+def _life_decisions(c: Ctx) -> dict:
+    from atlas.life import service as sv
+    from atlas.models import LfDecision
+    ds = list(c.db.scalars(select(LfDecision).order_by(LfDecision.day.desc()).limit(10)))
+    return {"decisiones": [{"titulo": d.title, "fecha": d.day.isoformat(), "decision": d.decision, "confianza": d.confidence,
+                            "esperado": d.expected_result, "real": d.actual_result, "resultado": d.outcome} for d in ds],
+            "calibracion": sv.decision_calibration(c.db)}
+
+
+def _life_failures(c: Ctx) -> dict:
+    from atlas.life import service as sv
+    from atlas.models import LfFailure
+    return {"errores": [{"titulo": f.title, "tipo": f.kind, "causas": f.causes, "lecciones": f.lessons, "etiquetas": f.tags}
+                        for f in c.db.scalars(select(LfFailure).order_by(LfFailure.day.desc()).limit(10))],
+            "patrones": sv.failure_patterns(c.db)}
+
+
+def _life_goals(c: Ctx) -> dict:
+    from atlas.life import service as sv
+    return {"estancados": sv.stalled_goals(c.db, c.today)}
+
+
+def _life_radar(c: Ctx) -> list:
+    from atlas.models import LfRadar, Research
+    out = []
+    for rd in c.db.scalars(select(LfRadar).order_by(LfRadar.id.desc()).limit(5)):
+        r = c.db.get(Research, rd.research_id)
+        out.append({"busqueda": rd.query, "enfoque": rd.lens, "estado": r.status if r else None,
+                    "conclusion": (r.report or {}).get("summary") if r and isinstance(r.report, dict) else None,
+                    "confianza": r.confidence if r else None, "fuentes": len((r.state or {}).get("sources", [])) if r else 0,
+                    "fecha": rd.created_at.date().isoformat()})
+    return out
+
+
+def _life_vision(c: Ctx) -> list:
+    from atlas.models import LfVision
+    return [{"seccion": v.section, "contenido": v.content[:600]} for v in c.db.scalars(select(LfVision)) if v.content]
+
+
 def _tasks(c: Ctx) -> dict:
     from atlas.services import tasks as t
     return {"hoy": t.summary(c.db, c.tz), "semana": t.plan_week(c.db, c.tz)}
@@ -222,6 +308,17 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("trading.stats", "READ", "Estadísticas del registro manual de paper trading (simulación)", _trading),
     Tool("betting.summary", "READ", "Paper Betting: bankroll ficticio, aciertos, ROI, calibración y últimos pronósticos", _betting),
     Tool("trading.desk", "READ", "Trading Desk: cuentas virtuales, posiciones, riesgo, estadísticas y diario", _desk),
+    Tool("life.opportunities", "READ", "Oportunidades de negocio, economía estimada y puntuación", _life_opps),
+    Tool("life.wealth", "READ", "Patrimonio neto (real vs estimado) y ahorro real mensual", _life_wealth),
+    Tool("life.learning", "READ", "Academia: nivel de dominio por materia según evaluaciones", _life_learning),
+    Tool("life.simulations", "READ", "Simulaciones de liderazgo y comunicación y sus evaluaciones", _life_sims),
+    Tool("life.discipline", "READ", "Hábitos, rachas, cumplimiento y compromisos incumplidos", _life_discipline),
+    Tool("life.contacts", "READ", "CRM personal: seguimientos pendientes (datos privados)", _life_contacts),
+    Tool("life.decisions", "READ", "Diario de decisiones y calibración de tu confianza", _life_decisions),
+    Tool("life.failures", "READ", "Errores registrados, lecciones y patrones", _life_failures),
+    Tool("life.goals", "READ", "Objetivos estancados", _life_goals),
+    Tool("life.radar", "READ", "Radar de oportunidades (investigaciones con fuentes)", _life_radar),
+    Tool("life.vision", "READ", "Tu visión de vida (Legacy)", _life_vision),
     Tool("tasks.overview", "READ", "Tareas de hoy y plan de la semana", _tasks),
     Tool("goals.snapshot", "READ", "Objetivos con su ritmo", _goals),
     Tool("calendar.upcoming", "READ", "Eventos de los próximos 14 días", _calendar),

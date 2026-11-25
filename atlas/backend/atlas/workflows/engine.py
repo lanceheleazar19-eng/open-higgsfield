@@ -59,7 +59,17 @@ def _briefing(db: Session, prefs: dict) -> str:
     from atlas.services.dashboard import build_dashboard
     d = build_dashboard(db, prefs)
     d["alerts"] = build_alerts(d)
-    return briefing(d)
+    text = briefing(d)
+    try:
+        from zoneinfo import ZoneInfo as _Z
+
+        from atlas.life.service import briefing_lines
+        extra = briefing_lines(db, datetime.now(_Z(str(prefs.get("timezone") or "Europe/Madrid"))).date())
+        if extra:
+            text += "\n\nLIFE OS:\n" + "\n".join(extra)
+    except Exception:  # noqa: BLE001 - el briefing base nunca debe fallar por LIFE OS
+        pass
+    return text
 
 
 def _eur(c: int) -> str:
@@ -93,7 +103,12 @@ def weekly_review(db: Session, tz: str) -> str:
         lines.append("• Decisiones guardadas: " + "; ".join(decisions))
     if research:
         lines.append("• Investigaciones terminadas: " + "; ".join(research))
-    if not any([done, created, workouts, spent, earned, goals, decisions]):
+    from atlas.life.service import week_lines
+    life = week_lines(db, today)
+    if life:
+        lines.append("LIFE OS:")
+        lines += life
+    if not any([done, created, workouts, spent, earned, goals, decisions, life]):
         lines.append("No hay actividad registrada esta semana.")
     return "\n".join(lines)
 

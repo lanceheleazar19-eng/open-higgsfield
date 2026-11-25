@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
 from atlas.api import (agents, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
-                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk, betting)
+                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk, betting, life)
 from atlas.config import get_settings
 from atlas.db import init_db
 
@@ -35,6 +35,18 @@ async def _periodic_sync() -> None:
             pass
 
 
+def _life_reminders() -> None:
+    from datetime import datetime as _dt
+    from zoneinfo import ZoneInfo
+
+    from atlas.db import session_scope
+    from atlas.life.service import reminders
+    from atlas.services.preferences import get_prefs
+    with session_scope() as db:
+        reminders(db, _dt.now(ZoneInfo(str(get_prefs(db)["timezone"]))))
+        db.commit()
+
+
 async def _workflows_loop() -> None:
     """Workflows programados (Daily Briefing, Weekly Review…) y copia de seguridad diaria."""
     import asyncio
@@ -45,6 +57,7 @@ async def _workflows_loop() -> None:
         try:
             await asyncio.to_thread(wf.tick)
             await asyncio.to_thread(wf.maintenance)
+            await asyncio.to_thread(_life_reminders)
         except Exception:  # noqa: BLE001 - el programador nunca debe tumbar el servidor
             pass
 
@@ -108,7 +121,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router):
+              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router, life.public, life.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)
