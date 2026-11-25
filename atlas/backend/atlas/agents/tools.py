@@ -68,6 +68,20 @@ def _trading(c: Ctx) -> dict:
     return {k: v for k, v in s.items() if k != "curve"} | {"aviso": "SIMULACIÓN: capital virtual, nunca dinero real"}
 
 
+def _desk(c: Ctx) -> dict:
+    """Trading Desk (simulación): cuentas, posiciones, estadísticas, riesgo y patrones del diario."""
+    from datetime import timezone as _tz
+
+    from atlas.desk import engine, tutor
+    accs = engine.ensure_accounts(c.db)
+    start = datetime.now(ZoneInfo(c.tz)).replace(hour=0, minute=0, second=0, microsecond=0).astimezone(_tz.utc).replace(tzinfo=None)
+    out = {}
+    for a in accs:
+        ctx = tutor.context(c.db, a, None, None, start)
+        out[a.kind] = {k: ctx[k] for k in ("cuenta", "posiciones_abiertas", "ordenes_pendientes", "estadisticas", "patrones_del_diario")}
+    return out | {"aviso": "PAPER TRADING: dinero virtual. El agente nunca ejecuta operaciones por su cuenta."}
+
+
 def _tasks(c: Ctx) -> dict:
     from atlas.services import tasks as t
     return {"hoy": t.summary(c.db, c.tz), "semana": t.plan_week(c.db, c.tz)}
@@ -195,7 +209,8 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("gym.snapshot", "READ", "Entrenamiento: rutina de hoy, volumen, progresión y estancamientos", _gym),
     Tool("nutrition.today", "READ", "Calorías y macros de hoy, objetivos y últimos 7 días", _nutrition),
     Tool("health.week", "READ", "Pasos, sueño y actividad de Apple Salud (7 días)", _health),
-    Tool("trading.stats", "READ", "Estadísticas del paper trading (simulación)", _trading),
+    Tool("trading.stats", "READ", "Estadísticas del registro manual de paper trading (simulación)", _trading),
+    Tool("trading.desk", "READ", "Trading Desk: cuentas virtuales, posiciones, riesgo, estadísticas y diario", _desk),
     Tool("tasks.overview", "READ", "Tareas de hoy y plan de la semana", _tasks),
     Tool("goals.snapshot", "READ", "Objetivos con su ritmo", _goals),
     Tool("calendar.upcoming", "READ", "Eventos de los próximos 14 días", _calendar),

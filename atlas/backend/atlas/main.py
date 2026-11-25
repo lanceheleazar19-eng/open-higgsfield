@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
 from atlas.api import (agents, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
-                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows)
+                       models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk)
 from atlas.config import get_settings
 from atlas.db import init_db
 
@@ -49,6 +49,25 @@ async def _workflows_loop() -> None:
             pass
 
 
+async def _desk_loop() -> None:
+    """Trading Desk (SIMULACIÓN): ejecuta órdenes limit/stop y SL/TP con el último precio y guarda la equity."""
+    import asyncio
+
+    from atlas.db import session_scope
+    from atlas.desk import engine as desk_engine
+
+    def tick() -> None:
+        with session_scope() as db:
+            desk_engine.periodic(db)
+            db.commit()
+    while True:
+        await asyncio.sleep(20)
+        try:
+            await asyncio.to_thread(tick)
+        except Exception:  # noqa: BLE001 - nunca tumba el servidor
+            pass
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     import asyncio
@@ -61,7 +80,9 @@ async def lifespan(_app: FastAPI):
     mark_interrupted()
     task = asyncio.create_task(_periodic_sync())
     wtask = asyncio.create_task(_workflows_loop())
+    dtask = asyncio.create_task(_desk_loop())
     yield
+    dtask.cancel()
     task.cancel()
     wtask.cancel()
 
@@ -77,7 +98,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router, body.router, telemetry.router, voice.router):
+              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)
