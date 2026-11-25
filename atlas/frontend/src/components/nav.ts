@@ -21,6 +21,7 @@ export const NAV: NavItem[] = [
   { id: "tasks", path: "/tasks", label: "Tareas", group: "Organización" },
   { id: "calendar", path: "/calendar", label: "Calendario", group: "Organización" },
   { id: "workflows", path: "/workflows", label: "Automatizaciones", group: "Organización" },
+  { id: "life", path: "/life", label: "Life OS", group: "Personal" },
   { id: "gym", path: "/gym", label: "Fitness", group: "Personal" },
   { id: "progress", path: "/progress", label: "Progress", group: "Personal" },
   { id: "nutrition", path: "/nutrition", label: "Nutrición", group: "Personal" },

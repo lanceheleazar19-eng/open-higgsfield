@@ -10,16 +10,16 @@ export interface NodeDef {
   description: string;
 }
 
-const T = (Math.PI * 2) / 3;
 const Q = Math.PI / 2;
-/** Los 13 planetas de VISTAN en 4 órbitas: 2 opuestos (180°) en la interior, 3 a 120° en la segunda y 4 a 90° en las dos exteriores. */
+/** Los 14 planetas de VISTAN en 4 órbitas: 2 opuestos (180°) en la interior y 4 a 90° en las otras tres. */
 export const NODE_DEFS: NodeDef[] = [
   { id: "ai", label: "Intelligence", icon: "ai", route: "/ai", orbit: 0, phase: 0.3, size: 1.0, hue: "#e11d35", description: "Cerebro conversacional, modelos y razonamiento." },
   { id: "memory", label: "Memory", icon: "memory", route: "/memory", orbit: 0, phase: 0.3 + Math.PI, size: 0.95, hue: "#c2142a", description: "Lo que VISTAN sabe de ti: preferencias, objetivos y decisiones." },
   { id: "agents", label: "Agents", icon: "agents", route: "/agents", orbit: 2, phase: 1.75 + 3 * Q, size: 1, hue: "#b51224", description: "Agentes especializados coordinados por VISTAN CORE." },
+  { id: "life", label: "Life OS", icon: "life", route: "/life", orbit: 1, phase: 1.05 + 3 * Q, size: 1, hue: "#e11d35", description: "Desarrollo personal y empresarial: negocios, aprendizaje, disciplina, decisiones." },
   { id: "research", label: "Research", icon: "research", route: "/research", orbit: 1, phase: 1.05, size: 1, hue: "#d01a31", description: "Investigaciones con fuentes, contradicciones y confianza." },
-  { id: "projects", label: "Projects", icon: "projects", route: "/projects", orbit: 1, phase: 1.05 + T, size: 1.05, hue: "#a51022", description: "Workspaces con tareas, notas, documentos e informes." },
-  { id: "tasks", label: "Tasks", icon: "tasks", route: "/tasks", orbit: 1, phase: 1.05 + 2 * T, size: 1, hue: "#e11d35", description: "Tareas, prioridades y plan de la semana." },
+  { id: "projects", label: "Projects", icon: "projects", route: "/projects", orbit: 1, phase: 1.05 + Q, size: 1.05, hue: "#a51022", description: "Workspaces con tareas, notas, documentos e informes." },
+  { id: "tasks", label: "Tasks", icon: "tasks", route: "/tasks", orbit: 1, phase: 1.05 + 2 * Q, size: 1, hue: "#e11d35", description: "Tareas, prioridades y plan de la semana." },
   { id: "calendar", label: "Calendar", icon: "calendar", route: "/calendar", orbit: 2, phase: 1.75, size: 0.95, hue: "#b51224", description: "Eventos de iCloud y de VISTAN, con solapes." },
   { id: "workflows", label: "Automations", icon: "workflows", route: "/workflows", orbit: 2, phase: 1.75 + Q, size: 0.95, hue: "#8f0e1e", description: "Daily Briefing, Weekly Review y tus automatizaciones." },
   { id: "gym", label: "Fitness", icon: "gym", route: "/gym", orbit: 2, phase: 1.75 + 2 * Q, size: 1.1, hue: "#e11d35", description: "Entrenos, progresión, fotos de físico y Progress." },
@@ -31,6 +31,6 @@ export const NODE_DEFS: NodeDef[] = [
 
 /** Relaciones reales entre módulos (comparten datos o contexto): por ellas viajan partículas. */
 export const LINKS: [string, string][] = [
-  ["ai", "agents"], ["memory", "research"], ["memory", "projects"], ["projects", "tasks"], ["tasks", "calendar"],
+  ["ai", "agents"], ["memory", "research"], ["memory", "projects"], ["projects", "tasks"], ["life", "memory"], ["tasks", "calendar"],
   ["workflows", "agents"], ["gym", "nutrition"], ["finance", "trading"], ["trading", "betting"],
 ];

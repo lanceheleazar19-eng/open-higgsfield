@@ -303,3 +303,25 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - **Betting Agent** (en VISTAN y en el módulo): analiza, enseña probabilidad, detecta falta de datos y errores; nunca
   promete ganancias ni recomienda perseguir pérdidas.
 - Sistema solar: 13 planetas en 4 órbitas (2/3/4/4) sin solapes en ningún tamaño de pantalla.
+
+## VISTAN LIFE OS · desarrollo personal y empresarial
+- `/life` (planeta «Life OS», menú Personal). Reutiliza Objetivos, Tareas, Proyectos, Finanzas, Memoria, Research,
+  Workflows (Daily Briefing / Weekly Review), Gimnasio y Apple Salud; las tablas nuevas (`lf_*`) cubren solo lo que faltaba.
+- **Entrepreneur Intelligence**: oportunidades con todos los campos, economía estimada (margen, punto muerto, beneficio,
+  recuperación, ROI), puntuación transparente 1-5 ponderada, comparativa, investigación web con fuentes, informe del
+  Business Agent (DAFO, mercado, riesgos, plan, supuestos y datos que faltan; etiquetado como estimación) y conversión en proyecto.
+- **Wealth**: activos/pasivos con base real/estimada y ámbito personal/negocio, patrimonio neto con histórico, ahorro real
+  mensual desde Finanzas, dinero virtual separado (Trading Desk, Paper Betting) y simulador de escenarios.
+- **Knowledge Academy**: 16 materias, temario, lecciones, casos y ejercicios (IA), tests y exámenes adaptativos;
+  el dominio se calcula SOLO con evaluaciones corregidas (reglas visibles), con puntos débiles e historial.
+- **Leadership / Communication**: 13 escenarios simulados con IA y análisis de decisiones, consecuencias, ventajas y errores.
+- **Discipline Engine**: hábitos (check/cantidad/límite, días, recordatorios), rachas, cumplimiento, calendario,
+  patrones por día de la semana, compromisos semanales/mensuales y detección de incumplimientos; sueño y entrenos automáticos.
+- **Personal CRM** con interacciones y tareas de seguimiento; **Decision Journal** con revisión, calibración (Brier) y
+  análisis de sesgos; **Failure Analysis** con patrones; **Goal Engine** sobre los Objetivos (horizonte, estancados,
+  plan del Planning Agent que crea tareas); **Opportunity Radar** sobre el motor de investigación; **Legacy** con línea temporal.
+- **Growth Analytics**: indicadores observables por área con su fórmula y evolución semanal; sin puntuaciones psicológicas.
+- **Agentes**: Entrepreneur, Wealth, Learning, Leadership, Discipline, Communication, Opportunity, Decision y Planning
+  integrados en VISTAN CORE con herramientas reales `life.*`.
+- **Privacidad**: bloqueo opcional con PIN (hash PBKDF2 en el llavero, sesión HttpOnly de 12 h, freno de fuerza bruta),
+  exportación, copias, registro de actividad y memoria editable; ningún agente envía, paga ni publica nada.
