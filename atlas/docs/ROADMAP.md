@@ -264,3 +264,20 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Voz estable: una respuesta nunca mezcla dos voces (el cambio al navegador solo ocurre antes de empezar a
   hablar); en el modo llamada se usa por defecto la voz del navegador (instantánea, ajustable); para interrumpir
   en llamada hacen falta 4+ palabras que no sean el eco de VISTAN.
+
+## VISTAN TRADING DESK · paper trading profesional
+- `/trading` es ahora una terminal a pantalla completa (el registro manual anterior sigue en `/trading/legacy`).
+- **Solo simulación**: dinero virtual, sin ningún bróker conectado, sin rutas de órdenes reales; todo se marca como simulado.
+- **Datos de mercado** (`atlas/desk/market.py`): Binance (cripto, tiempo real, sin clave), Stooq (índices/acciones/forex/
+  materias primas con retraso, sin clave), Twelve Data, Finnhub y Alpha Vantage (con clave en el llavero). Cada dato
+  indica fuente y tipo (tiempo real / retraso / histórico). Sin proveedor → N/D, nunca cotizaciones inventadas.
+- **Gráficos** con TradingView Lightweight Charts: velas, línea y área; 9 temporalidades; SMA, EMA, Bollinger, VWAP,
+  volumen, RSI, MACD y ATR (en paneles); tendencias y soportes/resistencias dibujables; comparación de activos.
+- **Motor** (`atlas/desk/engine.py`): market (último precio + deslizamiento), limit y stop que esperan a que el precio
+  cumpla la condición, SL/TP automáticos, costes, tipo de cambio real a la divisa de la cuenta, cierres parciales.
+- **Dos cuentas independientes** (SAFE: límites obligatorios y stop exigido; EXPERIMENTAL: solo avisos) con capital
+  configurable; las cuentas antiguas se archivan sin borrar historial.
+- **Riesgo**: riesgo por operación (dinero y %), R:R, tamaño sugerido, exposición, pérdida diaria, drawdown y alertas.
+- Portfolio, Analytics (win rate, profit factor, expectancy, DD máx., por activo/estrategia/temporalidad), Diario con
+  capturas del gráfico y detección de patrones, Tutor IA (Trading Agent) con tus datos reales, Noticias y macro,
+  Backtesting sobre histórico real, e integración con Memory, Research, Notifications y el agente de VISTAN.

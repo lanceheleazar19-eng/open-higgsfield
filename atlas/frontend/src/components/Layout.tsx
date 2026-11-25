@@ -7,7 +7,8 @@ import { Sidebar } from "./Sidebar";
 
 export function Layout() {
   const [open, setOpen] = useState(false);
-  const hud = useLocation().pathname === "/"; // centro de control a pantalla completa: menú como carril de iconos
+  const path = useLocation().pathname;
+  const hud = path === "/" || path === "/trading"; // pantalla completa (centro de control y Trading Desk): menú como carril de iconos
   return (
     <div className={`shell ${hud ? "is-hud" : ""}`}>
       <Header menuOpen={open} onMenu={() => setOpen((o) => !o)} />

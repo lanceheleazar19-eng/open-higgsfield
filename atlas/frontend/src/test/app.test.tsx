@@ -608,7 +608,7 @@ test("trading: etiquetado como simulación y estadísticas solo de operaciones r
       overall: agg, curve: [], by_strategy: [{ strategy: "breakout", ...agg }], mistakes: [{ mistake: "fomo", count: 1, pnl: -10 }],
       without_stop: 0, open: [], open_risk: 0 },
   });
-  renderAt("/trading");
+  renderAt("/trading/legacy");
   expect(await screen.findByText("PAPER · capital virtual")).toBeInTheDocument();
   expect(await screen.findByText("breakout")).toBeInTheDocument();
   expect(screen.getByText("fomo")).toBeInTheDocument();

@@ -11,6 +11,7 @@ import { Nutrition } from "./pages/Nutrition";
 import { Calendar } from "./pages/Calendar";
 import { Finance } from "./pages/Finance";
 import { Trading } from "./pages/Trading";
+import { TradingDesk } from "./pages/TradingDesk";
 import { Agents } from "./pages/Agents";
 import { Analytics } from "./pages/Analytics";
 import { CommandCenter } from "./pages/CommandCenter";
@@ -38,7 +39,8 @@ export function App() {
           <Route path="nutrition" element={<Nutrition />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="finance" element={<Finance />} />
-          <Route path="trading" element={<Trading />} />
+          <Route path="trading" element={<TradingDesk />} />
+          <Route path="trading/legacy" element={<Trading />} />
           <Route path="agents" element={<Agents />} />
           <Route path="reports" element={<Analytics />} />
           <Route path="command" element={<CommandCenter />} />
