@@ -26,6 +26,11 @@ STEP_TYPES: dict[str, tuple[str, str, list[str]]] = {
     "save_memory": ("WRITE", "Guardar en memoria", ["content"]),
     "notify": ("WRITE", "Notificarme", ["title"]),
     "backup": ("EXECUTE", "Copia de seguridad", []),
+    "lab_tech_watch": ("EXECUTE", "Lab: buscar publicaciones de las tecnologías seguidas (arXiv/OpenAlex)", []),
+    "lab_arena": ("EXECUTE", "Lab: comparar modelos de IA en el Arena", ["suite_id"]),
+    "lab_experiments_review": ("READ", "Lab: revisar experimentos", []),
+    "lab_report": ("READ", "Lab: informe del laboratorio", []),
+    "lab_patent_watch": ("EXECUTE", "Lab: seguimiento de patentes (Espacenet)", []),
 }
 
 BUILTINS = [
@@ -192,6 +197,11 @@ def _exec_step(db: Session, run: WorkflowRun, step: dict, prefs: dict, tz: str, 
         from atlas.services.backup import backup_db
         p = backup_db("workflow")
         return f"Copia guardada: {p.name}" if p else "No hay base de datos SQLite que copiar."
+    if t.startswith("lab_"):
+        from atlas.lab import service as lab
+        return {"lab_tech_watch": lambda: lab.step_tech_watch(db), "lab_arena": lambda: lab.step_arena(db, params),
+                "lab_experiments_review": lambda: lab.step_experiments_review(db), "lab_report": lambda: lab.step_lab_report(db),
+                "lab_patent_watch": lambda: lab.step_patent_watch(db)}[t]()
     raise ValueError(f"Paso desconocido: {t}")
 
 

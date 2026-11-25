@@ -37,7 +37,16 @@ def plan(text: str, forced: list[str] | None = None) -> list[str]:
         hits = len(a.rx.findall(t))
         if hits:
             scores.append((hits, a.id))
-    return [a for _, a in sorted(scores, reverse=True)[:3]]
+    chosen = [a for _, a in sorted(scores, reverse=True)[:3]]
+    # Colaboración: un agente puede pedir ayuda a otros (p. ej. Innovation → Research/Business/Planning/Coding/Memory)
+    hit = {a for _, a in scores}
+    for a in list(chosen):
+        helpers = AGENTS[a].helpers
+        if helpers and len(chosen) < 4:
+            extra = next((h for h in helpers if h in hit and h not in chosen), None) or next((h for h in helpers if h not in chosen), None)
+            if extra:
+                chosen.append(extra)
+    return chosen[:4]
 
 
 def run(db: Session, text: str, prefs: dict, tz: str, agents: list[str] | None = None, source: str = "chat") -> tuple[AgentRun, dict]:

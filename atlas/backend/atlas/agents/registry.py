@@ -13,6 +13,7 @@ class Agent:
     keywords: str
     actions: list[str] = field(default_factory=list)
     limits: str = ""
+    helpers: list[str] = field(default_factory=list)  # agentes a los que puede pedir ayuda (VISTAN CORE los añade)
 
     @property
     def rx(self) -> re.Pattern:
@@ -61,6 +62,11 @@ AGENTS: dict[str, Agent] = {a.id: a for a in [
     Agent("decision", "Decision Agent", "Diario de decisiones: compara lo esperado con lo ocurrido, sesgos y errores repetidos.",
           ["life.decisions", "life.failures", "life.vision"], r"decisi|decid|sesgo|error|equivoc|fallo|lecci|arrepent|elegir|opcion",
           [], "No juzga: busca patrones para aprender."),
+    Agent("innovation", "Innovation Agent", "Investiga tecnologías, propone y evalúa experimentos, analiza ideas y documenta descubrimientos.",
+          ["lab.overview", "lab.experiments", "lab.discoveries", "lab.ideas", "research.recent"],
+          r"innovaci|laboratorio|experiment|hipotesis|prototip|tecnologi|invent|patente|paper|publicacion cientific|robotic|cuantic|biotec|nanotec|futuro",
+          ["research.start"], "Distingue hechos, hipótesis y predicciones; nunca afirma patentabilidad.",
+          helpers=["research", "coding", "business", "planning", "memory"]),
     Agent("coding", "Coding Agent", "Diagnostica VISTAN: versión, estado de la IA y errores recientes.",
           ["system.diagnose"], r"codigo|error|bug|fallo|no funciona|diagnost|version|programa|actualiza|log",
           [], "Diagnóstico de solo lectura: no modifica el código."),

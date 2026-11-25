@@ -92,6 +92,35 @@ def _betting(c: Ctx) -> dict:
             "aviso": "SIMULACIÓN con dinero ficticio. No prometer ganancias ni recomendar perseguir pérdidas."}
 
 
+# ───────── INNOVATION LAB ─────────
+
+def _lab_overview(c: Ctx) -> dict:
+    from atlas.lab import service as lab
+    cc = lab.command_center(c.db)
+    return {k: cc[k] for k in ("status", "counts", "running_experiments", "recent_results", "emerging")}
+
+
+def _lab_experiments(c: Ctx) -> list:
+    from atlas.models import IxExperiment
+    return [{"nombre": e.name, "estado": e.status, "hipotesis": e.hypothesis, "esperado": e.expected, "observado": e.observed,
+             "veredicto": e.verdict, "metodologia": (e.methodology or "")[:400]}
+            for e in c.db.scalars(select(IxExperiment).order_by(IxExperiment.updated_at.desc()).limit(10))]
+
+
+def _lab_discoveries(c: Ctx) -> list:
+    from atlas.models import IxDiscovery
+    return [{"titulo": d.title, "categoria": d.category, "madurez": d.maturity, "fuente": d.source_url or d.source_name,
+             "fecha": (d.published_on or d.created_at.date()).isoformat(), "fiabilidad": d.reliability}
+            for d in c.db.scalars(select(IxDiscovery).order_by(IxDiscovery.id.desc()).limit(15))]
+
+
+def _lab_ideas(c: Ctx) -> list:
+    from atlas.models import IxIdea
+    return [{"nombre": i.name, "concepto": i.concept, "estado": i.status, "viabilidad": i.feasibility, "siguiente_experimento": i.next_experiment,
+             "origen": "generada por IA (sin validar)" if i.origin == "generated" else "tuya"}
+            for i in c.db.scalars(select(IxIdea).order_by(IxIdea.id.desc()).limit(10))]
+
+
 # ───────── LIFE OS ─────────
 
 def _life_opps(c: Ctx) -> list:
@@ -308,6 +337,10 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("trading.stats", "READ", "Estadísticas del registro manual de paper trading (simulación)", _trading),
     Tool("betting.summary", "READ", "Paper Betting: bankroll ficticio, aciertos, ROI, calibración y últimos pronósticos", _betting),
     Tool("trading.desk", "READ", "Trading Desk: cuentas virtuales, posiciones, riesgo, estadísticas y diario", _desk),
+    Tool("lab.overview", "READ", "Innovation Lab: estado, experimentos en curso, resultados y tecnologías emergentes", _lab_overview),
+    Tool("lab.experiments", "READ", "Experimentos: hipótesis, resultados esperados y observados, veredictos", _lab_experiments),
+    Tool("lab.discoveries", "READ", "Descubrimientos del radar con fuente, fecha, madurez y fiabilidad", _lab_discoveries),
+    Tool("lab.ideas", "READ", "Ideas de innovación y su estado", _lab_ideas),
     Tool("life.opportunities", "READ", "Oportunidades de negocio, economía estimada y puntuación", _life_opps),
     Tool("life.wealth", "READ", "Patrimonio neto (real vs estimado) y ahorro real mensual", _life_wealth),
     Tool("life.learning", "READ", "Academia: nivel de dominio por materia según evaluaciones", _life_learning),

@@ -5,6 +5,8 @@ from atlas.models.core import ActivityLog, Setting
 from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, WorkoutSet
 from atlas.models.email import EmailMessage
 from atlas.models.money import Budget, HealthDay, PaperTrade
+from atlas.models.lab import (IxArenaRun, IxArenaSuite, IxDiscovery, IxExperiment, IxFile, IxIdea, IxLibraryItem, IxLink, IxPatent,
+                              IxProjectMeta, IxPrototype, IxResearch, IxSandboxRun, IxScenario, IxTechnology, IxTrial, IxVersion)
 from atlas.models.life import (LfAsset, LfAssessment, LfCommitment, LfContact, LfDecision, LfFailure, LfHabit, LfHabitLog,
                                LfInteraction, LfLesson, LfMilestone, LfNetWorth, LfOpportunity, LfRadar, LfSimulation, LfSubject, LfVision)
 from atlas.models.bets import BtBacktest, BtBankroll, BtBet, BtEvent, BtLeg, BtPrediction
