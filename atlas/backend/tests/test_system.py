@@ -14,7 +14,7 @@ def test_health_reports_online_and_ai_not_configured(client):
 
 def test_modules_registry_has_all_sidebar_sections(client):
     ids = [m["id"] for m in client.get("/api/system/modules").json()]
-    assert ids == ["dashboard", "ai", "tasks", "gym", "nutrition", "progress", "finance", "trading", "projects", "calendar", "memory",
+    assert ids == ["dashboard", "ai", "tasks", "gym", "nutrition", "progress", "finance", "trading", "betting", "projects", "calendar", "memory",
                    "knowledge", "research", "agents", "workflows", "reports", "command", "settings"]
     assert all(m.status == "active" for m in MODULES)
 

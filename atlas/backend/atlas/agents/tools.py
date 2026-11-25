@@ -82,6 +82,16 @@ def _desk(c: Ctx) -> dict:
     return out | {"aviso": "PAPER TRADING: dinero virtual. El agente nunca ejecuta operaciones por su cuenta."}
 
 
+def _betting(c: Ctx) -> dict:
+    """Paper Betting (dinero ficticio): bankroll, rendimiento, calibración y últimos pronósticos."""
+    from atlas.bets import engine
+    from atlas.models import BtBet
+    a = engine.analytics(c.db)
+    recent = [engine.bet_dict(c.db, b) for b in c.db.scalars(select(BtBet).order_by(BtBet.id.desc()).limit(8))]
+    return {k: v for k, v in a.items() if k != "curve"} | {"ultimos": recent,
+            "aviso": "SIMULACIÓN con dinero ficticio. No prometer ganancias ni recomendar perseguir pérdidas."}
+
+
 def _tasks(c: Ctx) -> dict:
     from atlas.services import tasks as t
     return {"hoy": t.summary(c.db, c.tz), "semana": t.plan_week(c.db, c.tz)}
@@ -210,6 +220,7 @@ TOOLS: dict[str, Tool] = {t.name: t for t in [
     Tool("nutrition.today", "READ", "Calorías y macros de hoy, objetivos y últimos 7 días", _nutrition),
     Tool("health.week", "READ", "Pasos, sueño y actividad de Apple Salud (7 días)", _health),
     Tool("trading.stats", "READ", "Estadísticas del registro manual de paper trading (simulación)", _trading),
+    Tool("betting.summary", "READ", "Paper Betting: bankroll ficticio, aciertos, ROI, calibración y últimos pronósticos", _betting),
     Tool("trading.desk", "READ", "Trading Desk: cuentas virtuales, posiciones, riesgo, estadísticas y diario", _desk),
     Tool("tasks.overview", "READ", "Tareas de hoy y plan de la semana", _tasks),
     Tool("goals.snapshot", "READ", "Objetivos con su ritmo", _goals),
