@@ -28,6 +28,7 @@ import { Workflows } from "./pages/Workflows";
 import { Progress } from "./pages/Progress";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
+import { DesktopSettings } from "./pages/DesktopSettings";
 
 const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "betting", "life", "lab", "meta", "legal", "academy", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
 
@@ -35,6 +36,7 @@ export function App() {
   return (
     <AtlasProvider>
       <Routes>
+        <Route path="desktop" element={<DesktopSettings />} />
         <Route element={<Layout />}>
           <Route index element={<ControlCenter />} />
           <Route path="settings" element={<Settings />} />

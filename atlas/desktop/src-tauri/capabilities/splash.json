@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "splash",
+  "description": "Pantalla de arranque local (empaquetada en la app): solo estado del backend y acciones de recuperación.",
+  "local": true,
+  "windows": ["main"],
+  "permissions": [
+    "core:window:allow-start-dragging",
+    "allow-backend-status",
+    "allow-restart-backend",
+    "allow-choose-repo",
+    "allow-app-info",
+    "allow-open-logs",
+    "allow-open-external"
+  ]
+}

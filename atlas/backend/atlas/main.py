@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -125,6 +126,8 @@ async def lifespan(_app: FastAPI):
 def create_app() -> FastAPI:
     s = get_settings()
     app = FastAPI(title="VISTAN — Personal Intelligence System", version=__version__, lifespan=lifespan)
+    if s.host in ("127.0.0.1", "localhost", "::1") and "*" not in s.allowed_hosts:
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=s.allowed_hosts)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=s.cors_origins,

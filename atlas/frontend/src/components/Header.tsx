@@ -24,7 +24,7 @@ export function Header({ menuOpen, onMenu }: { menuOpen: boolean; onMenu: () => 
   const { health, healthError, profile, prefs } = useAtlas();
   const online = health?.status === "online" && !healthError;
   return (
-    <header className="hdr">
+    <header className="hdr" data-tauri-drag-region>
       <button className="icon-btn hdr-menu" onClick={onMenu} aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen}>
         <Icon name={menuOpen ? "close" : "menu"} />
       </button>

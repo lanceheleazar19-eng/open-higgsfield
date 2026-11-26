@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>VISTAN usa el micrófono solo cuando tú activas la voz (dictado, asistente por voz o práctica de idiomas).</string>
+  <key>NSSpeechRecognitionUsageDescription</key>
+  <string>VISTAN convierte tu voz en texto solo cuando pulsas el botón de dictado.</string>
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsLocalNetworking</key>
+    <true/>
+  </dict>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.productivity</string>
+  <key>NSHumanReadableCopyright</key>
+  <string>VISTAN · uso personal</string>
+</dict>
+</plist>

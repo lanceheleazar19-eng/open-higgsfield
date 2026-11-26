@@ -1,0 +1,47 @@
+# Compila VISTAN Desktop (VISTAN.app + DMG) en un Mac de GitHub y lo deja como artefacto descargable.
+# Sin secretos de Apple → firma ad-hoc (no notarizada). Con los secretos APPLE_* configurados → firmada y notarizada.
+name: VISTAN Desktop (macOS)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "atlas/desktop/**"
+      - ".github/workflows/vistan-desktop-macos.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: atlas/desktop/src-tauri
+      - name: Compilar
+        working-directory: atlas/desktop
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY || '-' }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          npm ci --no-fund --no-audit || npm install --no-fund --no-audit
+          npx tauri build --bundles app,dmg
+          cd src-tauri/target/release/bundle
+          ditto -c -k --keepParent macos/VISTAN.app VISTAN.app.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VISTAN-Desktop-macOS
+          path: |
+            atlas/desktop/src-tauri/target/release/bundle/dmg/*.dmg
+            atlas/desktop/src-tauri/target/release/bundle/VISTAN.app.zip
+          if-no-files-found: error

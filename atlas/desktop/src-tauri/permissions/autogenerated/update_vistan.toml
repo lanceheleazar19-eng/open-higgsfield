@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-update-vistan"
+description = "Enables the update_vistan command without any pre-configured scope."
+commands.allow = ["update_vistan"]
+
+[[permission]]
+identifier = "deny-update-vistan"
+description = "Denies the update_vistan command without any pre-configured scope."
+commands.deny = ["update_vistan"]

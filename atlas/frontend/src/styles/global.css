@@ -2047,3 +2047,42 @@ textarea.code.doc { font: 13.5px/1.6 var(--font); min-height: 420px; }
 .sx-log li.d-executed { border-color: #34d399; } .sx-log li.d-skipped { border-color: #64748b; } .sx-log li.d-rejected, .sx-log li.d-error { border-color: #fb7185; }
 .sx-dec { font: 600 9px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
 .sx-insights { border-top: 1px solid var(--d-line); padding-top: 6px; }
+
+/* ───────── VISTAN Desktop (macOS): misma interfaz, sensación de app nativa ───────── */
+html.desktop, html.desktop body { overscroll-behavior: none; }
+html.desktop body { -webkit-user-select: none; user-select: none; cursor: default; }
+html.desktop :is(input, textarea, [contenteditable="true"], pre, code, p, td, li, .selectable, .md, .msg-body) { -webkit-user-select: text; user-select: text; }
+html.desktop :is(a, button, [role="button"], summary, label, select) { cursor: default; }
+html.desktop.mac .hdr { padding-left: 96px; } /* espacio para los botones rojo/amarillo/verde de la ventana */
+html.desktop ::-webkit-scrollbar { width: 10px; height: 10px; }
+html.desktop ::-webkit-scrollbar-thumb { background: rgba(119, 119, 119, .28); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+html.desktop ::-webkit-scrollbar-thumb:hover { background-color: rgba(225, 29, 53, .45); }
+html.desktop ::-webkit-scrollbar-track { background: transparent; }
+.desk-settings-link { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 16px; }
+
+/* Ventana «Permisos y privacidad» */
+.dk-page { min-height: 100vh; background: radial-gradient(ellipse at 50% -10%, #2a0409 0%, #110305 30%, #080808 65%); color: #eaeaea; padding: 0 28px 40px; }
+.dk-head { display: flex; align-items: center; gap: 14px; padding: 44px 0 18px; }
+html.desktop.mac .dk-head { padding-top: 46px; }
+.dk-head h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: .02em; }
+.dk-head p { margin: 2px 0 0; color: #777; font-size: 12px; letter-spacing: .08em; }
+.dk-card { background: rgba(17, 17, 17, .86); border: 1px solid rgba(181, 18, 36, .28); border-radius: 14px; padding: 6px 18px 10px; margin: 0 0 16px; max-width: 900px; }
+.dk-card h2 { font: 600 11px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .16em; text-transform: uppercase; color: #e11d35; margin: 14px 0 6px; }
+.dk-row { display: flex; gap: 16px; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid rgba(255, 255, 255, .05); }
+.dk-row:first-of-type { border-top: 0; }
+.dk-row h3 { margin: 0 0 3px; font-size: 14px; font-weight: 600; }
+.dk-row p { margin: 0; color: #9a9a9a; font-size: 12.5px; line-height: 1.5; overflow-wrap: anywhere; }
+.dk-row code, .dk-card code { font-size: 11.5px; color: #cfcfcf; background: rgba(255, 255, 255, .05); padding: 1px 5px; border-radius: 4px; }
+.dk-ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; flex-shrink: 0; }
+.dk-input { width: 170px; background: #0d0d0d; border: 1px solid #2a2a2a; color: #eaeaea; border-radius: 8px; padding: 7px 9px; font: 13px var(--font-mono, ui-monospace, monospace); }
+.dk-switch { position: relative; display: inline-block; width: 38px; height: 22px; }
+.dk-switch input { opacity: 0; width: 0; height: 0; }
+.dk-switch span { position: absolute; inset: 0; background: #2a2a2a; border-radius: 22px; transition: background .18s; }
+.dk-switch span::after { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #eaeaea; transition: transform .18s; }
+.dk-switch input:checked + span { background: #b51224; }
+.dk-switch input:checked + span::after { transform: translateX(16px); }
+.dk-switch input:focus-visible + span { outline: 2px solid #e11d35; outline-offset: 2px; }
+.dk-msg { max-width: 900px; margin: 0 0 12px; padding: 9px 12px; border-radius: 8px; background: rgba(181, 18, 36, .16); border: 1px solid rgba(225, 29, 53, .4); font-size: 13px; }
+.dk-warn { max-width: 900px; margin: 0 0 12px; padding: 9px 12px; border-radius: 8px; background: rgba(251, 191, 36, .1); border: 1px solid rgba(251, 191, 36, .35); font-size: 13px; }
+.dk-list { margin: 4px 0 8px; padding-left: 18px; color: #9a9a9a; font-size: 12.5px; line-height: 1.6; }
+@media (max-width: 620px) { .dk-row { flex-direction: column; align-items: flex-start; } .dk-ctl { justify-content: flex-start; } }

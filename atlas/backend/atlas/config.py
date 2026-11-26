@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     sync_interval_s: int = 1800
     frontend_dist: Path = ATLAS_ROOT / "frontend" / "dist"
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    # Cabecera Host aceptada (protege contra DNS rebinding: una web maliciosa no puede hablar con tu VISTAN local).
+    # *.ts.net = Tailscale Serve (móvil). Si escuchas fuera de 127.0.0.1 (ATLAS_HOST), añade aquí tu nombre o IP.
+    allowed_hosts: list[str] = ["127.0.0.1", "localhost", "[::1]", "*.ts.net", "testserver"]
 
     @property
     def resolved_data_dir(self) -> Path:

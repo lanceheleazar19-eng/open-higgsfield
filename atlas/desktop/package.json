@@ -1,0 +1,15 @@
+{
+  "name": "vistan-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "VISTAN Desktop: aplicación nativa (Tauri) que envuelve el VISTAN existente (mismo backend, misma interfaz, mismos datos).",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:mac": "./scripts/build-macos.sh"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.6"
+  }
+}

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VISTAN</title>
+<style>
+  :root { --bg:#080808; --panel:#111111; --crimson:#B51224; --red:#E11D35; --dark:#650B19; --text:#EAEAEA; --muted:#777777; color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text); font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing:antialiased; user-select:none; -webkit-user-select:none; cursor:default; }
+  body { display:grid; place-items:center; background:radial-gradient(ellipse at 50% 35%, #2a0409 0%, #110305 40%, var(--bg) 75%); overflow:hidden; }
+  .drag { position:fixed; inset:0 0 auto 0; height:52px; }
+  main { width:min(560px, calc(100vw - 48px)); text-align:center; }
+  .logo { width:112px; height:112px; filter:drop-shadow(0 0 28px rgba(225,29,53,.45)); animation:pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { filter:drop-shadow(0 0 44px rgba(225,29,53,.75)); transform:scale(1.02); } }
+  h1 { margin:22px 0 4px; font-weight:300; letter-spacing:.55em; font-size:30px; padding-left:.55em; }
+  .sub { margin:0; font-size:10px; letter-spacing:.32em; color:var(--muted); }
+  .bar { margin:34px auto 14px; width:220px; height:2px; background:#1a1a1a; border-radius:2px; overflow:hidden; }
+  .bar i { display:block; width:40%; height:100%; background:linear-gradient(90deg, var(--dark), var(--red)); animation:slide 1.3s ease-in-out infinite; }
+  @keyframes slide { from { transform:translateX(-100%); } to { transform:translateX(250%); } }
+  .msg { min-height:20px; font-size:13px; color:#bdbdbd; }
+  .failed .bar { display:none; }
+  .failed .logo { animation:none; filter:grayscale(.4) drop-shadow(0 0 18px rgba(181,18,36,.4)); }
+  .err { color:#ff8a96; }
+  .actions { display:none; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+  .failed .actions { display:flex; }
+  button { font:600 12px/1 inherit; font-family:inherit; padding:10px 16px; border-radius:8px; border:1px solid rgba(225,29,53,.55); background:rgba(181,18,36,.22); color:var(--text); cursor:pointer; }
+  button.primary { background:var(--crimson); border-color:var(--red); }
+  button:hover { background:rgba(225,29,53,.35); }
+  pre { display:none; text-align:left; margin:18px 0 0; max-height:200px; overflow:auto; background:var(--panel); border:1px solid #1f1f1f; border-radius:8px; padding:10px 12px; font:11px/1.45 ui-monospace, Menlo, monospace; color:#9a9a9a; white-space:pre-wrap; user-select:text; -webkit-user-select:text; }
+  .failed pre.has { display:block; }
+  .meta { margin-top:26px; font-size:10px; color:#4a4a4a; letter-spacing:.08em; }
+</style>
+</head>
+<body>
+<div class="drag" data-tauri-drag-region></div>
+<main id="root">
+  <svg class="logo" viewBox="0 0 512 512" aria-hidden="true">
+    <defs><linearGradient id="v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5a6a"/><stop offset="1" stop-color="#b51224"/></linearGradient></defs>
+    <ellipse cx="256" cy="268" rx="214" ry="74" fill="none" stroke="#e11d35" stroke-opacity=".5" stroke-width="10" transform="rotate(-16 256 268)"/>
+    <path d="M86 104h88l82 204 82-204h88L304 426h-96z" fill="url(#v)"/>
+    <circle cx="430" cy="200" r="18" fill="#eaeaea"/>
+  </svg>
+  <h1>VISTAN</h1>
+  <p class="sub">PERSONAL INTELLIGENCE SYSTEM</p>
+  <div class="bar"><i></i></div>
+  <p class="msg" id="msg" role="status">Iniciando…</p>
+  <div class="actions">
+    <button class="primary" id="retry" type="button">Reintentar</button>
+    <button id="repo" type="button" hidden>Elegir carpeta de VISTAN…</button>
+    <button id="logs" type="button">Mostrar registro</button>
+  </div>
+  <pre id="log"></pre>
+  <p class="meta" id="meta"></p>
+</main>
+<script>
+  const inv = (cmd, args) => (window.__TAURI_INTERNALS__ ? window.__TAURI_INTERNALS__.invoke(cmd, args) : Promise.reject(new Error("Fuera de VISTAN Desktop")));
+  const $ = (id) => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  if (params.get("state") === "reconnecting") $("msg").textContent = "Reconectando con VISTAN…";
+  async function tick() {
+    try {
+      const s = await inv("backend_status");
+      const failed = s.phase === "failed";
+      document.body.classList.toggle("failed", failed);
+      $("msg").textContent = s.message || "Iniciando…";
+      $("msg").classList.toggle("err", failed);
+      $("repo").hidden = !s.needs_repo;
+      const log = (s.log_tail || []).join("\n");
+      $("log").textContent = log;
+      $("log").classList.toggle("has", !!log);
+      if (s.phase === "ready" && s.url) { location.replace(s.url); return; }
+    } catch (e) { $("msg").textContent = String(e && e.message || e); }
+    setTimeout(tick, 600);
+  }
+  $("retry").onclick = () => { document.body.classList.remove("failed"); $("msg").textContent = "Reintentando…"; inv("restart_backend").catch((e) => { $("msg").textContent = String(e); }); };
+  $("repo").onclick = () => inv("choose_repo").catch((e) => { if (String(e) !== "Cancelado") $("msg").textContent = String(e); });
+  $("logs").onclick = () => inv("open_logs").catch(() => {});
+  inv("app_info").then((i) => { $("meta").textContent = `VISTAN Desktop ${i.version} · ${i.repo || "proyecto no encontrado"}`; }).catch(() => {});
+  tick();
+</script>
+</body>
+</html>

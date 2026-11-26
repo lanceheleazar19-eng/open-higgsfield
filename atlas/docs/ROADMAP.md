@@ -375,3 +375,7 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 ## VISTAN SIX · experimentación autónoma en paper trading
 - Pestaña **Live Experimentation** en el Trading Desk: seis agentes (3 SAFE, 3 EXPERIMENTAL) que operan solo con el motor de Paper Trading existente. Detalle en `docs/SIX.md`. Migración 0018.
 - Pendiente: más familias (pares/cointegración), walk-forward con varios cortes y comparación con benchmark *buy & hold* en el panel.
+
+## VISTAN Desktop · app nativa de macOS
+- `atlas/desktop` (Tauri 2): ventana nativa, Dock, menú, atajos (locales y global), notificaciones nativas, inicio automático, una sola instancia y gestión automática del backend existente (reutiliza la instancia en marcha; nunca duplica ni mata procesos ajenos). Detalle en `docs/DESKTOP.md`.
+- Pendiente: firma Developer ID y notarización (requieren cuenta de Apple Developer); actualizaciones firmadas del binario (Tauri updater).

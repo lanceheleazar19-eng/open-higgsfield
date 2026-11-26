@@ -26,6 +26,7 @@ def health(db: DB) -> dict:
     return {
         "storage": _storage(db, s) if db_ok else None,
         "status": "online" if db_ok else "degraded",
+        "app": "vistan",  # identifica el servidor (VISTAN Desktop no confunde otro programa con VISTAN)
         "version": __version__,
         "database": {"ok": db_ok, "engine": s.db_url.split(":", 1)[0]},
         "ai": _ai(db),

@@ -151,3 +151,10 @@ atlas/
 ├── docs/               Arquitectura y hoja de ruta
 └── data/               Tu base de datos (ignorada por git)
 ```
+
+## VISTAN Desktop (macOS)
+Aplicación nativa con icono, Dock, menú, atajos y notificaciones, sobre el mismo backend y los mismos datos:
+```bash
+./atlas/desktop/scripts/build-macos.sh
+```
+Detalles en `docs/DESKTOP.md`. VISTAN Web (navegador) sigue disponible.

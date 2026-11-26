@@ -7,6 +7,7 @@ import { VoiceSettings } from "../components/VoiceSettings";
 import { ProfileSettings } from "../components/ProfileSettings";
 import { IntegrationsSettings } from "../components/IntegrationsSettings";
 import { NotificationSettings } from "../components/NotificationSettings";
+import { desktop, isDesktop } from "../lib/desktop";
 import { ModelsSettings } from "../components/ModelsSettings";
 import { ProactiveSettings } from "../components/ProactiveSettings";
 import { SecuritySettings } from "../components/SecuritySettings";
@@ -44,6 +45,12 @@ export function Settings() {
         <p className="eyebrow">Sistema</p>
         <h1>Configuración</h1>
       </header>
+      {isDesktop() && (
+        <p className="desk-settings-link">
+          <button type="button" className="btn" onClick={() => void desktop.openPreferences().catch(() => undefined)}>VISTAN Desktop · Permisos y privacidad…</button>
+          <span className="muted small">Inicio automático, atajo global, notificaciones, micrófono, actualizaciones.</span>
+        </p>
+      )}
       <ProfileSettings />
       <div id="integraciones"><IntegrationsSettings /></div>
       <div id="modelos"><ModelsSettings /></div>
