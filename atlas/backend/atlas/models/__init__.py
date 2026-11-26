@@ -6,6 +6,7 @@ from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, Wor
 from atlas.models.email import EmailMessage
 from atlas.models.money import Budget, HealthDay, PaperTrade
 from atlas.models.meta import MbRun, MemoryRevision
+from atlas.models.academy import AcConcept, AcCourse, AcLab, AcPath, AcSession, AcTutorMsg
 from atlas.models.legal import (LgAlert, LgAnalysis, LgCase, LgComment, LgComparison, LgCompliance, LgDeadline, LgDocument,
                                 LgDraft, LgDraftVersion, LgEvent, LgQuery, LgResearch)
 from atlas.models.lab import (IxArenaRun, IxArenaSuite, IxDiscovery, IxExperiment, IxFile, IxIdea, IxLibraryItem, IxLink, IxPatent,
@@ -57,6 +58,7 @@ __all__ = [
     "Conversation",
     "ConversationMessage",
     "MbRun",
+    "AcConcept", "AcCourse", "AcLab", "AcPath", "AcSession", "AcTutorMsg",
     "LgAlert", "LgAnalysis", "LgCase", "LgComment", "LgComparison", "LgCompliance", "LgDeadline", "LgDocument",
     "LgDraft", "LgDraftVersion", "LgEvent", "LgQuery", "LgResearch",
     "MemoryRevision",

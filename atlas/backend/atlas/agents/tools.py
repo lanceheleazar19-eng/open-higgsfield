@@ -351,7 +351,19 @@ def _legal_obligations(c: Ctx) -> dict:
             "nota": "Referencias con fuente oficial en VISTAN LEGAL → Cumplimiento; requieren comprobar vigencia y aplicación al caso."}
 
 
+def _academy_overview(c: Ctx) -> dict:
+    from atlas.academy import tracker
+    from atlas.models import AcCourse
+    from sqlalchemy import select
+    st = tracker.stats(c.db)
+    return {"horas_estudio": st["hours"], "lecciones_completadas": st["lessons_done"], "racha_dias": st["streak"], "nota_media": st["avg_score"],
+            "retencion_pct": st["retention_pct"], "repasos_pendientes_hoy": st["due_reviews"], "conceptos": st["concepts"],
+            "cursos_activos": [x.title for x in c.db.scalars(select(AcCourse).where(AcCourse.status == "active").limit(8))],
+            "recomendaciones": [r["text"] for r in tracker.recommendations(c.db, st)], "nota": "Detalle en VISTAN ACADEMY (/academy)."}
+
+
 TOOLS: dict[str, Tool] = {t.name: t for t in [
+    Tool("academy.overview", "READ", "VISTAN ACADEMY: progreso real, repasos pendientes, cursos activos y recomendaciones", _academy_overview),
     Tool("legal.overview", "READ", "VISTAN LEGAL: expedientes activos, plazos y alertas (sin texto de documentos)", _legal_overview),
     Tool("legal.obligations", "READ", "VISTAN LEGAL: obligaciones de partida para un tipo de negocio", _legal_obligations),
     Tool("progress.trends", "READ", "Progreso: tendencias reales de peso, entreno y nutrición", _progress),

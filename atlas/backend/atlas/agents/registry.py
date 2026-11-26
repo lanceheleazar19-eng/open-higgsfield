@@ -44,8 +44,9 @@ AGENTS: dict[str, Agent] = {a.id: a for a in [
           ["life.opportunities", "projects.list", "docs.search", "research.recent"],
           r"negocio|tienda|producto|proveedor|cliente|venta|marketing|shopify|emprend|margen|precio|competencia|marca|startup|empresa|dafo|viabilidad|idea",
           ["research.start"], "Se basa en tus proyectos, documentos e investigaciones."),
-    Agent("learning", "Learning Agent", "Academia personal: niveles de dominio por evaluación, puntos débiles y qué estudiar.",
-          ["life.learning"], r"aprend|estudi|leccion|examen|test|asignatura|academia|curso|conocimiento|idioma|repasar",
+    Agent("learning", "Learning Agent", "VISTAN ACADEMY (Academy Coordinator): cursos, repasos pendientes, dominio por evaluación, "
+          "puntos débiles y qué estudiar; elige al profesor especializado adecuado.",
+          ["life.learning", "academy.overview"], r"aprend|estudi|leccion|examen|test|asignatura|academia|curso|conocimiento|idioma|repasar",
           [], "El dominio se mide con evaluaciones, nunca por lecciones completadas."),
     Agent("leadership", "Leadership Agent", "Liderazgo, negociación, equipos, crisis y decisiones bajo presión (simulaciones).",
           ["life.simulations", "life.decisions"], r"lider|negoci|equipo|deleg|conflict|crisis|presion|inversor|dirigir|jefe",

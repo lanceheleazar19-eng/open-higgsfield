@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { life, type Row } from "../../api/life";
 import { Stat } from "../desk/ui";
@@ -21,7 +22,8 @@ export function Academy() {
   const d = detail.data;
   return (
     <div className="desk-module">
-      <div className="mod-head"><h2>Knowledge Academy</h2><p className="muted small">El nivel de dominio se calcula <b>solo con evaluaciones corregidas</b>; completar lecciones no te marca como experto. El contenido lo genera la IA: contrástalo.</p></div>
+      <div className="mod-head"><h2>Knowledge Academy</h2><p className="muted small">El nivel de dominio se calcula <b>solo con evaluaciones corregidas</b>; completar lecciones no te marca como experto. El contenido lo genera la IA: contrástalo.</p>
+        <p className="small">Estas asignaturas, lecciones y evaluaciones forman parte de <Link to="/academy">VISTAN ACADEMY</Link>, con cursos completos, profesores, repasos espaciados y laboratorios.</p></div>
       <State loading={list.loading && !list.data} error={list.error}>
         <div className="subject-grid">{list.data?.map((s) => (
           <button type="button" key={s.id} className={`subject ${sid === s.id ? "on" : ""}`} onClick={() => { setSid(s.id); setLesson(null); setQuiz(null); setResult(null); }}>

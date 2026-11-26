@@ -33,6 +33,7 @@ STEP_TYPES: dict[str, tuple[str, str, list[str]]] = {
     "lab_patent_watch": ("EXECUTE", "Lab: seguimiento de patentes (Espacenet)", []),
     "meta_council": ("READ", "META-BRAIN: resolver una pregunta con el consejo (crítico y verificación)", ["question"]),
     "meta_eval": ("READ", "META-BRAIN: informe de autoevaluación", []),
+    "academy_reviews": ("WRITE", "ACADEMY: crear recordatorios de los repasos pendientes en Tareas", []),
     "legal_scan": ("READ", "LEGAL: revisar plazos, contratos y cumplimiento y generar alertas", []),
 }
 
@@ -209,6 +210,9 @@ def _exec_step(db: Session, run: WorkflowRun, step: dict, prefs: dict, tz: str, 
         if r.status != "done":
             raise ValueError(r.error or r.status)
         return f"{r.answer}\n\n(META-BRAIN #{r.id} · {r.calls} llamadas · verificación: {(r.verification or {}).get('rate', 'N/D')} %)"
+    if t == "academy_reviews":
+        from atlas.api.academy import schedule_reviews
+        return f"VISTAN ACADEMY: {schedule_reviews(db)['created']} recordatorio(s) de repaso creados."
     if t == "legal_scan":
         from atlas.legal.risks import scan
         n = scan(db)

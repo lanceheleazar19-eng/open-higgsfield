@@ -366,3 +366,8 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - Investigación en fuentes oficiales con verificación de citas y vigencia; análisis y comparación de contratos; Document Studio
   sin datos inventados; expedientes, plazos (nunca calculados), alertas, cumplimiento, base de conocimiento aislada por
   expediente, Legal Agent e informes PDF/DOCX. Originales cifrados; solo IA local salvo autorización.
+
+## VISTAN ACADEMY · universidad personal con IA
+- `/academy` sobre la academia de LIFE OS (sin duplicarla). Detalle en `docs/ACADEMY.md`. Migración 0017.
+- Cursos, lecciones interactivas, profesores especializados con coordinador, exámenes con criterios definidos, repetición
+  espaciada, seguimiento real, laboratorios con dinero virtual, investigación, itinerarios, voz y memoria educativa.

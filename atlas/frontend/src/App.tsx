@@ -17,6 +17,7 @@ import { Life } from "./pages/Life";
 import { Lab } from "./pages/Lab";
 import { MetaBrain } from "./pages/MetaBrain";
 import { Legal } from "./pages/Legal";
+import { Academy } from "./pages/Academy";
 import { Agents } from "./pages/Agents";
 import { Analytics } from "./pages/Analytics";
 import { CommandCenter } from "./pages/CommandCenter";
@@ -28,7 +29,7 @@ import { Progress } from "./pages/Progress";
 import { ModulePage } from "./pages/ModulePage";
 import { Settings } from "./pages/Settings";
 
-const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "betting", "life", "lab", "meta", "legal", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
+const BUILT = new Set(["dashboard", "settings", "ai", "memory", "tasks", "gym", "nutrition", "calendar", "finance", "trading", "betting", "life", "lab", "meta", "legal", "academy", "agents", "reports", "command", "knowledge", "projects", "research", "workflows", "progress"]);
 
 export function App() {
   return (
@@ -51,6 +52,7 @@ export function App() {
           <Route path="lab" element={<Lab />} />
           <Route path="meta" element={<MetaBrain />} />
           <Route path="legal" element={<Legal />} />
+          <Route path="academy" element={<Academy />} />
           <Route path="agents" element={<Agents />} />
           <Route path="reports" element={<Analytics />} />
           <Route path="command" element={<CommandCenter />} />

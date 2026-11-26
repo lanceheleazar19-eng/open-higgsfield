@@ -4,7 +4,7 @@ separados de los personales (hábitos, contactos personales, decisiones, errores
 
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, false
 from sqlalchemy.orm import Mapped, mapped_column
 
 from atlas.models.base import Base, utcnow
@@ -70,6 +70,9 @@ class LfSubject(Base):
     name: Mapped[str] = mapped_column(String(80))
     syllabus: Mapped[list] = mapped_column(JSON, default=list)  # [{"topic": str, "level": 1-5}]
     syllabus_source: Mapped[str | None] = mapped_column(String(80))
+    category: Mapped[str | None] = mapped_column(String(16), index=True)  # biblioteca de VISTAN ACADEMY
+    description: Mapped[str | None] = mapped_column(Text)
+    custom: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class LfLesson(Base):
@@ -81,6 +84,11 @@ class LfLesson(Base):
     content: Mapped[dict] = mapped_column(JSON)  # explicación, ejemplos, caso práctico, ejercicios
     model: Mapped[str | None] = mapped_column(String(80))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime)
+    course_id: Mapped[int | None] = mapped_column(ForeignKey("ac_courses.id", ondelete="SET NULL"), index=True)
+    module_idx: Mapped[int | None] = mapped_column(Integer)
+    lesson_idx: Mapped[int | None] = mapped_column(Integer)
+    progress: Mapped[dict | None] = mapped_column(JSON)  # dónde te quedaste, secciones vistas, respuestas de comprensión
+    minutes: Mapped[float] = mapped_column(Float, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
 
 
@@ -98,6 +106,9 @@ class LfAssessment(Base):
     model: Mapped[str | None] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
     graded_at: Mapped[datetime | None] = mapped_column(DateTime)
+    course_id: Mapped[int | None] = mapped_column(ForeignKey("ac_courses.id", ondelete="SET NULL"), index=True)
+    module_idx: Mapped[int | None] = mapped_column(Integer)
+    criteria: Mapped[dict | None] = mapped_column(JSON)  # criterios de evaluación explícitos (puntos por pregunta y rúbricas)
 
 
 class LfSimulation(Base):

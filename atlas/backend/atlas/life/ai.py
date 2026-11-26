@@ -120,6 +120,14 @@ SCENARIOS: dict[str, dict] = {
                "brief": "Explica una idea compleja de forma simple y responde a preguntas incómodas."},
     "email": {"area": "communication", "title": "Comunicación escrita empresarial", "role": "destinatario de tus correos (cliente exigente)",
               "brief": "Escribe correos claros y profesionales para resolver una reclamación."},
+    "salary": {"area": "negotiation", "title": "Negociar tu primer sueldo", "role": "responsable de RR. HH. de una empresa tecnológica con una banda salarial limitada",
+               "brief": "Te ofrecen un puesto junior. Quieres mejorar salario o condiciones (formación, teletrabajo) sin perder la oferta."},
+    "b2b_contract": {"area": "negotiation", "title": "Cerrar un contrato B2B", "role": "director de compras que exige descuento y pago a 90 días",
+                     "brief": "Vendes un servicio mensual. El cliente quiere un 25 % de descuento y pagar a 90 días; tú necesitas margen y cobrar antes."},
+    "partner_equity": {"area": "negotiation", "title": "Repartir participaciones con un socio", "role": "posible cofundador técnico con mucha experiencia",
+                       "brief": "Fundas una startup. Tu futuro socio pide el 50 % y un sueldo desde el primer mes; tú aportas la idea y los primeros clientes."},
+    "landlord": {"area": "negotiation", "title": "Negociar el alquiler de un local", "role": "propietario de un local comercial con otros interesados",
+                 "brief": "Quieres alquilar un local para tu negocio. El propietario pide 6 meses de fianza y una renta alta; tienes un presupuesto ajustado."},
 }
 
 
