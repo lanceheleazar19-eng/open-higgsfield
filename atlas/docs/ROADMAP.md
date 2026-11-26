@@ -371,3 +371,7 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - `/academy` sobre la academia de LIFE OS (sin duplicarla). Detalle en `docs/ACADEMY.md`. Migración 0017.
 - Cursos, lecciones interactivas, profesores especializados con coordinador, exámenes con criterios definidos, repetición
   espaciada, seguimiento real, laboratorios con dinero virtual, investigación, itinerarios, voz y memoria educativa.
+
+## VISTAN SIX · experimentación autónoma en paper trading
+- Pestaña **Live Experimentation** en el Trading Desk: seis agentes (3 SAFE, 3 EXPERIMENTAL) que operan solo con el motor de Paper Trading existente. Detalle en `docs/SIX.md`. Migración 0018.
+- Pendiente: más familias (pares/cointegración), walk-forward con varios cortes y comparación con benchmark *buy & hold* en el panel.

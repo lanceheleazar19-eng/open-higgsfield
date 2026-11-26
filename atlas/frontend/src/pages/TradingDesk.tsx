@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { desk, TIMEFRAMES, type Analytics, type Candles, type DeskAccount, type DeskState, type Order, type Overview, type Quote, type Tf } from "../api/desk";
 import { Blotter } from "../components/desk/Blotter";
+import { Experiment } from "../components/desk/Experiment";
 import { AnalyticsView, BacktestView, DataView, JournalView, Markets, NewsView, Portfolio } from "../components/desk/Modules";
 import { OrderTicket } from "../components/desk/OrderTicket";
 import { loadDrawings, PriceChart, saveDrawings, type ChartType, type DrawMode, type Drawings } from "../components/desk/PriceChart";
@@ -9,8 +10,8 @@ import { Tutor } from "../components/desk/Tutor";
 import { ago, KindTag, money, pct, price, SimBadge, compact, tone } from "../components/desk/ui";
 import { INDICATOR_HELP, INDICATORS, type IndicatorId } from "../lib/indicators";
 
-type Tab = "terminal" | "markets" | "portfolio" | "analytics" | "journal" | "backtest" | "news" | "data";
-const TABS: [Tab, string][] = [["terminal", "Terminal"], ["markets", "Mercados"], ["portfolio", "Portfolio · Riesgo"], ["analytics", "Analytics"],
+type Tab = "terminal" | "live" | "markets" | "portfolio" | "analytics" | "journal" | "backtest" | "news" | "data";
+const TABS: [Tab, string][] = [["terminal", "Terminal"], ["live", "Live Experimentation"], ["markets", "Mercados"], ["portfolio", "Portfolio · Riesgo"], ["analytics", "Analytics"],
   ["journal", "Diario"], ["backtest", "Backtesting"], ["news", "Noticias · Macro"], ["data", "Datos"]];
 
 function useLocal<T>(key: string, init: T): [T, (v: T) => void] {
@@ -249,6 +250,7 @@ export function TradingDesk() {
           {tab === "analytics" && <AnalyticsView account={account} />}
           {tab === "journal" && <JournalView account={account} onAskTutor={askTutor} />}
           {tab === "backtest" && <BacktestView symbols={rows.length ? rows.map((r) => r.symbol) : [symbol]} />}
+          {tab === "live" && <Experiment />}
           {tab === "news" && <NewsView />}
           {tab === "data" && <DataView />}
         </main>

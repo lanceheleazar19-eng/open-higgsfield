@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { Academy } from "../pages/Academy";
 
+vi.mock("lightweight-charts", () => ({ createChart: () => ({ addSeries: () => ({ setData: vi.fn(), createPriceLine: vi.fn() }), timeScale: () => ({ fitContent: vi.fn() }), remove: vi.fn() }),
+  AreaSeries: {}, LineSeries: {}, ColorType: { Solid: "solid" } }));
+
+
 type H = (body: unknown) => [number, unknown];
 function stub(routes: Record<string, H>) {
   const calls: { key: string; body?: unknown }[] = [];

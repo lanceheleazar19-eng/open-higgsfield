@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import (academy, agents, legal, meta, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
+from atlas.api import (academy, agents, legal, meta, six, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
                        models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk, betting, life, lab)
 from atlas.config import get_settings
 from atlas.db import init_db
@@ -76,6 +76,14 @@ async def _desk_loop() -> None:
         with session_scope() as db:
             desk_engine.periodic(db)
             db.commit()
+        try:  # VISTAN SIX: ciclo autónomo de paper trading (solo si lo activaste y sin kill switch)
+            from atlas.six import runner as six_runner
+            with session_scope() as db:
+                if six_runner.due(db):
+                    six_runner.tick(db)
+                    db.commit()
+        except Exception:  # noqa: BLE001 - un fallo de los agentes nunca detiene el Trading Desk
+            pass
         global _bet_tick
         _bet_tick += 1
         if _bet_tick % 15 == 0:  # cada ~5 min: liquidar pronósticos simulados con resultados reales
@@ -125,7 +133,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router, life.public, life.router, lab.router, meta.router, legal.router, academy.router):
+              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router, life.public, life.router, lab.router, meta.router, legal.router, academy.router, six.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

@@ -26,7 +26,8 @@ DEFAULTS: dict[str, object] = {
     "meta": None,  # META-BRAIN: kill switch, límites, consejo, privacidad (ver atlas/metabrain/governance.py)
     "agent_perms": None,
     "legal": None,
-    "academy": None,  # VISTAN ACADEMY: gamificación, objetivos semanales, estilo, voz  # VISTAN LEGAL: {"allow_cloud": false} — por defecto solo modelos locales  # permisos por agente: activo, memoria, nube
+    "academy": None,
+    "six": None,  # VISTAN SIX: modo autónomo de paper trading (activación explícita), intervalo  # VISTAN ACADEMY: gamificación, objetivos semanales, estilo, voz  # VISTAN LEGAL: {"allow_cloud": false} — por defecto solo modelos locales  # permisos por agente: activo, memoria, nube
     "greeting": "",  # saludo personalizado  # capital VIRTUAL inicial del paper trading (no es dinero real)
 }
 
