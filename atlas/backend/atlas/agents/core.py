@@ -30,7 +30,7 @@ def research_command(text: str) -> str | None:
 def plan(text: str, forced: list[str] | None = None) -> list[str]:
     """Agentes que intervienen (máx. 3), por relevancia. Lista vacía = conversación general."""
     if forced:
-        return [a for a in forced if a in AGENTS][:3]
+        return [a for a in forced if a in AGENTS][:4]
     t = norm(text)
     scores = []
     for a in AGENTS.values():
@@ -51,7 +51,9 @@ def plan(text: str, forced: list[str] | None = None) -> list[str]:
 
 def run(db: Session, text: str, prefs: dict, tz: str, agents: list[str] | None = None, source: str = "chat") -> tuple[AgentRun, dict]:
     """Ejecuta las herramientas de lectura de los agentes elegidos. Devuelve (registro, contexto para el modelo)."""
-    chosen = plan(text, agents)
+    from atlas.metabrain.governance import agent_perms, kill_switch_on
+    perms = agent_perms(prefs)
+    chosen = [] if kill_switch_on(db) else [a for a in plan(text, agents) if perms[a]["enabled"]]
     run_ = AgentRun(request=text[:4000], agents=chosen, intent="consulta" if chosen else "general", status="running",
                     steps=[], source=source)
     db.add(run_)
@@ -65,6 +67,9 @@ def run(db: Session, text: str, prefs: dict, tz: str, agents: list[str] | None =
         out: dict = {}
         for tname in agent.tools:
             tool = TOOLS[tname]
+            if tname.startswith("memory.") and not perms[aid]["memory"]:
+                steps.append({"agent": aid, "tool": tname, "level": tool.level, "ok": True, "ms": 0, "summary": "sin permiso de memoria (gobierno)"})
+                continue
             if tname in used:  # otro agente ya la ejecutó en esta petición (colaboración)
                 steps.append({"agent": aid, "tool": tname, "level": tool.level, "ok": True, "ms": 0, "shared": True,
                               "summary": "resultado compartido con otro agente"})

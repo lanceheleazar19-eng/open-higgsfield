@@ -347,3 +347,16 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
 - **Innovation Projects**, **Lab Workflows** (vigilancia tecnológica, Arena, revisión de experimentos, informe, patentes;
   se instalan desactivadas), **Analytics** por periodo y categoría e **Innovation Agent** (colabora con Research, Coding,
   Business, Planning y Memory).
+
+## VISTAN META-BRAIN · think, coordinate, verify, execute
+- `/meta` (núcleo central «VISTAN CORE» del sistema solar, menú Inteligencia) y «piensa a fondo: …» en el chat. Detalle de
+  lo operativo y lo que necesita credenciales en `docs/META-BRAIN.md`. Migración 0015 (`mb_runs`, `memory_revisions`, memoria ampliada).
+- **META-BRAIN**: fases trazables con checkpoint (reanudar sin repetir), límites de llamadas/tiempo/coste, cancelación y kill switch.
+- **Router**: inventario real (Ollama + capacidades, nube con clave, proveedor compatible con OpenAI), cadena con fallback,
+  privacidad por contenido y por agente, rendimiento medido por modelo.
+- **Council + Critic + Verifier**: especialistas reales, contexto compartido (sin llamadas duplicadas), crítico independiente
+  que puede pedir investigación, verificación determinista de cálculos y del soporte textual de cada hecho.
+- **Memory Intelligence**: tipos, duplicados, contradicciones (corregido: un dato con otra cifra ya no se descarta como
+  duplicado), resolución con histórico, historial de cambios y acceso all/local/private.
+- **Execution**: objetivo → plan con pasos reales → autorizaciones, reintentos, checkpoints, cancelar/reintentar.
+- **Benchmark Center** (sobre el Arena), **Self-Evaluation**, **Multimodal** y **Governance** (kill switch, permisos, auditoría).

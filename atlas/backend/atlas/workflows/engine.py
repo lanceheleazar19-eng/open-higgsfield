@@ -31,6 +31,8 @@ STEP_TYPES: dict[str, tuple[str, str, list[str]]] = {
     "lab_experiments_review": ("READ", "Lab: revisar experimentos", []),
     "lab_report": ("READ", "Lab: informe del laboratorio", []),
     "lab_patent_watch": ("EXECUTE", "Lab: seguimiento de patentes (Espacenet)", []),
+    "meta_council": ("READ", "META-BRAIN: resolver una pregunta con el consejo (crítico y verificación)", ["question"]),
+    "meta_eval": ("READ", "META-BRAIN: informe de autoevaluación", []),
 }
 
 BUILTINS = [
@@ -197,6 +199,23 @@ def _exec_step(db: Session, run: WorkflowRun, step: dict, prefs: dict, tz: str, 
         from atlas.services.backup import backup_db
         p = backup_db("workflow")
         return f"Copia guardada: {p.name}" if p else "No hay base de datos SQLite que copiar."
+    if t == "meta_council":
+        from atlas.metabrain import engine as meta
+        q = str(params.get("question") or "").strip()
+        if len(q) < 4:
+            raise ValueError("Falta la pregunta")
+        r = meta.run_sync(db, q, "council", source="workflow")
+        if r.status != "done":
+            raise ValueError(r.error or r.status)
+        return f"{r.answer}\n\n(META-BRAIN #{r.id} · {r.calls} llamadas · verificación: {(r.verification or {}).get('rate', 'N/D')} %)"
+    if t == "meta_eval":
+        from atlas.metabrain.evaluation import evaluate
+        e = evaluate(db, 7)
+        m = e["metrics"]
+        nd = lambda v, s="": "N/D" if v is None else f"{v}{s}"  # noqa: E731
+        return (f"Últimos 7 días: {m['runs']} ejecuciones · completadas {nd(m['completion_pct'], ' %')} · errores {nd(m['error_pct'], ' %')} · "
+                f"latencia media {nd(m['avg_latency_ms'], ' ms')} · hechos con respaldo {nd(m['supported_pct'], ' %')} · coste {nd(m['cost_usd'], ' $')}\n"
+                + "\n".join(f"• {r}" for r in e["recommendations"]))
     if t.startswith("lab_"):
         from atlas.lab import service as lab
         return {"lab_tech_watch": lambda: lab.step_tech_watch(db), "lab_arena": lambda: lab.step_arena(db, params),
@@ -216,7 +235,22 @@ def execute(db: Session, run: WorkflowRun) -> WorkflowRun:
     outputs = [e.get("output", "") for e in log if e.get("ok") and e.get("type") not in ("notify",)]
     approved = set(run.params.get("_approved", []))
     run.status = "running"
+    from atlas.metabrain.governance import killed
+    db.flush()  # lo pendiente (p. ej. pasos ya aprobados) se conserva al refrescar el estado
     while run.next_step < len(steps):
+        db.refresh(run)
+        if run.status == "cancelled":
+            log.append({"step": run.next_step, "type": "-", "level": "-", "ok": False, "output": "Cancelado por ti"})
+            run.log, run.finished_at = log, datetime.utcnow()
+            db.commit()
+            return run
+        if killed(get_prefs(db)):
+            run.status, run.output, run.finished_at = "cancelled", "Kill switch activo: automatización detenida", datetime.utcnow()
+            log.append({"step": run.next_step, "type": "-", "level": "-", "ok": False, "output": run.output})
+            run.log = log
+            db.commit()
+            return run
+        run.status = "running"
         i = run.next_step
         step = steps[i]
         level = STEP_TYPES.get(step.get("type"), ("ADMIN",))[0]
@@ -229,11 +263,16 @@ def execute(db: Session, run: WorkflowRun) -> WorkflowRun:
             db.commit()
             return run
         t0 = time.perf_counter()
-        try:
-            out = _exec_step(db, run, step, prefs, tz, outputs)
-            ok = True
-        except Exception as exc:  # noqa: BLE001
-            out, ok = f"Error: {exc}", False
+        retries = max(0, min(3, int(step.get("retries", 1 if level == "EXECUTE" else 0))))
+        for attempt in range(retries + 1):
+            try:
+                out = _exec_step(db, run, step, prefs, tz, outputs)
+                ok = True
+                break
+            except Exception as exc:  # noqa: BLE001
+                out, ok = f"Error: {exc}" + (f" (tras {attempt + 1} intentos)" if attempt else ""), False
+                if attempt < retries:
+                    time.sleep(min(4, 1 + attempt * 2))
         log.append({"step": i, "type": step["type"], "level": level, "ok": ok, "output": out,
                     "ms": int((time.perf_counter() - t0) * 1000)})
         run.log = log

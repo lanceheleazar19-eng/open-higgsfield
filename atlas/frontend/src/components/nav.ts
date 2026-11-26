@@ -16,6 +16,7 @@ export const NAV: NavItem[] = [
   { id: "agents", path: "/agents", label: "Agentes", group: "Inteligencia" },
   { id: "memory", path: "/memory", label: "Memoria", group: "Inteligencia" },
   { id: "knowledge", path: "/knowledge", label: "Conocimiento", group: "Inteligencia" },
+  { id: "meta", path: "/meta", label: "META-BRAIN", group: "Inteligencia" },
   { id: "lab", path: "/lab", label: "Innovation Lab", group: "Inteligencia" },
   { id: "research", path: "/research", label: "Investigación", group: "Inteligencia" },
   { id: "projects", path: "/projects", label: "Proyectos", group: "Organización" },

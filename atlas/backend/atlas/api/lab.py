@@ -649,6 +649,9 @@ class SandboxIn(BaseModel):
 async def sandbox_run(body: SandboxIn, db: DB) -> dict:
     if not body.confirm:
         raise HTTPException(428, "Confirma la ejecución: el código se ejecutará en el sandbox aislado (sin red, sin tus archivos, 10 s)")
+    from atlas.metabrain.governance import kill_switch_on
+    if kill_switch_on(db):
+        raise HTTPException(423, "Kill switch activo: la ejecución de código está detenida (META-BRAIN → Gobierno)")
     res = await run_in_threadpool(sandbox.run_python, body.code)
     r = IxSandboxRun(prototype_id=body.prototype_id, code=body.code, **res)
     db.add(r)

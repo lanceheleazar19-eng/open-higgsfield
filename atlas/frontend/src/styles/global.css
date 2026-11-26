@@ -1881,3 +1881,52 @@ textarea.code { width: 100%; font: 12.5px var(--font-mono); background: #050505;
   .lab-hero { gap: 14px; padding: 14px; }
 }
 .lab .desk-module > .btn { align-self: flex-start; justify-self: start; width: auto; }
+
+/* ── VISTAN META-BRAIN ───────────────────────────────────────────── */
+.core-id.core-link { pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit; border-radius: 14px; padding: 6px 10px; }
+.core-id.core-link:hover .core-open, .core-id.core-link:focus-visible .core-open { opacity: 1; }
+.core-id.core-link:focus-visible { outline: 2px solid var(--crimson-hi); outline-offset: 4px; }
+.core-open { font: 600 10px var(--font-mono); letter-spacing: .18em; color: var(--cyan-2); opacity: .55; transition: opacity .2s; }
+.meta-ask { display: grid; gap: 8px; }
+.meta-ask textarea { width: 100%; background: rgba(0,0,0,.3); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px; font: inherit; resize: vertical; }
+.meta-ask .row-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.meta-plan { margin-top: 10px; padding: 10px 12px; border-left: 2px solid var(--line-2); background: var(--soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.meta .mod-cols { align-items: start; }
+.meta-runs { max-width: 380px; }
+.meta-run { min-width: 0; display: grid; gap: 10px; }
+.meta-q { margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.phase-line { display: flex; flex-wrap: wrap; gap: 4px; }
+.phase-line span { font: 600 10px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-3); }
+.phase-line span.done { color: var(--green); border-color: color-mix(in srgb, var(--green) 50%, transparent); }
+.phase-line span.now { color: var(--crimson-hi); border-color: var(--crimson-hi); animation: labPulse 1.6s ease-in-out infinite; }
+.meta-answer { padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: rgba(0,0,0,.22); overflow-wrap: anywhere; }
+.meta-kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.meta-sec { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; }
+.meta-sec > summary { cursor: pointer; font: 600 11px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--text-2); }
+.meta-sec[open] > summary { margin-bottom: 8px; }
+.meta-sec .sc-card { margin-bottom: 8px; }
+.trace { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.trace li { display: grid; grid-template-columns: auto auto 1fr; gap: 2px 10px; padding: 5px 8px; border-left: 2px solid var(--line-2); font-size: 12.5px; }
+.trace li.bad { border-color: var(--amber); }
+.trace time { font: 11px var(--font-mono); color: var(--text-3); }
+.trace b { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-2); }
+.trace span { color: var(--cyan-2); font-size: 12px; }
+.trace p { grid-column: 1 / -1; margin: 0; color: var(--text); overflow-wrap: anywhere; }
+.mini-btn.on { border-color: var(--crimson-hi); background: var(--soft); }
+.prov.ok { border-color: color-mix(in srgb, var(--green) 35%, var(--line)); }
+.dpanel.kill.on { border-color: var(--crimson-hi); box-shadow: 0 0 0 1px var(--crimson-hi), 0 0 28px var(--glow); }
+.check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px; margin-bottom: 8px; }
+.dtable.bench th { white-space: nowrap; }
+.bench-detail { padding: 6px 0 4px 10px; }
+.plan-steps { margin: 8px 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13px; }
+.plan-steps li .mini-btn { margin-left: 6px; }
+.exec-run { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+.life-list.audit { max-height: 360px; overflow: auto; }
+@media (max-width: 820px) {
+  .meta-runs { max-width: none; }
+  .trace li { grid-template-columns: auto 1fr; }
+  .trace span { grid-column: 1 / -1; }
+}
+/* Las tablas anchas se desplazan dentro de su panel; el módulo nunca se ensancha */
+.meta .desk-main, .meta .desk-module, .meta .desk-module > *, .meta .mod-cols > * { min-width: 0; max-width: 100%; }
+.disc-list .lab-tag { justify-self: start; }

@@ -11,7 +11,7 @@ export interface NodeDef {
 }
 
 const Q = Math.PI / 2;
-/** Los 15 planetas de VISTAN en 4 órbitas: 3 a 120° en la interior y 4 a 90° en las otras tres. */
+/** Los 15 planetas de VISTAN en 4 órbitas: 3 a 120° en la interior y 4 a 90° en las otras tres. (El núcleo central abre el META-BRAIN.) */
 export const NODE_DEFS: NodeDef[] = [
   { id: "ai", label: "Intelligence", icon: "ai", route: "/ai", orbit: 0, phase: 0.3, size: 1.0, hue: "#e11d35", description: "Cerebro conversacional, modelos y razonamiento." },
   { id: "lab", label: "Innovation Lab", icon: "lab", route: "/lab", orbit: 0, phase: 0.3 + (4 * Math.PI) / 3, size: 0.95, hue: "#e11d35", description: "Laboratorio privado: radar tecnológico, investigación, experimentos y prototipos." },

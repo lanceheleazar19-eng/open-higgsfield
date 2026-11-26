@@ -23,6 +23,8 @@ DEFAULTS: dict[str, object] = {
     "security_policy": None,  # niveles WRITE/EXECUTE/ADMIN: auto | confirm
     "proactive": None,  # reglas de inteligencia proactiva activadas
     "insights_dismissed": None,
+    "meta": None,  # META-BRAIN: kill switch, límites, consejo, privacidad (ver atlas/metabrain/governance.py)
+    "agent_perms": None,  # permisos por agente: activo, memoria, nube
     "greeting": "",  # saludo personalizado  # capital VIRTUAL inicial del paper trading (no es dinero real)
 }
 

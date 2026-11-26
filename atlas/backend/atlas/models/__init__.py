@@ -5,6 +5,7 @@ from atlas.models.core import ActivityLog, Setting
 from atlas.models.gym import BodyMetric, Exercise, Routine, RoutineExercise, WorkoutSet
 from atlas.models.email import EmailMessage
 from atlas.models.money import Budget, HealthDay, PaperTrade
+from atlas.models.meta import MbRun, MemoryRevision
 from atlas.models.lab import (IxArenaRun, IxArenaSuite, IxDiscovery, IxExperiment, IxFile, IxIdea, IxLibraryItem, IxLink, IxPatent,
                               IxProjectMeta, IxPrototype, IxResearch, IxSandboxRun, IxScenario, IxTechnology, IxTrial, IxVersion)
 from atlas.models.life import (LfAsset, LfAssessment, LfCommitment, LfContact, LfDecision, LfFailure, LfHabit, LfHabitLog,
@@ -53,4 +54,6 @@ __all__ = [
     "GoalProgress",
     "Conversation",
     "ConversationMessage",
+    "MbRun",
+    "MemoryRevision",
 ]

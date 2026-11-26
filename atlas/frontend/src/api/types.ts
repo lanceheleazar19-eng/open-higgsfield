@@ -52,7 +52,8 @@ export interface AiStatus {
   note: string | null;
 }
 
-export type MemoryKind = "preference" | "goal" | "decision" | "fact" | "note";
+export type MemoryKind = "preference" | "goal" | "decision" | "fact" | "note" | "procedure" | "episode";
+export type MemoryAccess = "all" | "local" | "private";
 
 export interface MemoryItem {
   id: number;
@@ -63,6 +64,8 @@ export interface MemoryItem {
   expired: boolean;
   project_id: number | null;
   source: "manual" | "chat" | "suggested";
+  access?: MemoryAccess;
+  superseded_by?: number | null;
   created_at: string;
   updated_at: string;
 }

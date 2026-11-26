@@ -265,6 +265,48 @@ def chat(body: ChatIn) -> StreamingResponse:
                 db.commit()
                 return
 
+            # META-BRAIN: «piensa a fondo: …» → consejo de agentes con crítico y verificación (progreso en directo)
+            from atlas.metabrain.complexity import deep_command
+            deep = deep_command(body.text)
+            if deep:
+                import time as _t
+
+                from atlas.metabrain import engine as meta
+                from atlas.metabrain.governance import killed
+                if killed(prefs):
+                    reply = "El kill switch del META-BRAIN está activado: desactívalo en META-BRAIN → Gobierno para usar el consejo."
+                    yield _line({"type": "delta", "text": reply})
+                    yield _line({"type": "done", "mode": "meta", "model": None})
+                    convs.add_message(db, conv, "assistant", reply, mode="local")
+                    db.commit()
+                    return
+                mr = meta.create(db, deep, "council", "chat")
+                db.commit()
+                meta.start(mr.id)
+                yield _line({"type": "status", "state": "thinking", "model": "META-BRAIN · consejo en marcha"})
+                last = None
+                while True:
+                    _t.sleep(1.0)
+                    db.expire_all()
+                    mr = db.get(meta.MbRun, mr.id)
+                    if mr.phase != last and mr.status in ("running", "waiting"):
+                        last = mr.phase
+                        yield _line({"type": "status", "state": "thinking", "model": f"META-BRAIN · {mr.phase}"})
+                    if mr.status in ("done", "error", "cancelled"):
+                        break
+                if mr.status == "done":
+                    ver = (mr.verification or {})
+                    reply = (f"{mr.answer}\n\n— META-BRAIN #{mr.id} · {mr.calls} llamadas · {len((mr.critique or {}).get('issues', []))} avisos del crítico"
+                             + (f" · {ver['supported']}/{ver['checked']} hechos con respaldo" if ver.get("checked") else "")
+                             + f". Traza completa en /meta?run={mr.id}")
+                else:
+                    reply = f"El META-BRAIN no pudo terminar: {mr.error}. Puedes reanudarlo en /meta?run={mr.id}"
+                yield _line({"type": "delta", "text": reply})
+                yield _line({"type": "done", "mode": "meta", "model": ", ".join(mr.models or []) or None})
+                convs.add_message(db, conv, "assistant", reply, mode="ai" if mr.status == "done" else "local")
+                db.commit()
+                return
+
             # Investigación en internet: «investiga …»
             from atlas.agents import core as agent_core
             rq = agent_core.research_command(body.text)
@@ -334,10 +376,18 @@ def chat(body: ChatIn) -> StreamingResponse:
             if HEALTH_Q.search(q) or offline:
                 from atlas.api.health import snapshot as health_snapshot
                 d["apple_salud"] = health_snapshot(db, today_d)
-            memory_ctx = mem.memory_context(db, body.text, tz, conversation_id=conv.id)
+            # Privacidad (META-BRAIN → Gobierno): datos de agentes sin permiso de nube o personales → solo modelo local
+            from atlas.brain import router as model_router
+            from atlas.metabrain.complexity import PERSONAL
+            from atlas.metabrain.governance import needs_local
+            force_local, _why = needs_local(prefs, run_.agents, bool(PERSONAL.search(q)))
+            cloud = None if force_local else model_router.cloud_choice("chat", prefs)
+            memory_ctx = mem.memory_context(db, body.text, tz, conversation_id=conv.id, allow_local=cloud is None)
             db.commit()
             text, final = "", None
-            for ev in chat_events(d, prefs, body.text, hist, memory=memory_ctx):
+            from atlas.brain.orchestrator import get_provider as _local_provider
+            for ev in chat_events(d, prefs, body.text, hist, memory=memory_ctx,
+                                  provider=_local_provider() if force_local and model_router.cloud_choice("chat", prefs) else None):
                 if ev["type"] == "delta":
                     text += ev["text"]
                 elif ev["type"] in ("done", "error"):

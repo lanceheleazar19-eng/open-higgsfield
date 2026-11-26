@@ -84,7 +84,8 @@ def test_experiments_require_verifiable_results_and_trials(client):
 def test_arena_only_configured_models_and_real_metrics(client, ollama):
     models = client.get("/api/lab/arena/models").json()
     ids = [m["id"] for m in models]
-    assert ids and all(m.startswith("ollama:") for m in ids)  # sin claves de nube: solo modelos locales reales
+    # sin claves de nube: solo modelos locales reales (+ el propio META-BRAIN, que usa esos mismos modelos)
+    assert ids and all(m.startswith("ollama:") or m == "vistan:meta-brain" for m in ids)
     s = client.post("/api/lab/arena/suites", json={"name": "Básico", "tests": [{"prompt": "Capital de Francia", "check": "contains", "expected": "París"}]})
     assert client.post("/api/lab/arena/suites", json={"name": "Mal", "tests": [{"prompt": "x", "check": "exact"}]}).status_code == 422
     sid = s.json()["id"]

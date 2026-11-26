@@ -1,12 +1,12 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api/client";
-import type { MemoryItem, MemoryKind, StoredMessage } from "../api/types";
+import type { MemoryAccess, MemoryItem, MemoryKind, StoredMessage } from "../api/types";
 import { useAsync } from "../api/useAsync";
 import { useAtlas } from "../components/AtlasContext";
 import { Icon } from "../components/Icon";
 import { Empty, Panel } from "../components/Panel";
 import { formatDateTime } from "../lib/format";
-import { KIND_LABEL } from "../lib/memory";
+import { ACCESS_LABEL, KIND_LABEL } from "../lib/memory";
 
 const KINDS = Object.keys(KIND_LABEL) as MemoryKind[];
 
@@ -117,6 +117,8 @@ function Memories() {
                     {m.permanent ? "Permanente" : m.expired ? "Caducado" : `Temporal · hasta ${formatDateTime(m.expires_at!, tz)}`}
                     {" · "}{m.source === "manual" ? "añadido a mano" : m.source === "chat" ? "por conversación" : "sugerido por VISTAN"}
                     {" · "}{formatDateTime(m.updated_at, tz)}
+                    {m.access && m.access !== "all" && <>{" · "}<b>{ACCESS_LABEL[m.access]}</b></>}
+                    {m.superseded_by && <>{" · "}histórico (reemplazado por #{m.superseded_by})</>}
                   </span>
                 </span>
                 <span className="row-actions">
@@ -189,6 +191,7 @@ function AddMemory({ onSaved }: { onSaved: (created: boolean, content: string) =
 function EditMemory({ m, onDone }: { m: MemoryItem; onDone: (msg: string | null) => void }) {
   const [content, setContent] = useState(m.content);
   const [kind, setKind] = useState<MemoryKind>(m.kind);
+  const [access, setAccess] = useState<MemoryAccess>(m.access ?? "all");
   const [error, setError] = useState<string | null>(null);
 
   async function save(e: FormEvent) {
@@ -197,6 +200,7 @@ function EditMemory({ m, onDone }: { m: MemoryItem; onDone: (msg: string | null)
       await api.updateMemory(m.id, {
         ...(content.trim() !== m.content ? { content: content.trim() } : {}),
         ...(kind !== m.kind ? { kind } : {}),
+        ...(access !== (m.access ?? "all") ? { access } : {}),
       });
       onDone("Recuerdo actualizado.");
     } catch (err) {
@@ -210,6 +214,9 @@ function EditMemory({ m, onDone }: { m: MemoryItem; onDone: (msg: string | null)
       <div className="form-actions">
         <select value={kind} onChange={(e) => setKind(e.target.value as MemoryKind)} aria-label="Tipo">
           {KINDS.map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
+        </select>
+        <select value={access} onChange={(e) => setAccess(e.target.value as MemoryAccess)} aria-label="Acceso">
+          {(Object.keys(ACCESS_LABEL) as MemoryAccess[]).map((k) => <option key={k} value={k}>{ACCESS_LABEL[k]}</option>)}
         </select>
         {!m.permanent && (
           <button type="button" className="mini-btn ghost" onClick={async () => {

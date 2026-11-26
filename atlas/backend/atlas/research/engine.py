@@ -124,6 +124,10 @@ def run(rid: int, searcher: WebSearcher | None = None, fetcher=fetch) -> None:  
         with session_scope() as db:
             r = db.get(Research, rid)
             question, state, prefs = r.question, dict(r.state or {}), get_prefs(db)
+        from atlas.metabrain.governance import killed
+        if killed(prefs):
+            _save(rid, status="error", error="Kill switch activo: investigación detenida")
+            return
         done = state.setdefault("done", [])
         searcher = searcher or WebSearcher()
         _save(rid, status="running", error=None)
@@ -132,6 +136,9 @@ def run(rid: int, searcher: WebSearcher | None = None, fetcher=fetch) -> None:  
         def step(name: str) -> bool:
             if name in done:
                 return False
+            with session_scope() as kdb:
+                if killed(get_prefs(kdb)):
+                    raise RuntimeError("Kill switch activo: investigación detenida")
             _save(rid, step=name, state=state)
             return True
 

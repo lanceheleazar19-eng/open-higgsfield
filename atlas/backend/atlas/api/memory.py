@@ -43,6 +43,7 @@ class MemoryPatch(BaseModel):
     kind: str | None = Field(default=None, pattern=KIND_PATTERN)
     expires_at: datetime | None = None
     permanent: bool | None = None  # True => quita la caducidad
+    access: str | None = Field(default=None, pattern="^(all|local|private)$")
 
 
 @router.get("/api/memory")

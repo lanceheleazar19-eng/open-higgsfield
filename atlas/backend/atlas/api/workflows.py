@@ -95,6 +95,39 @@ def runs(db: DB, workflow_id: int | None = None, limit: int = 30) -> list[dict]:
     return [engine.run_dict(r, names.get(r.workflow_id)) for r in db.scalars(q)]
 
 
+@router.post("/runs/{rid}/cancel")
+def cancel_run(rid: int, db: DB) -> dict:
+    """Detiene una ejecución en curso o en espera de autorización (las aprobaciones pendientes se anulan)."""
+    from datetime import datetime
+
+    from atlas.models import Approval
+    r = db.get(WorkflowRun, rid)
+    if not r:
+        raise HTTPException(404, "Ejecución no encontrada")
+    if r.status not in ("running", "awaiting_approval"):
+        raise HTTPException(409, "La ejecución no está en curso")
+    r.status, r.finished_at = "cancelled", datetime.utcnow()
+    r.output = (r.output or "") + "\nCancelado por ti."
+    for a in db.scalars(select(Approval).where(Approval.workflow_run_id == rid, Approval.status == "pending")):
+        a.status, a.decided_at = "rejected", datetime.utcnow()
+    db.commit()
+    return engine.run_dict(r, db.get(Workflow, r.workflow_id))
+
+
+@router.post("/runs/{rid}/retry")
+def retry_run(rid: int, db: DB) -> dict:
+    """Reintenta desde el paso que falló (checkpoint): los pasos ya completados no se repiten."""
+    r = db.get(WorkflowRun, rid)
+    if not r:
+        raise HTTPException(404, "Ejecución no encontrada")
+    if r.status not in ("error", "cancelled"):
+        raise HTTPException(409, "Solo se reintenta una ejecución con error o cancelada")
+    r.status, r.finished_at, r.output = "running", None, None
+    db.commit()
+    engine.execute(db, r)
+    return engine.run_dict(r, db.get(Workflow, r.workflow_id))
+
+
 @router.get("/runs/{rid}")
 def run_detail(rid: int, db: DB) -> dict:
     r = db.get(WorkflowRun, rid)

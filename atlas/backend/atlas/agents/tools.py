@@ -236,7 +236,7 @@ def _insights(c: Ctx) -> list:
 def _memory(c: Ctx) -> list:
     from atlas.services import memory as m
     return [{"id": x.id, "contenido": x.content, "tipo": x.kind, "fecha": x.updated_at.date().isoformat()}
-            for x in m.search_memories(c.db, c.text, limit=8)]
+            for x in m.search_memories(c.db, c.text, limit=12) if m.usable_for_ai(x, c.prefs.get("_allow_local", True))][:8]
 
 
 def _memory_stats(c: Ctx) -> dict:

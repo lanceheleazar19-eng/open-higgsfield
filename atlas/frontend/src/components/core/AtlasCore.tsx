@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Icon } from "../Icon";
 import { LINKS, NODE_DEFS } from "./nodes";
 import { DEFAULT_PITCH, cameraDistance, pitchFor, project, rotateView, separate, sub, type Vec3 } from "./orbits";
@@ -100,7 +101,7 @@ export function AtlasCore({ info, state, rippleKey, onOpen, selected, onSelect }
     // Arrastrar para girar la vista · rueda para hacer zoom
     let drag: { x: number; y: number; moved: boolean } | null = null;
     const down = (e: PointerEvent) => {
-      if ((e.target as HTMLElement).closest(".planet, .core-card, .core-ctrl")) return;
+      if ((e.target as HTMLElement).closest(".planet, .core-card, .core-ctrl, .core-link")) return;
       drag = { x: e.clientX, y: e.clientY, moved: false };
       wrap.setPointerCapture?.(e.pointerId);
     };
@@ -248,11 +249,12 @@ export function AtlasCore({ info, state, rippleKey, onOpen, selected, onSelect }
       <canvas ref={canvasRef} className="core-canvas" aria-hidden="true" />
       {mode !== "webgl" && <div className="core-fallback" aria-hidden="true"><span /><span /><span /></div>}
 
-      <div className="core-id" aria-live="polite">
+      <Link className="core-id core-link" to="/meta" aria-label="VISTAN CORE: abrir META-BRAIN" title="Abrir META-BRAIN">
         <span className="core-name">VISTAN</span>
         <span className="core-sub">CORE</span>
-        <span className="core-state"><i className="core-dot" />{STATE_LABEL[state]}</span>
-      </div>
+        <span className="core-state" aria-live="polite"><i className="core-dot" />{STATE_LABEL[state]}</span>
+        <span className="core-open">META-BRAIN →</span>
+      </Link>
 
       <nav className="core-nodes" aria-label="Módulos de VISTAN">
         {NODE_DEFS.map((n, i) => {

@@ -1,5 +1,5 @@
 import type {
-  AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryItem, MemoryKind,
+  AiStatus, AssistantReply, ChatEvent, ConversationSummary, Dashboard, Health, MemoryAccess, MemoryItem, MemoryKind,
   MemorySuggestion, ModuleInfo, Prefs, StoredMessage, GoalItem, Priority, TaskItem, TaskSummary, WeekPlan,
   Integrations, ImportantMail, TxItem, FinanceSummary, PaperTradeItem, TradingStats, HealthDayItem, HealthSetup, CalEvent, Profile, SystemMetrics, NutritionProfile, NutritionTargets, NutritionDay, Macros, FoodItem, MealProposal, MealEntryItem, BodyEntry, GymExercise, GymInsights, GymProgress, GymSession, GymToday, GymVolume, ParsedLog, RoutineData, RoutineTemplate,
 } from "./types";
@@ -101,7 +101,7 @@ export const api = {
   },
   createMemory: (m: { content: string; kind: MemoryKind; expires_at?: string | null; source?: "manual" | "suggested" }) =>
     request<{ memory: MemoryItem; created: boolean }>("/api/memory", { method: "POST", body: JSON.stringify(m) }),
-  updateMemory: (id: number, p: { content?: string; kind?: MemoryKind; expires_at?: string | null; permanent?: boolean }) =>
+  updateMemory: (id: number, p: { content?: string; kind?: MemoryKind; expires_at?: string | null; permanent?: boolean; access?: MemoryAccess }) =>
     request<MemoryItem>(`/api/memory/${id}`, { method: "PATCH", body: JSON.stringify(p) }),
   deleteMemory: (id: number) => requestEmpty(`/api/memory/${id}`, { method: "DELETE" }),
   purgeExpired: () => request<{ deleted: number }>("/api/memory/purge-expired", { method: "POST" }),

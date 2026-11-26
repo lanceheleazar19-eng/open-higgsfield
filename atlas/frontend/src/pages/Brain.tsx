@@ -94,6 +94,8 @@ export function Brain() {
           </ul>
           <p className="muted small">Aún no: crear o modificar datos (llega con cada módulo), memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
             Habla con VISTAN desde el <Link to="/">centro de control</Link>.</p>
+          <p className="small">Para problemas complejos, el <Link to="/meta">META-BRAIN</Link> coordina varios modelos y agentes, pasa un crítico y un verificador,
+            y te enseña la traza completa (o escribe en el chat «piensa a fondo: …»).</p>
         </Panel>
       </div>
     </div>

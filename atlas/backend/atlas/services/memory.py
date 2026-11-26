@@ -20,7 +20,8 @@ from atlas.models.base import utcnow
 from atlas.services.activity import log_activity
 from atlas.services.clock import local_to_utc_naive, utc_naive_to_local
 
-KIND_ES = {"preference": "preferencia", "goal": "objetivo", "decision": "decisión", "fact": "dato", "note": "nota"}
+KIND_ES = {"preference": "preferencia", "goal": "objetivo", "decision": "decisión", "fact": "dato", "note": "nota",
+           "procedure": "procedimiento", "episode": "episodio"}
 SIMILARITY_DUP = 0.9
 
 STOPWORDS = set("""
@@ -81,6 +82,8 @@ def to_dict(m: Memory, tz: str) -> dict:
         "expired": bool(m.expires_at and m.expires_at <= now),
         "project_id": m.project_id,
         "source": m.source,
+        "access": m.access or "all",
+        "superseded_by": m.superseded_by,
         "created_at": utc_naive_to_local(m.created_at, tz).isoformat(),
         "updated_at": utc_naive_to_local(m.updated_at, tz).isoformat(),
     }
@@ -145,7 +148,11 @@ def find_duplicate(db: Session, content: str, project_id: int | None = None) -> 
     if exact:
         return exact
     norm = normalize(content)
+    nums = set(re.findall(r"\d+(?:[.,]\d+)?", content))
     for cand in search_memories(db, content, limit=8, project_id=project_id):
+        # Mismo texto con cifras distintas NO es un duplicado: es un dato nuevo (posible contradicción a revisar)
+        if nums != set(re.findall(r"\d+(?:[.,]\d+)?", cand.content)):
+            continue
         if cand.project_id == project_id and difflib.SequenceMatcher(None, norm, normalize(cand.content)).ratio() >= SIMILARITY_DUP:
             return cand
     return None
@@ -170,8 +177,13 @@ def remember(db: Session, content: str, kind: str = "fact", expires_at: datetime
     return m, True
 
 
-def update_memory(db: Session, m: Memory, **changes) -> Memory:
+def update_memory(db: Session, m: Memory, reason: str | None = None, **changes) -> Memory:
+    from atlas.models import MemoryRevision
     for k, v in changes.items():
+        before = getattr(m, k)
+        if before != v and k in ("content", "kind", "expires_at", "project_id", "access", "superseded_by"):
+            db.add(MemoryRevision(memory_id=m.id, field=k, before=None if before is None else str(before)[:4000],
+                                  after=None if v is None else str(v)[:4000], reason=(reason or "edición")[:200]))
         setattr(m, k, v)
     if "content" in changes:
         m.content_key = content_key(m.content)
@@ -279,16 +291,24 @@ def time_window(query: str, tz: str, today: date | None = None) -> tuple[datetim
 
 # ----------------------------------------------------------------- contexto para el cerebro
 
-def memory_context(db: Session, query: str, tz: str, conversation_id: int | None = None) -> dict:
+def usable_for_ai(m: Memory, allow_local: bool = True) -> bool:
+    """Control de acceso: «private» nunca entra en el contexto de la IA; «local» solo con modelos locales;
+    los recuerdos reemplazados por una versión más nueva no se usan."""
+    acc = m.access or "all"
+    return m.superseded_by is None and acc != "private" and (allow_local or acc != "local")
+
+
+def memory_context(db: Session, query: str, tz: str, conversation_id: int | None = None, allow_local: bool = True) -> dict:
     """Recuerdos y fragmentos de conversaciones anteriores relevantes para `query`."""
     now = utcnow()
-    profile = list(db.scalars(
-        select(Memory).where(Memory.expires_at.is_(None), Memory.kind.in_(("preference", "goal")),
+    ok = lambda m: usable_for_ai(m, allow_local)  # noqa: E731
+    profile = [m for m in db.scalars(
+        select(Memory).where(Memory.expires_at.is_(None), Memory.kind.in_(("preference", "goal", "procedure")),
                              Memory.project_id.is_(None))
-        .order_by(Memory.updated_at.desc()).limit(12)))
-    temporary = list(db.scalars(select(Memory).where(Memory.expires_at > now).order_by(Memory.expires_at).limit(8)))
+        .order_by(Memory.updated_at.desc()).limit(16)) if ok(m)][:12]
+    temporary = [m for m in db.scalars(select(Memory).where(Memory.expires_at > now).order_by(Memory.expires_at).limit(8)) if ok(m)]
     seen = {m.id for m in profile + temporary}
-    relevant = [m for m in search_memories(db, query, limit=8) if m.id not in seen]
+    relevant = [m for m in search_memories(db, query, limit=12) if m.id not in seen and ok(m)][:8]
     window = time_window(query, tz)
     msgs = search_messages(db, query, limit=6, exclude_conversation=conversation_id,
                            since=window[0] if window else None, until=window[1] if window else None)
