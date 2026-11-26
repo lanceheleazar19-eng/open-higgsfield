@@ -491,9 +491,37 @@ def fx_rate(frm: str, to: str, db=None) -> tuple[float | None, str | None]:
     if direct:
         return direct, "directo"
     a, b = px(frm, "USD"), px("USD", to)
+    a = a or (1.0 if frm == "USD" else None)
+    b = b or (1.0 if to == "USD" else None)
+    note = "vía USD"
+    # Respaldo con datos reales de Binance si el proveedor de divisas no responde: EURUSDT, GBPUSDT… (USDT ≈ USD)
+    if not a and frm != "USD":
+        r = _binance_fx(frm)
+        a, note = (r, f"vía Binance {frm}USDT (USDT≈USD)") if r else (None, note)
+    if not b and to != "USD":
+        r = _binance_fx(to)
+        b, note = (1 / r, f"vía Binance {to}USDT (USDT≈USD)") if r else (None, note)
     if a and b:
-        return a * b, "vía USD"
+        return a * b, note
     return None, None
+
+
+_FX_CACHE: dict[str, tuple[float, float]] = {}
+
+
+def _binance_fx(ccy: str) -> float | None:
+    """Precio real de 1 unidad de `ccy` en USDT según Binance (solo divisas con par en Binance). Caché de 2 min."""
+    import time as _t
+    hit = _FX_CACHE.get(ccy)
+    if hit and _t.time() - hit[1] < 120:
+        return hit[0]
+    try:
+        p = binance_quotes([f"{ccy}USDT"]).get(f"{ccy}USDT", {}).get("price")
+    except Exception:  # noqa: BLE001 - sin par o sin conexión: no hay tipo de cambio (nunca se inventa)
+        p = None
+    if p:
+        _FX_CACHE[ccy] = (p, _t.time())
+    return p
 
 
 def provider_status(test: bool = False) -> list[dict]:

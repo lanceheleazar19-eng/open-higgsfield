@@ -21,6 +21,7 @@ export interface SixAgent {
   allocation_pct: number; risk_pct: number; max_positions: number; max_dd_pct: number; max_daily_loss_pct: number; ledger: SixLedger | null;
   analyzing: Record<string, SixAnalyzing>; rotations: { at: string; from: string; to: string; evidence: Record<string, number | null> }[];
   last_run_at: string | null; last_error: string | null; metrics: SixMetrics | null; metrics_current: SixMetrics | null; open: SixPosition[];
+  last_decision: SixDecision | null; next_bar_at: number | null;
 }
 export interface SixDecision { id: number; agent: string; strategy: string | null; symbol: string | null; action: string; status: "executed" | "skipped" | "rejected" | "error" | "info"; reason: string; data: Record<string, unknown> | null; order_id: number | null; position_id: number | null; at: string }
 export interface SixAccount { id: number; name: string; initial_capital: number; equity: number; cash: number; return_pct: number | null; open_positions: number; commission_pct: number; commission_fixed: number; slippage_bps: number; enforce_limits: boolean; max_risk_pct: number | null; max_exposure_pct: number | null }

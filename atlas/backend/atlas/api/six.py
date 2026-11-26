@@ -45,6 +45,13 @@ def pos_dict(db, p: TdPosition, acc) -> dict:  # noqa: ANN001
     return d
 
 
+def _next_bar(a: SxAgent) -> int | None:
+    """Cuándo cierra la próxima vela que evaluará (las entradas solo se deciden con velas cerradas)."""
+    times = [v.get("bar_time") for v in ((a.state or {}).get("analyzing") or {}).values() if v.get("bar_time")]
+    tf = mk.TF_SECONDS.get(a.variants[a.variant_idx]["timeframe"])
+    return int(max(times) + 2 * tf) if times and tf else None
+
+
 def agent_dict(db, a: SxAgent) -> dict:  # noqa: ANN001
     acc = runner.account_for(db, a)
     lg = runner.ledger(db, a, acc) if acc else None
@@ -55,6 +62,8 @@ def agent_dict(db, a: SxAgent) -> dict:  # noqa: ANN001
             "max_daily_loss_pct": a.max_daily_loss_pct, "ledger": lg, "analyzing": (a.state or {}).get("analyzing", {}),
             "rotations": (a.state or {}).get("rotations", []), "last_run_at": a.last_run_at.isoformat() if a.last_run_at else None,
             "last_error": a.last_error, "metrics": runner.evaluate(db, a, acc) if acc else None,
+            "last_decision": (lambda d: dec_dict(d) if d else None)(db.scalar(select(SxDecision).where(SxDecision.agent == a.key, SxDecision.action != "config").order_by(SxDecision.id.desc()).limit(1))),
+            "next_bar_at": _next_bar(a),
             "metrics_current": runner.evaluate(db, a, acc, runner.sid(a)) if acc else None,
             "open": [pos_dict(db, p, acc) for p in runner.agent_positions(db, a, acc, "open")] if acc else []}
 

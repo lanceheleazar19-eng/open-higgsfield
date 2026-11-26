@@ -101,6 +101,13 @@ function AgentCard({ a, onChange, onValidated }: { a: SixAgent; onChange: () => 
           })}
         </ul>
       )}
+      <div className="sx-last" data-testid={`last-${a.key}`}>
+        <span className="muted small">Último análisis: {a.last_run_at ? dt(a.last_run_at) : "todavía ninguno"}
+          {a.next_bar_at ? ` · próxima vela cerrada ${new Date(a.next_bar_at * 1000).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}` : ""}</span>
+        {a.last_decision ? (
+          <p className="small"><span className={`sx-dec d-${a.last_decision.status}`}>{DEC[a.last_decision.status]}</span> {a.last_decision.symbol ? `${a.last_decision.symbol} · ` : ""}{a.last_decision.reason}</p>
+        ) : <p className="small muted">Sin decisiones todavía.</p>}
+      </div>
       <h4 className="sx-h">Rendimiento total <Verdict m={a.metrics} /></h4>
       <MetricsRow m={a.metrics} />
       {a.variants.length > 1 && <p className="muted small">Variante actual: {a.metrics_current?.trades ?? 0} ops · {a.metrics_current?.verdict_text}</p>}

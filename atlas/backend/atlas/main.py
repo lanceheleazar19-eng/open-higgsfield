@@ -1,5 +1,6 @@
 """Aplicación FastAPI de VISTAN."""
 
+import logging
 import mimetypes
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,6 +16,7 @@ from atlas.api import (academy, agents, legal, meta, six, ai, assistant, body, t
                        models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk, betting, life, lab)
 from atlas.config import get_settings
 from atlas.db import init_db
+from atlas.services.activity import log_activity
 
 
 async def _periodic_sync() -> None:
@@ -83,8 +85,14 @@ async def _desk_loop() -> None:
                 if six_runner.due(db):
                     six_runner.tick(db)
                     db.commit()
-        except Exception:  # noqa: BLE001 - un fallo de los agentes nunca detiene el Trading Desk
-            pass
+        except Exception as exc:  # noqa: BLE001 - un fallo de los agentes nunca detiene el Trading Desk, pero queda registrado
+            logging.getLogger("atlas.six").exception("Ciclo de VISTAN SIX fallido")
+            try:
+                with session_scope() as db:
+                    log_activity(db, "trading", "six_error", f"VISTAN SIX: el ciclo automático falló: {type(exc).__name__}: {exc}"[:300])
+                    db.commit()
+            except Exception:  # noqa: BLE001
+                pass
         global _bet_tick
         _bet_tick += 1
         if _bet_tick % 15 == 0:  # cada ~5 min: liquidar pronósticos simulados con resultados reales

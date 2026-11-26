@@ -328,3 +328,31 @@ def test_autonomous_loop_due(client, six, session):
     client.post("/api/six/tick")
     session.expire_all()
     assert runner.due(session) is False
+
+
+def test_fx_fallback_to_binance_when_forex_provider_down(client, monkeypatch, session):
+    """Si el proveedor de divisas no da EUR/USD, se usa el precio real EURUSDT de Binance (nunca un valor inventado)."""
+    from atlas.desk import market as m
+    monkeypatch.setattr(m, "quote", lambda inst, ttl=None: {"symbol": inst.symbol, "price": None, "kind": "none", "source": None})
+    m._FX_CACHE.clear()
+    monkeypatch.setattr(m, "binance_quotes", lambda syms: {"EURUSDT": {"price": 1.25}} if syms == ["EURUSDT"] else {})
+    rate, note = m.fx_rate("USD", "EUR", session)
+    assert rate == pytest.approx(0.8) and "Binance EURUSDT" in note
+    m._FX_CACHE.clear()
+    monkeypatch.setattr(m, "binance_quotes", lambda syms: {})
+    assert m.fx_rate("USD", "EUR", session) == (None, None)  # sin datos → sin tipo de cambio
+
+
+def test_agent_card_shows_last_decision_and_next_bar(client, six):
+    only(client, "orion")
+    activate(client)
+    six["n"] = 30
+    client.post("/api/six/tick")
+    orion = next(a for a in client.get("/api/six/status").json()["agents"] if a["key"] == "orion")
+    assert orion["last_decision"]["status"] == "skipped" and "insuficientes" in orion["last_decision"]["reason"]
+    six["n"] = 300
+    six["signal"] = {}
+    client.post("/api/six/tick")
+    orion = next(a for a in client.get("/api/six/status").json()["agents"] if a["key"] == "orion")
+    bar = orion["analyzing"]["BTC/USDT"]["bar_time"]
+    assert orion["next_bar_at"] == bar + 2 * 3600
