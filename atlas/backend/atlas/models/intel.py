@@ -18,6 +18,8 @@ class Document(Base):
     title: Mapped[str] = mapped_column(String(300))
     filename: Mapped[str | None] = mapped_column(String(300))
     kind: Mapped[str] = mapped_column(String(16))  # pdf, docx, txt, md, csv, xlsx, image, url, note
+    # Bóveda: None = documento general; "legal" = confidencial de VISTAN LEGAL (fuera de la búsqueda general y del chat)
+    vault: Mapped[str | None] = mapped_column(String(12), index=True)
     source_url: Mapped[str | None] = mapped_column(String(1000))
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id", ondelete="SET NULL"), index=True)
     size_bytes: Mapped[int] = mapped_column(Integer, default=0)

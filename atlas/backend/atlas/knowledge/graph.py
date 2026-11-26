@@ -51,7 +51,7 @@ def build(db: Session, project_id: int | None = None) -> dict:
             edge(_nid("task", t.id), _nid("goal", t.goal_id), "avanza", "dato")
         if t.project_id:
             edge(_nid("task", t.id), _nid("project", t.project_id), "pertenece a", "dato")
-    for d in db.scalars(select(Document)):
+    for d in db.scalars(select(Document).where(Document.vault.is_(None))):
         node("document", d.id, d.title, "document", project_id=d.project_id, doc_kind=d.kind)
         if d.project_id:
             edge(_nid("document", d.id), _nid("project", d.project_id), "pertenece a", "dato")

@@ -360,3 +360,9 @@ memoria entre sesiones (Fase 3), Internet y documentos (Investigación).
   duplicado), resolución con histórico, historial de cambios y acceso all/local/private.
 - **Execution**: objetivo → plan con pasos reales → autorizaciones, reintentos, checkpoints, cancelar/reintentar.
 - **Benchmark Center** (sobre el Arena), **Self-Evaluation**, **Multimodal** y **Governance** (kill switch, permisos, auditoría).
+
+## VISTAN LEGAL · departamento de inteligencia jurídica
+- `/legal` con el PIN de LIFE OS. Detalle de lo operativo, lo que requiere credenciales y las limitaciones en `docs/LEGAL.md`.
+- Investigación en fuentes oficiales con verificación de citas y vigencia; análisis y comparación de contratos; Document Studio
+  sin datos inventados; expedientes, plazos (nunca calculados), alertas, cumplimiento, base de conocimiento aislada por
+  expediente, Legal Agent e informes PDF/DOCX. Originales cifrados; solo IA local salvo autorización.

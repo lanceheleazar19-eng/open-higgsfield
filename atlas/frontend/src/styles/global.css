@@ -1930,3 +1930,39 @@ textarea.code { width: 100%; font: 12.5px var(--font-mono); background: #050505;
 /* Las tablas anchas se desplazan dentro de su panel; el módulo nunca se ensancha */
 .meta .desk-main, .meta .desk-module, .meta .desk-module > *, .meta .mod-cols > * { min-width: 0; max-width: 100%; }
 .disc-list .lab-tag { justify-self: start; }
+
+/* ── VISTAN LEGAL ─────────────────────────────────────────────────── */
+.legal { --lc: #E11D35; --lh: #e9a23b; --lm: #c9b458; --ll: #777777; }
+.lg-search { border-color: var(--line-2); background: radial-gradient(ellipse at 0% 0%, rgba(181,18,36,.16), transparent 60%), var(--glass); }
+.lg-search-label { display: block; font: 600 10px var(--font-mono); letter-spacing: .24em; color: var(--crimson-hi); margin-bottom: 8px; }
+.lg-search-row { display: flex; gap: 8px; }
+.lg-search-row input { flex: 1; min-width: 0; font-size: 15px; padding: 12px 14px; background: rgba(0,0,0,.35); border: 1px solid var(--line-2); border-radius: var(--radius-sm); color: var(--text); }
+.lg-search-row input:focus { outline: none; border-color: var(--crimson-hi); box-shadow: 0 0 0 3px var(--soft); }
+.lg-levels { display: flex; flex-wrap: wrap; gap: 8px; }
+.lg-levels span { font: 600 11px var(--font-mono); letter-spacing: .08em; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); }
+.lg-levels b { font-size: 14px; margin-right: 4px; }
+.l-critico { --k: var(--lc); } .l-alto { --k: var(--lh); } .l-medio { --k: var(--lm); } .l-bajo { --k: var(--ll); }
+.lg-levels span[class^="l-"] { color: var(--k); border-color: color-mix(in srgb, var(--k) 45%, transparent); }
+.lg-level { display: inline-block; font: 700 9.5px var(--font-mono); letter-spacing: .08em; padding: 2px 7px; border-radius: 5px; color: var(--k); border: 1px solid var(--k); }
+.lg-level.l-critico { background: rgba(225,29,53,.14); animation: labPulse 2.4s ease-in-out infinite; }
+.disc-list li.risk { border-left: 3px solid var(--k, var(--line)); }
+.disc-list blockquote, .risk blockquote { margin: 4px 0; padding: 6px 10px; border-left: 2px solid var(--line-2); background: rgba(0,0,0,.25); font-size: 12.5px; color: var(--text-2); overflow-wrap: anywhere; }
+.lg-alt { color: var(--green); }
+.lg-vig, .lg-ok, .lg-bad { font: 600 10px var(--font-mono); padding: 1px 6px; border-radius: 5px; margin-left: 6px; border: 1px solid; }
+.lg-vig.v-vigente, .lg-ok { color: var(--green); }
+.lg-vig.v-derogada, .lg-bad { color: var(--crimson-hi); }
+.lg-vig.v-no_comprobada { color: var(--amber); }
+.lg-report h4, .lg-editor h4 { margin: 10px 0 4px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-2); }
+.legal .neg { color: var(--crimson-hi); } .legal .warn { color: var(--amber); }
+.cmp-item { display: flex; gap: 6px; align-items: flex-start; }
+.cmp-item > button { flex: 1; min-width: 0; }
+.cmp-item input { margin-top: 12px; }
+.diff-card { border: 1px solid var(--line); border-left: 3px solid var(--text-3); border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 8px; }
+.diff-card.k-añadida { border-left-color: var(--green); } .diff-card.k-eliminada { border-left-color: var(--crimson-hi); } .diff-card.k-modificada { border-left-color: var(--amber); }
+.diff { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; margin: 6px 0 0; }
+.diff del { background: rgba(225,29,53,.18); color: #f07b88; text-decoration: line-through; padding: 0 2px; border-radius: 3px; }
+.diff ins { background: rgba(60,207,122,.16); color: #7fe3a8; text-decoration: none; padding: 0 2px; border-radius: 3px; }
+.lg-editor .title-in { background: transparent; border: none; color: var(--text); font: 600 12px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; min-width: 0; flex: 1; }
+textarea.code.doc { font: 13.5px/1.6 var(--font); min-height: 420px; }
+.legal .desk-main, .legal .desk-module, .legal .desk-module > *, .legal .mod-cols > * { min-width: 0; max-width: 100%; }
+@media (max-width: 820px) { .lg-search-row { flex-direction: column; } }

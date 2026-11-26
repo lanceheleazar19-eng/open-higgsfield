@@ -325,7 +325,35 @@ def _meal_photos(c: Ctx) -> list:
             for m in c.db.scalars(select(MealPhoto).where(MealPhoto.eaten_at >= since).order_by(MealPhoto.eaten_at.desc()).limit(10))]
 
 
+def _legal_overview(c: Ctx) -> dict:
+    """Solo metadatos (expedientes, plazos, alertas): nunca el texto de documentos confidenciales."""
+    from datetime import date
+
+    from sqlalchemy import select
+
+    from atlas.models import LgAlert, LgCase, LgDeadline
+    today = date.today()
+    return {"expedientes_activos": [{"ref": x.ref, "nombre": x.name, "estado": x.status, "prioridad": x.priority}
+                                    for x in c.db.scalars(select(LgCase).where(LgCase.status.notin_(("resuelto", "archivado"))).limit(15))],
+            "plazos_proximos": [{"plazo": d.title, "fecha": d.due_on.isoformat(), "dias": (d.due_on - today).days,
+                                 "verificado": d.verified} for d in c.db.scalars(select(LgDeadline).where(LgDeadline.status == "pendiente")
+                                                                                 .order_by(LgDeadline.due_on).limit(10))],
+            "alertas_abiertas": [{"nivel": a.level, "titulo": a.title} for a in c.db.scalars(select(LgAlert).where(LgAlert.status == "abierta").limit(10))],
+            "nota": "Detalle y documentos en VISTAN LEGAL (/legal). Los plazos no verificados requieren comprobación prioritaria."}
+
+
+def _legal_obligations(c: Ctx) -> dict:
+    from atlas.legal import compliance
+    t = c.text.lower()
+    profile = "ecommerce" if any(w in t for w in ("tienda", "shopify", "ecommerce", "vender online")) else "saas" if "saas" in t or "app" in t else "servicios"
+    items = compliance.items(profile)
+    return {"perfil": compliance.PROFILES[profile], "obligaciones_de_partida": [f"{i['obligation']} — {i['norm']} {i['article']}".strip() for i in items][:14],
+            "nota": "Referencias con fuente oficial en VISTAN LEGAL → Cumplimiento; requieren comprobar vigencia y aplicación al caso."}
+
+
 TOOLS: dict[str, Tool] = {t.name: t for t in [
+    Tool("legal.overview", "READ", "VISTAN LEGAL: expedientes activos, plazos y alertas (sin texto de documentos)", _legal_overview),
+    Tool("legal.obligations", "READ", "VISTAN LEGAL: obligaciones de partida para un tipo de negocio", _legal_obligations),
     Tool("progress.trends", "READ", "Progreso: tendencias reales de peso, entreno y nutrición", _progress),
     Tool("physique.latest", "READ", "Últimos análisis de tus fotos de físico", _physique),
     Tool("meals.photos", "READ", "Comidas fotografiadas de los últimos 7 días", _meal_photos),
@@ -375,5 +403,7 @@ ACTIONS = {
     "research.start": ("EXECUTE", "Investigar en internet (busca y lee webs públicas)"),
     "notify": ("WRITE", "Crear una notificación en VISTAN"),
     "backup.create": ("EXECUTE", "Hacer una copia de seguridad de la base de datos"),
+    "legal.research": ("EXECUTE", "Investigación jurídica en fuentes oficiales (VISTAN LEGAL)"),
+    "legal.analyze": ("READ", "Analizar un contrato de la bóveda jurídica con IA local"),
     "settings.change": ("ADMIN", "Cambiar configuraciones críticas (modelos, permisos, credenciales)"),
 }

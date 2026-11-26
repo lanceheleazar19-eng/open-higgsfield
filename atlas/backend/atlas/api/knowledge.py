@@ -20,7 +20,7 @@ MAX_FILE = 40 * 1024 * 1024
 
 @router.get("/documents")
 def list_docs(db: DB, project_id: int | None = None) -> list[dict]:
-    q = select(Document).order_by(Document.created_at.desc())
+    q = select(Document).where(Document.vault.is_(None)).order_by(Document.created_at.desc())
     if project_id:
         q = q.where(Document.project_id == project_id)
     return [doc_dict(d) for d in db.scalars(q)]
@@ -77,7 +77,7 @@ def add_note(body: NoteIn, db: DB) -> dict:
 @router.get("/documents/{doc_id}")
 def get_doc(doc_id: int, db: DB) -> dict:
     d = db.get(Document, doc_id)
-    if not d:
+    if not d or d.vault:  # la bóveda legal solo se ve desde VISTAN LEGAL
         raise HTTPException(404, "Documento no encontrado")
     chunks = [c.text for c in db.scalars(select(DocChunk).where(DocChunk.document_id == d.id).order_by(DocChunk.idx).limit(6))]
     return doc_dict(d) | {"preview": "\n\n".join(chunks)[:6000]}
@@ -86,7 +86,7 @@ def get_doc(doc_id: int, db: DB) -> dict:
 @router.patch("/documents/{doc_id}")
 def patch_doc(doc_id: int, body: dict, db: DB) -> dict:
     d = db.get(Document, doc_id)
-    if not d:
+    if not d or d.vault:  # la bóveda legal solo se ve desde VISTAN LEGAL
         raise HTTPException(404, "Documento no encontrado")
     if "project_id" in body:
         d.project_id = body["project_id"]
@@ -99,7 +99,7 @@ def patch_doc(doc_id: int, body: dict, db: DB) -> dict:
 @router.delete("/documents/{doc_id}", status_code=204)
 def delete_doc(doc_id: int, db: DB) -> None:
     d = db.get(Document, doc_id)
-    if not d:
+    if not d or d.vault:  # la bóveda legal solo se ve desde VISTAN LEGAL
         raise HTTPException(404, "Documento no encontrado")
     db.query(Relation).filter(((Relation.src_type == "document") & (Relation.src_id == doc_id)) |
                               ((Relation.dst_type == "document") & (Relation.dst_id == doc_id))).delete(synchronize_session=False)

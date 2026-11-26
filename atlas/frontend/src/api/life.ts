@@ -50,3 +50,4 @@ export function makeClient(prefix: string): Client {
 export const life = makeClient("/api/life");
 export const lab = makeClient("/api/lab");
 export const meta = makeClient("/api/meta");
+export const legal = makeClient("/api/legal");

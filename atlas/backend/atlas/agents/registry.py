@@ -78,6 +78,13 @@ AGENTS: dict[str, Agent] = {a.id: a for a in [
           ["tasks.overview", "goals.snapshot", "life.goals", "calendar.upcoming", "insights.detect", "projects.list"],
           r"tarea|pendiente|plan|organiz|semana|hoy|mañana|calendario|evento|reunion|objetivo|meta|priorid|proyecto|horario|agenda",
           ["task.create"], ""),
+    Agent("legal", "VISTAN LEGAL AGENT", "Investiga normativa en fuentes oficiales, analiza contratos, prepara borradores, gestiona "
+          "expedientes, plazos, riesgos y obligaciones de cumplimiento. Información jurídica, no asesoramiento profesional.",
+          ["legal.overview", "legal.obligations"],
+          r"legal|ley\b|leyes|juridic|abogad|contrato|clausula|demanda|denuncia|multa|plazo legal|rgpd|lopd|lssi|aviso legal|"
+          r"politica de privacidad|terminos y condiciones|despido|herencia|alquiler|fianza|reclamacion|expediente|normativa|cumplimiento",
+          ["legal.research", "legal.analyze"], "No ejecuta acciones jurídicas externas, no inventa normas ni sentencias, no calcula plazos y "
+          "no envía documentos a la nube sin tu autorización.", helpers=["research", "business", "finance", "memory", "planning", "security"]),
     Agent("security", "Security Agent", "Supervisa permisos, acciones sensibles, credenciales y copias de seguridad.",
           ["security.status"], r"segur|permiso|credencial|api key|clave|privacidad|copia de seguridad|backup|contraseña|hack",
           ["backup.create"], "Nunca muestra el valor de una credencial."),

@@ -20,6 +20,8 @@ dependencies = [
   "psutil>=5.9",
   "keyring>=24",
   "caldav>=1.3",
+  "fpdf2>=2.7",  # informes PDF (VISTAN LEGAL)
+  "cryptography>=42",  # cifrado de documentos confidenciales
 ]
 
 [project.optional-dependencies]

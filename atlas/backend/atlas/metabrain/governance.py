@@ -14,7 +14,7 @@ DEFAULT_META = {
     "auto_research": True,  # el crítico puede pedir una investigación nueva si detecta falta de evidencia
 }
 # Agentes que manejan datos personales sensibles: por defecto sus datos nunca salen a la nube
-SENSITIVE = {"finance", "fitness", "discipline", "decision", "communication", "leadership", "memory"}
+SENSITIVE = {"legal", "finance", "fitness", "discipline", "decision", "communication", "leadership", "memory"}
 
 
 def meta_conf(prefs: dict) -> dict:

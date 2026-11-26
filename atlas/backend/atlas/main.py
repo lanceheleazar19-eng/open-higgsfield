@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from atlas import __version__
-from atlas.api import (agents, meta, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
+from atlas.api import (agents, legal, meta, ai, assistant, body, telemetry, center, dashboard, finance, goals, gym, health, integrations, knowledge, memory,
                        models_api, nutrition, profile, projects, research, security, settings, system, tasks, trading, voice, workflows, desk, betting, life, lab)
 from atlas.config import get_settings
 from atlas.db import init_db
@@ -103,6 +103,8 @@ async def lifespan(_app: FastAPI):
     mark_interrupted()
     from atlas.metabrain.engine import mark_interrupted as meta_interrupted
     meta_interrupted()
+    from atlas.legal.research import mark_interrupted as legal_interrupted
+    legal_interrupted()
     task = asyncio.create_task(_periodic_sync())
     wtask = asyncio.create_task(_workflows_loop())
     dtask = asyncio.create_task(_desk_loop())
@@ -123,7 +125,7 @@ def create_app() -> FastAPI:
     )
     for r in (system.router, dashboard.router, settings.router, assistant.router, ai.router, memory.router, tasks.router, goals.router, gym.router, profile.router, nutrition.router, integrations.router, finance.router, trading.router, health.router,
               knowledge.router, research.router, agents.router, workflows.router, models_api.router, security.router,
-              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router, life.public, life.router, lab.router, meta.router):
+              projects.router, center.router, body.router, telemetry.router, voice.router, desk.router, betting.router, life.public, life.router, lab.router, meta.router, legal.router):
         app.include_router(r)
 
     _mount_frontend(app, s.frontend_dist)

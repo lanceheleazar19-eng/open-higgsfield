@@ -102,9 +102,9 @@ def image_text(data: bytes, prefs: dict) -> str:
 
 def ingest(db: Session, *, title: str, kind: str, text_: str | None = None, data: bytes | None = None,
            filename: str | None = None, url: str | None = None, project_id: int | None = None,
-           prefs: dict | None = None) -> Document:
+           prefs: dict | None = None, vault: str | None = None) -> Document:
     doc = Document(title=title[:300], kind=kind, filename=filename, source_url=url, project_id=project_id,
-                   size_bytes=len(data or (text_ or "").encode()))
+                   size_bytes=len(data or (text_ or "").encode()), vault=vault)
     db.add(doc)
     db.flush()
     try:
@@ -137,12 +137,18 @@ def doc_dict(d: Document) -> dict:
 
 
 # ---------- Recuperación ----------
-def search(db: Session, query: str, k: int = 6, project_id: int | None = None) -> list[dict]:
-    """Fragmentos más relevantes: texto completo (BM25) + similitud semántica si hay embeddings."""
+def search(db: Session, query: str, k: int = 6, project_id: int | None = None, vault: str | None = None,
+           doc_ids: set[int] | None = None) -> list[dict]:
+    """Fragmentos más relevantes: texto completo (BM25) + similitud semántica si hay embeddings.
+    Aislamiento: sin `vault` solo busca en documentos generales (nunca en la bóveda legal). Con `vault="legal"` busca
+    solo en esa bóveda y, si se da `doc_ids`, solo en esos documentos (p. ej. los de UN expediente)."""
     scored: dict[int, float] = {}
     match = _fts_query(query)
+    if doc_ids is not None and not doc_ids:
+        return []
+    limit = 400 if (vault or doc_ids) else 40
     if match and _has_fts(db, "chunk_fts"):
-        rows = db.execute(text("SELECT rowid, bm25(chunk_fts) AS s FROM chunk_fts WHERE chunk_fts MATCH :q ORDER BY s LIMIT 40"),
+        rows = db.execute(text(f"SELECT rowid, bm25(chunk_fts) AS s FROM chunk_fts WHERE chunk_fts MATCH :q ORDER BY s LIMIT {limit}"),
                           {"q": match}).all()
         for i, (rid, s) in enumerate(rows):
             scored[rid] = scored.get(rid, 0) + 1.0 / (1 + i)  # fusión por rango
@@ -165,6 +171,8 @@ def search(db: Session, query: str, k: int = 6, project_id: int | None = None) -
         if not c:
             continue
         d = docs[c.document_id]
+        if d.vault != vault or (doc_ids is not None and d.id not in doc_ids):
+            continue
         if project_id is not None and d.project_id != project_id:
             continue
         clean, flagged = sanitize_untrusted(c.text)

@@ -77,7 +77,7 @@ def detail(pid: int, db: DB) -> dict:
     return pdict(db, p) | {
         "tasks": [tasks_svc.to_dict(t, tz, names=names) for t in tasks],
         "notes": [mem.to_dict(m, tz) for m in db.scalars(select(Memory).where(Memory.project_id == pid).order_by(Memory.updated_at.desc()))],
-        "documents": [doc_dict(d) for d in db.scalars(select(Document).where(Document.project_id == pid).order_by(Document.created_at.desc()))],
+        "documents": [doc_dict(d) for d in db.scalars(select(Document).where(Document.project_id == pid, Document.vault.is_(None)).order_by(Document.created_at.desc()))],
         "research": [research_dict(r) for r in db.scalars(select(Research).where(Research.project_id == pid).order_by(Research.created_at.desc()))],
         "entities": [{"id": e.id, "name": e.name, "kind": e.kind} for e in db.scalars(select(Entity).where(Entity.project_id == pid))],
         "history": history,
